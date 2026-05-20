@@ -14,10 +14,24 @@ npm run build       # Compile TypeScript
 npm test            # Run Jest tests
 ```
 
+## Database
+
+```bash
+docker compose up -d  # Start MySQL on localhost:3308
+npm run db:generate   # Generate migration files
+npm run db:migrate    # Apply migrations
+```
+
 ## Environment Variables
 
-| Variable       | Description                 |
-| -------------- | --------------------------- |
-| `DATABASE_URL` | MySQL connection string     |
-| `JWT_SECRET`   | Secret for JWT signing      |
-| `PORT`         | Server port (default: 3000) |
+| Variable | Description |
+| -------- | ----------- |
+| `MYSQL_HOST` | MySQL host |
+| `MYSQL_PORT` | MySQL port |
+| `MYSQL_DATABASE` | MySQL database name |
+| `MYSQL_USER` | MySQL application user |
+| `MYSQL_PASSWORD` | MySQL application password |
+| `MYSQL_ROOT_PASSWORD` | MySQL root password for Docker initialization |
+| `JWT_SECRET` | Secret for JWT signing |
+| `PORT` | Server port (default: 3000) |
+| `SPACE_URL` | Space App URL |
