@@ -1,7 +1,8 @@
+import { sql } from "drizzle-orm";
 import { mysqlTable, serial, varchar, timestamp } from "drizzle-orm/mysql-core";
 
 export const publishEvents = mysqlTable("publish_events", {
-  id: serial("id").primaryKey(),
+  id: serial().primaryKey(),
   resourceType: varchar("resource_type", { length: 50 }),
   resourceId: varchar("resource_id", { length: 255 }),
   authorId: varchar("author_id", { length: 255 }),
@@ -9,6 +10,7 @@ export const publishEvents = mysqlTable("publish_events", {
   authorEmail: varchar("author_email", { length: 255 }),
   status: varchar("status", { length: 50 }),
   rejectedNote: varchar("rejected_note", { length: 1000 }),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
 });
+
+export type PublishEvent = typeof publishEvents.$inferSelect;

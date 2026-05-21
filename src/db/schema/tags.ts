@@ -1,8 +1,10 @@
+import { sql } from "drizzle-orm";
 import { mysqlTable, serial, varchar, timestamp } from "drizzle-orm/mysql-core";
 
 export const tags = mysqlTable("tags", {
-  id: serial("id").primaryKey(),
+  id: serial().primaryKey(),
   name: varchar("name", { length: 255 }),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
 });
+
+export type Tag = typeof tags.$inferSelect;
