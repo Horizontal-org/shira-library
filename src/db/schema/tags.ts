@@ -1,9 +1,8 @@
 import { mysqlTable, serial, varchar, timestamp } from "drizzle-orm/mysql-core";
 
-export const quizTemplates = mysqlTable("quiz_templates", {
+export const tags = mysqlTable("tags", {
   id: serial("id").primaryKey(),
-  title: varchar("title", { length: 255 }),
-  language: varchar("language", { length: 10 }),
+  name: varchar("name", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });

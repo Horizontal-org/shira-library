@@ -1,9 +1,12 @@
-import { mysqlTable, serial, varchar, text, int, timestamp } from "drizzle-orm/mysql-core";
+import { mysqlTable, serial, int, boolean, timestamp } from "drizzle-orm/mysql-core";
 import { quizTemplates } from "./quiz-templates";
 
 export const questionTemplates = mysqlTable("question_templates", {
   id: serial("id").primaryKey(),
-  quizTemplateId: int("quiz_template_id").notNull().references(() => quizTemplates.id, { onDelete: "cascade" }),
-  //add things
+  highlighted: boolean("highlighted"),
+  quizId: int("quiz_id").notNull().references(() => quizTemplates.id, { onDelete: "cascade" }),
+  isPhishing: boolean("is_phishing"),
+  isDemo: boolean("is_demo"),
   createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
