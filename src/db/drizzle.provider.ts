@@ -8,7 +8,8 @@ import * as schema from "./schema";
 export const DrizzleProvider: FactoryProvider<MySql2Database<typeof schema>> = {
   provide: DRIZZLE,
   inject: [ConfigService],
-  useFactory: async (configService: ConfigService) => {    
+  useFactory: async (configService: ConfigService) => {
+    console.log("🚀 ~ configService:", configService.get('MYSQL_DATABASE'))
     const pool = createPool({
       host: configService.get('MYSQL_HOST'),
       port: Number(configService.get('MYSQL_PORT')) || 3306,

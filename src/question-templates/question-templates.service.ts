@@ -9,12 +9,11 @@ import * as schema from "../db/schema";
 export class QuestionTemplatesService {
   constructor(@Inject(DRIZZLE) private readonly db: MySql2Database<typeof schema>) {}
 
-  async findByQuiz(quizTemplateId: number) {
+  async findByQuiz(quizId: number) {
     return this.db
       .select()
       .from(questionTemplates)
-      .where(eq(questionTemplates.quizTemplateId, quizTemplateId))
-      .orderBy(questionTemplates.order);
+      .where(eq(questionTemplates.quizId, quizId));
   }
 
   async findOne(id: number) {
@@ -23,12 +22,10 @@ export class QuestionTemplatesService {
   }
 
   async create(data: {
-    quizTemplateId: number;
-    question: string;
-    type: string;
-    options?: string;
-    correctAnswer: string;
-    order?: number;
+    quizId: number;
+    highlighted?: boolean;
+    isPhishing?: boolean;
+    isDemo?: boolean;
   }) {
     const [result] = await this.db.insert(questionTemplates).values(data);
     return this.findOne(result.insertId);
@@ -37,11 +34,9 @@ export class QuestionTemplatesService {
   async update(
     id: number,
     data: {
-      question?: string;
-      type?: string;
-      options?: string;
-      correctAnswer?: string;
-      order?: number;
+      highlighted?: boolean;
+      isPhishing?: boolean;
+      isDemo?: boolean;
     },
   ) {
     await this.db.update(questionTemplates).set(data).where(eq(questionTemplates.id, id));
