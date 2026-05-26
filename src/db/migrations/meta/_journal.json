@@ -15,6 +15,20 @@
       "when": 1779380393973,
       "tag": "0001_bored_hairball",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1779810845022,
+      "tag": "0002_new_master_chief",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1748264400000,
+      "tag": "0003_charset_utf8mb4",
+      "breakpoints": true
     }
   ]
 }

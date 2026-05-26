@@ -4,7 +4,7 @@ import { PassportStrategy } from "@nestjs/passport";
 import { ExtractJwt, Strategy } from "passport-jwt";
 
 export interface JwtPayload {
-  sub: string;
+  userId: string;
   roles: string[];
 }
 
@@ -28,9 +28,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: JwtPayload): Promise<AuthenticatedUser> {
-    if (!payload.sub || !Array.isArray(payload.roles)) {
+    if (!payload.userId || !Array.isArray(payload.roles)) {
       throw new UnauthorizedException("Invalid token payload");
     }
-    return { userId: payload.sub, roles: payload.roles };
+    return { userId: payload.userId, roles: payload.roles };
   }
 }
