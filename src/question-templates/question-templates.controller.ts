@@ -32,7 +32,7 @@ export class QuestionTemplatesController {
   @Roles("space-admin", "super-admin")
   async create(
     @Param("quizId", ParseIntPipe) quizId: number,
-    @Body() body: { highlighted?: boolean; isPhishing?: boolean; isDemo?: boolean },
+    @Body() body: { content: string; highlighted?: boolean; isPhishing?: boolean; isDemo?: boolean },
   ) {
     return this.service.create({ ...body, quizId });
   }

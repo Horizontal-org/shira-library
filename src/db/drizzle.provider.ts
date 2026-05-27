@@ -17,6 +17,7 @@ export const DrizzleProvider: FactoryProvider<MySql2Database<typeof schema>> = {
       password: configService.get('MYSQL_PASSWORD'),
       database: configService.get('MYSQL_DATABASE'),
       connectionLimit: 10,
+      charset: "utf8mb4",
     });
 
     return drizzle(pool, { schema, mode: "default" });

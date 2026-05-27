@@ -23,6 +23,7 @@ export class QuestionTemplatesService {
 
   async create(data: {
     quizId: number;
+    content: string;
     highlighted?: boolean;
     isPhishing?: boolean;
     isDemo?: boolean;
