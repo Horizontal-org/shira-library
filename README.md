@@ -14,6 +14,42 @@ npm run build       # Compile TypeScript
 npm test            # Run Jest tests
 ```
 
+## Console Commands
+
+Commands run against the database without starting the HTTP server. Pass flags after `--` to prevent npm from consuming them.
+
+```bash
+npm run console <command> [options]
+```
+
+### `list-questions`
+
+Lists all question templates in a table.
+
+```bash
+npm run console list-questions
+```
+
+### `list-quizzes`
+
+Lists all quiz templates in a table.
+
+```bash
+npm run console list-quizzes
+```
+
+### `assemble-quiz`
+
+Creates a new quiz with up to 10 random questions. Links one lang tag to the quiz if any exist in the database.
+
+```bash
+npm run console assemble-quiz -- --title "My Quiz"
+```
+
+| Option | Required | Description |
+| --- | --- | --- |
+| `-t, --title <title>` | Yes | Title for the new quiz |
+
 ## Environment Variables
 
 | Variable       | Description                 |
