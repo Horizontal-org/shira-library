@@ -10,7 +10,8 @@
     "db:generate": "drizzle-kit generate",
     "db:reset-migrations": "rm -f src/db/migrations/*.sql src/db/migrations/meta/*.json && echo '{\"version\":\"7\",\"dialect\":\"mysql\",\"entries\":[]}' > src/db/migrations/meta/_journal.json",
     "db:migrate": "drizzle-kit migrate",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "console": "ts-node src/console.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.0",
@@ -21,6 +22,7 @@
     "@nestjs/platform-express": "^11.0.0",
     "drizzle-orm": "^0.45.2",
     "mysql2": "^3.14.0",
+    "nestjs-console": "^10.0.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.2.2",
