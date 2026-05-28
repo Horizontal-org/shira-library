@@ -1,13 +1,13 @@
 import { Inject, Injectable } from "@nestjs/common"
 import { sql } from "drizzle-orm"
 import { MySql2Database } from "drizzle-orm/mysql2"
-import { DRIZZLE } from "../db/drizzle.constants"
-import * as schema from "../db/schema"
-import { questionTemplates } from "../db/schema/question-templates"
-import { quizTemplates } from "../db/schema/quiz-templates"
-import { quizQuestions } from "../db/schema/quiz-questions"
-import { langTags } from "../db/schema/lang-tags"
-import { quizLangTags } from "../db/schema/quiz-lang-tags"
+import { DRIZZLE } from "../../db/drizzle.constants"
+import * as schema from "../../db/schema"
+import { questionTemplates } from "../../db/schema/question-templates"
+import { quizTemplates } from "../../db/schema/quiz-templates"
+import { quizQuestions } from "../../db/schema/quiz-questions"
+import { langTags } from "../../db/schema/lang-tags"
+import { quizLangTags } from "../../db/schema/quiz-lang-tags"
 
 @Injectable()
 export class AssembleQuizService {

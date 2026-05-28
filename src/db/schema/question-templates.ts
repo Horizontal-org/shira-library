@@ -6,7 +6,6 @@ export const questionTemplates = mysqlTable("question_templates", {
   id: serial().primaryKey(),
   name: varchar("name", { length: 255 }),
   highlighted: boolean("highlighted"),
-  quizId: bigint("quiz_id", { mode: "number", unsigned: true }).references(() => quizTemplates.id, { onDelete: "cascade" }),
   isPhishing: boolean("is_phishing"),
   content: text("content").notNull(),
   isDemo: boolean("is_demo"),

@@ -29,6 +29,13 @@
       "when": 1748264400000,
       "tag": "0003_charset_utf8mb4",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1779983148876,
+      "tag": "0004_handy_molly_hayes",
+      "breakpoints": true
     }
   ]
 }

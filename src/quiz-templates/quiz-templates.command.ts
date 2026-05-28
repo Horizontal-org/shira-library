@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common"
 import { Command, Console } from "nestjs-console"
-import { AssembleQuizService } from "./assemble-quiz.service"
-import { QuizTemplatesService } from "./quiz-templates.service"
+import { AssembleQuizService } from "./services/assemble-quiz.service"
+import { QuizTemplatesService } from "./services/quiz-templates.service"
 
 @Console()
 @Injectable()
@@ -9,7 +9,7 @@ export class QuizTemplatesCommand {
   constructor(
     private readonly service: QuizTemplatesService,
     private readonly assembleQuizService: AssembleQuizService,
-  ) {}
+  ) { }
 
   @Command({ command: "list-quizzes", description: "List all quiz templates" })
   async listQuizzes() {
@@ -18,7 +18,6 @@ export class QuizTemplatesCommand {
       quizzes.map((q) => ({
         id: q.id,
         title: q.title,
-        language: q.language,
         createdAt: q.createdAt,
       })),
     )

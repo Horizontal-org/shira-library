@@ -9,11 +9,11 @@ import {
   Post,
   Req,
   UseGuards,
-} from "@nestjs/common";
-import { Roles } from "../auth/roles.decorator";
-import { RolesGuard } from "../auth/roles.guard";
-import { AuthenticatedUser } from "../auth/jwt.strategy";
-import { QuizTemplatesService } from "./quiz-templates.service";
+} from "@nestjs/common"
+import { Roles } from "../../auth/roles.decorator"
+import { RolesGuard } from "../../auth/roles.guard"
+import { AuthenticatedUser } from "../../auth/jwt.strategy"
+import { QuizTemplatesService } from "../services/quiz-templates.service"
 
 @Controller("quiz-templates")
 export class QuizTemplatesController {
@@ -21,12 +21,12 @@ export class QuizTemplatesController {
 
   @Get()
   async findAll() {
-    return this.service.findAll();
+    return this.service.findAll()
   }
 
   @Get(":id")
   async findOne(@Param("id", ParseIntPipe) id: number) {
-    return this.service.findOne(id);
+    return this.service.findOne(id)
   }
 
   @Post()
@@ -36,7 +36,7 @@ export class QuizTemplatesController {
     @Body() body: { title: string; description?: string },
     @Req() req: { user: AuthenticatedUser },
   ) {
-    return this.service.create({ ...body, createdBy: req.user.userId });
+    return this.service.create({ ...body, createdBy: req.user.userId })
   }
 
   @Patch(":id")
@@ -46,14 +46,14 @@ export class QuizTemplatesController {
     @Param("id", ParseIntPipe) id: number,
     @Body() body: { title?: string; description?: string },
   ) {
-    return this.service.update(id, body);
+    return this.service.update(id, body)
   }
 
   @Delete(":id")
   @UseGuards(RolesGuard)
   @Roles("super-admin")
   async remove(@Param("id", ParseIntPipe) id: number) {
-    await this.service.remove(id);
-    return { deleted: true };
+    await this.service.remove(id)
+    return { deleted: true }
   }
 }

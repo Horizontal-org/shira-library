@@ -8,23 +8,18 @@ import {
   Patch,
   Post,
   UseGuards,
-} from "@nestjs/common";
-import { Roles } from "../auth/roles.decorator";
-import { RolesGuard } from "../auth/roles.guard";
-import { QuestionTemplatesService } from "./question-templates.service";
+} from "@nestjs/common"
+import { Roles } from "../../auth/roles.decorator"
+import { RolesGuard } from "../../auth/roles.guard"
+import { QuestionTemplatesService } from "../services/question-templates.service"
 
 @Controller("quiz-templates/:quizId/questions")
 export class QuestionTemplatesController {
   constructor(private readonly service: QuestionTemplatesService) {}
 
-  @Get()
-  async findByQuiz(@Param("quizId", ParseIntPipe) quizId: number) {
-    return this.service.findByQuiz(quizId);
-  }
-
   @Get(":id")
   async findOne(@Param("id", ParseIntPipe) id: number) {
-    return this.service.findOne(id);
+    return this.service.findOne(id)
   }
 
   @Post()
@@ -34,7 +29,7 @@ export class QuestionTemplatesController {
     @Param("quizId", ParseIntPipe) quizId: number,
     @Body() body: { content: string; highlighted?: boolean; isPhishing?: boolean; isDemo?: boolean },
   ) {
-    return this.service.create({ ...body, quizId });
+    return this.service.create({ ...body, quizId })
   }
 
   @Patch(":id")
@@ -44,14 +39,14 @@ export class QuestionTemplatesController {
     @Param("id", ParseIntPipe) id: number,
     @Body() body: { highlighted?: boolean; isPhishing?: boolean; isDemo?: boolean },
   ) {
-    return this.service.update(id, body);
+    return this.service.update(id, body)
   }
 
   @Delete(":id")
   @UseGuards(RolesGuard)
   @Roles("super-admin")
   async remove(@Param("id", ParseIntPipe) id: number) {
-    await this.service.remove(id);
-    return { deleted: true };
+    await this.service.remove(id)
+    return { deleted: true }
   }
 }
