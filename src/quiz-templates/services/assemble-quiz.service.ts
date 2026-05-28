@@ -28,7 +28,7 @@ export class AssembleQuizService {
       )
     }
 
-    const [langTag] = await this.db.select().from(langTags).limit(1)
+    const [langTag] = await this.db.select().from(langTags).orderBy(sql`RAND()`).limit(1)
 
     if (langTag) {
       await this.db.insert(quizLangTags).values({ quizId, langTagId: langTag.id })
