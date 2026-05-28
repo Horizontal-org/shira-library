@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common"
-import { eq } from "drizzle-orm"
+import { and, asc, desc, eq, inArray, like, sql, SQL } from "drizzle-orm"
 import { MySql2Database } from "drizzle-orm/mysql2"
 import { DRIZZLE } from "../../db/drizzle.constants"
 import { quizTemplates } from "../../db/schema/quiz-templates"
@@ -7,11 +7,7 @@ import * as schema from "../../db/schema"
 
 @Injectable()
 export class QuizTemplatesService {
-  constructor(@Inject(DRIZZLE) private readonly db: MySql2Database<typeof schema>) {}
-
-  async findAll() {
-    return this.db.select().from(quizTemplates)
-  }
+  constructor(@Inject(DRIZZLE) private readonly db: MySql2Database<typeof schema>) { }
 
   async findOne(id: number) {
     const [result] = await this.db.select().from(quizTemplates).where(eq(quizTemplates.id, id))

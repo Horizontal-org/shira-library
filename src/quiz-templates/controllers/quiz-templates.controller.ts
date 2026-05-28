@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from "@nestjs/common"
@@ -14,14 +15,30 @@ import { Roles } from "../../auth/roles.decorator"
 import { RolesGuard } from "../../auth/roles.guard"
 import { AuthenticatedUser } from "../../auth/jwt.strategy"
 import { QuizTemplatesService } from "../services/quiz-templates.service"
+import { ListQuizTemplatesDto } from "../dto/list-quiz-templates.dto"
+import { ListQuizTemplatesService } from "../services/list-quiz.service"
+import { Public } from "@/auth/public.decorator"
 
 @Controller("quiz-templates")
+@Public()
 export class QuizTemplatesController {
-  constructor(private readonly service: QuizTemplatesService) {}
+  constructor(
+    private readonly service: QuizTemplatesService,
+    private readonly listService: ListQuizTemplatesService,
+  ) { }
 
+  // @UseGuards(RolesGuard)
+  // @Roles("space-admin", "super-admin")
   @Get()
-  async findAll() {
-    return this.service.findAll()
+  async findAll(@Query() query: ListQuizTemplatesDto) {
+    return this.listService.findAll({
+      search: query.search,
+      filters: {
+        langTags: query.langTags?.split(',').map((s) => s.trim()).filter(Boolean),
+        tags: query.tags?.split(',').map(Number).filter(Boolean),
+      },
+      sortOrder: query.sortOrder ?? 'desc'
+    })
   }
 
   @Get(":id")
