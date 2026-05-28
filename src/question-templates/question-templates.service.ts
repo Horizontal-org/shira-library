@@ -9,6 +9,10 @@ import * as schema from "../db/schema";
 export class QuestionTemplatesService {
   constructor(@Inject(DRIZZLE) private readonly db: MySql2Database<typeof schema>) {}
 
+  async findAll() {
+    return this.db.select().from(questionTemplates)
+  }
+
   async findByQuiz(quizId: number) {
     return this.db
       .select()

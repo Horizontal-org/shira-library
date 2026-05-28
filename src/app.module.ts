@@ -6,10 +6,12 @@ import { JwtAuthGuard } from "./auth/jwt-auth.guard";
 import { DrizzleModule } from "./db/drizzle.module";
 import { QuizTemplatesModule } from "./quiz-templates/quiz-templates.module";
 import { QuestionTemplatesModule } from "./question-templates/question-templates.module";
+import { ConsoleModule } from "nestjs-console";
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    ConsoleModule,
     DrizzleModule,
     AuthModule,
     QuizTemplatesModule,
