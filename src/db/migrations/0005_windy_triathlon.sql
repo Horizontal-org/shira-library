@@ -1,0 +1,1 @@
+ALTER TABLE `tags` ADD `slug` varchar(255);
