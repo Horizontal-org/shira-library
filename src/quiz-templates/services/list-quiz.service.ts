@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common"
-import { and, asc, desc, eq, inArray, like, SQL } from "drizzle-orm"
+import { and, asc, count, desc, eq, inArray, like, SQL } from "drizzle-orm"
 import { MySql2Database } from "drizzle-orm/mysql2"
 import { DRIZZLE } from "../../db/drizzle.constants"
 import { quizTemplates } from "../../db/schema/quiz-templates"
@@ -16,14 +16,25 @@ export class ListQuizTemplatesService {
 
   async findAll(query: ListQuizTemplatesQuery) {
     const conditions = this.buildConditions(query)
+    const where = conditions.length ? and(...conditions) : undefined
+    const { page, limit } = query
 
-    const quizzes = await this.db
-      .select()
-      .from(quizTemplates)
-      .where(conditions.length ? and(...conditions) : undefined)
-      .orderBy(query.sortOrder === 'asc' ? asc(quizTemplates.createdAt) : desc(quizTemplates.createdAt))
+    const [quizzes, [{ total }]] = await Promise.all([
+      this.db
+        .select()
+        .from(quizTemplates)
+        .where(where)
+        .orderBy(query.sortOrder === 'asc' ? asc(quizTemplates.createdAt) : desc(quizTemplates.createdAt))
+        .limit(limit)
+        .offset((page - 1) * limit),
 
-    if (quizzes.length === 0) return []
+      this.db
+        .select({ total: count() })
+        .from(quizTemplates)
+        .where(where),
+    ])
+
+    if (quizzes.length === 0) return { data: [], total: Number(total), page, limit }
 
     const quizIds = quizzes.map((q) => q.id)
 
@@ -50,7 +61,7 @@ export class ListQuizTemplatesService {
         .where(inArray(quizTags.quizId, quizIds)),
     ])
 
-    return quizzes.map((quiz) => ({
+    const data = quizzes.map((quiz) => ({
       ...quiz,
       langTags: langTagRows
         .filter((r) => r.quizId === quiz.id)
@@ -59,6 +70,8 @@ export class ListQuizTemplatesService {
         .filter((r) => r.quizId === quiz.id)
         .map(({ quizId: _, ...t }) => t),
     }))
+
+    return { data, total: Number(total), page, limit }
   }
 
   async findOne(id: number) {

@@ -15,7 +15,7 @@ export class QuizTemplatesCommand {
 
   @Command({ command: "list-quizzes", description: "List all quiz templates" })
   async listQuizzes() {
-    const quizzes = await this.listService.findAll({ filters: {}, sortOrder: 'desc' })
+    const quizzes = await this.listService.findAll({ filters: {}, sortOrder: 'desc', page: 1, limit: 100 })
     // console.table(
     //   quizzes.map((q) => ({
     //     id: q.id,

@@ -37,7 +37,9 @@ export class QuizTemplatesController {
         langTags: query.langTags?.split(',').map((s) => s.trim()).filter(Boolean),
         tags: query.tags?.split(',').map(Number).filter(Boolean),
       },
-      sortOrder: query.sortOrder ?? 'desc'
+      sortOrder: query.sortOrder ?? 'desc',
+      page: Math.max(1, parseInt(query.page ?? '1', 10) || 1),
+      limit: Math.min(100, Math.max(1, parseInt(query.limit ?? '20', 10) || 20)),
     })
   }
 
