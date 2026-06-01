@@ -7,7 +7,7 @@ import * as schema from "../../db/schema"
 
 @Injectable()
 export class QuestionTemplatesService {
-  constructor(@Inject(DRIZZLE) private readonly db: MySql2Database<typeof schema>) {}
+  constructor(@Inject(DRIZZLE) private readonly db: MySql2Database<typeof schema>) { }
 
   async findAll() {
     return this.db.select().from(questionTemplates)
@@ -20,10 +20,13 @@ export class QuestionTemplatesService {
 
   async create(data: {
     quizId: number
+    name: string
     content: string
-    highlighted?: boolean
-    isPhishing?: boolean
-    isDemo?: boolean
+    highlighted: boolean
+    isPhishing: boolean
+    isDemo: boolean
+    appType: string
+    defaultApp: string
   }) {
     const [result] = await this.db.insert(questionTemplates).values(data)
     return this.findOne(result.insertId)
