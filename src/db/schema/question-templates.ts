@@ -4,12 +4,13 @@ import { quizTemplates } from "./quiz-templates";
 
 export const questionTemplates = mysqlTable("question_templates", {
   id: serial().primaryKey(),
-  name: varchar("name", { length: 255 }),
-  highlighted: boolean("highlighted"),
-  quizId: bigint("quiz_id", { mode: "number", unsigned: true }).references(() => quizTemplates.id, { onDelete: "cascade" }),
-  isPhishing: boolean("is_phishing"),
+  name: varchar("name", { length: 255 }).notNull(),
+  highlighted: boolean("highlighted").notNull().default(false),
+  isPhishing: boolean("is_phishing").notNull(),
   content: text("content").notNull(),
-  isDemo: boolean("is_demo"),
+  appType: varchar("app_type", { length: 255 }).notNull(),
+  defaultApp: varchar("default_app", { length: 255 }),
+  isDemo: boolean("is_demo").notNull().default(false),
   createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
 });
 

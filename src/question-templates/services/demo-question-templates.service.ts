@@ -1,13 +1,13 @@
 import { Inject, Injectable } from "@nestjs/common"
 import { eq } from "drizzle-orm"
 import { MySql2Database } from "drizzle-orm/mysql2"
-import { DRIZZLE } from "../db/drizzle.constants"
-import * as schema from "../db/schema"
-import { questionTemplates } from "../db/schema/question-templates"
-import { langTags } from "../db/schema/lang-tags"
-import { questionLangTags } from "../db/schema/question-lang-tags"
-import { explanationTemplates } from "../db/schema/explanation-templates"
-import { DemoQuestionDto } from "./dto/import-demo-questions.dto"
+import { DRIZZLE } from "../../db/drizzle.constants"
+import * as schema from "../../db/schema"
+import { questionTemplates } from "../../db/schema/question-templates"
+import { langTags } from "../../db/schema/lang-tags"
+import { questionLangTags } from "../../db/schema/question-lang-tags"
+import { explanationTemplates } from "../../db/schema/explanation-templates"
+import { DemoQuestionDto } from "../dto/import-demo-questions.dto"
 
 @Injectable()
 export class DemoQuestionTemplatesService {
@@ -19,6 +19,9 @@ export class DemoQuestionTemplatesService {
     for (const item of items) {
       const [insertResult] = await this.db.insert(questionTemplates).values({
         name: item.name,
+        highlighted: false,
+        appType: item.app_type,
+        defaultApp: item.default_app,
         content: item.content,
         isPhishing: item.is_phishing,
         isDemo: true,

@@ -1,27 +1,29 @@
 import { Injectable } from "@nestjs/common"
 import { Command, Console } from "nestjs-console"
-import { AssembleQuizService } from "./assemble-quiz.service"
-import { QuizTemplatesService } from "./quiz-templates.service"
+import { AssembleQuizService } from "./services/assemble-quiz.service"
+import { QuizTemplatesService } from "./services/quiz-templates.service"
+import { ListQuizTemplatesService } from "./services/list-quiz.service"
 
 @Console()
 @Injectable()
 export class QuizTemplatesCommand {
   constructor(
     private readonly service: QuizTemplatesService,
+    private readonly listService: ListQuizTemplatesService,
     private readonly assembleQuizService: AssembleQuizService,
-  ) {}
+  ) { }
 
   @Command({ command: "list-quizzes", description: "List all quiz templates" })
   async listQuizzes() {
-    const quizzes = await this.service.findAll()
+    const quizzes = await this.listService.findAll({ filters: {}, sortOrder: 'desc', page: 1, limit: 100 })
     console.table(
-      quizzes.map((q) => ({
+      quizzes.data.map((q) => ({
         id: q.id,
         title: q.title,
-        language: q.language,
         createdAt: q.createdAt,
       })),
     )
+    console.log(quizzes)
     process.exit(0)
   }
 
@@ -37,14 +39,19 @@ export class QuizTemplatesCommand {
     ],
   })
   async assembleQuiz({ title }: { title: string }) {
-    const { quizId, questionCount, langTag } = await this.assembleQuizService.assemble(title)
+    const { quizId, questionCount, langTag, tag } = await this.assembleQuizService.assemble(title)
 
     console.log(`Quiz #${quizId} "${title}" created`)
-    console.log(`  Questions linked: ${questionCount}`)
+    console.log(`Questions linked: ${questionCount}`)
     if (langTag) {
-      console.log(`  Lang tag: ${langTag.name} (${langTag.code})`)
+      console.log(`Lang tag: ${langTag.name} (${langTag.code})`)
     } else {
-      console.warn("  No lang tags found — skipping lang tag assignment")
+      console.warn("No lang tags found — skipping lang tag assignment")
+    }
+    if (tag) {
+      console.log(`Tag: ${tag.name} (${tag.slug})`)
+    } else {
+      console.warn("No tags found — skipping tag assignment")
     }
     process.exit(0)
   }
