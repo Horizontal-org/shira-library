@@ -43,6 +43,13 @@
       "when": 1780070727912,
       "tag": "0005_windy_triathlon",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1780327234900,
+      "tag": "0006_jazzy_lethal_legion",
+      "breakpoints": true
     }
   ]
 }
