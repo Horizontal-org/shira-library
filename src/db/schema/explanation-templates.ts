@@ -5,8 +5,8 @@ import { questionTemplates } from "./question-templates";
 export const explanationTemplates = mysqlTable("explanation_templates", {
   id: serial().primaryKey(),
   questionId: bigint("question_id", { mode: "number", unsigned: true }).notNull().references(() => questionTemplates.id, { onDelete: "cascade" }),
-  position: varchar("position", { length: 255 }),
-  positionIndex: varchar("position_index", { length: 255 }),
+  position: varchar("position", { length: 255 }).notNull(),
+  positionIndex: varchar("position_index", { length: 255 }).notNull(),
   content: text("content").notNull(),
   createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
 });

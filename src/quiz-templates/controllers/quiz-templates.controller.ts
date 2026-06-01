@@ -48,6 +48,11 @@ export class QuizTemplatesController {
     return this.service.findOne(id)
   }
 
+  @Get(":id/questions")
+  async findQuestions(@Param("id", ParseIntPipe) id: number) {
+    return this.service.findQuestions(id)
+  }
+
   @Post()
   @UseGuards(RolesGuard)
   @Roles("space-admin", "super-admin")

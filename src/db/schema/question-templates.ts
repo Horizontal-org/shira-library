@@ -1,12 +1,11 @@
 import { sql } from "drizzle-orm";
-import { mysqlTable, serial, bigint, boolean, timestamp, text, varchar } from "drizzle-orm/mysql-core";
-import { quizTemplates } from "./quiz-templates";
+import { mysqlTable, serial, boolean, timestamp, text, varchar } from "drizzle-orm/mysql-core";
 
 export const questionTemplates = mysqlTable("question_templates", {
   id: serial().primaryKey(),
-  name: varchar("name", { length: 255 }),
+  name: varchar("name", { length: 255 }).notNull(),
   highlighted: boolean("highlighted"),
-  isPhishing: boolean("is_phishing"),
+  isPhishing: boolean("is_phishing").notNull(),
   content: text("content").notNull(),
   appType: varchar("app_type", { length: 255 }).notNull(),
   defaultApp: varchar("default_app", { length: 255 }),
