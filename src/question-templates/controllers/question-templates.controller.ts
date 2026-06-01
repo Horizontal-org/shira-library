@@ -15,31 +15,11 @@ import { QuestionTemplatesService } from "../services/question-templates.service
 
 @Controller("quiz-templates/:quizId/questions")
 export class QuestionTemplatesController {
-  constructor(private readonly service: QuestionTemplatesService) {}
+  constructor(private readonly service: QuestionTemplatesService) { }
 
   @Get(":id")
   async findOne(@Param("id", ParseIntPipe) id: number) {
     return this.service.findOne(id)
-  }
-
-  @Post()
-  @UseGuards(RolesGuard)
-  @Roles("space-admin", "super-admin")
-  async create(
-    @Param("quizId", ParseIntPipe) quizId: number,
-    @Body() body: { content: string; highlighted?: boolean; isPhishing?: boolean; isDemo?: boolean },
-  ) {
-    return this.service.create({ ...body, quizId })
-  }
-
-  @Patch(":id")
-  @UseGuards(RolesGuard)
-  @Roles("space-admin", "super-admin")
-  async update(
-    @Param("id", ParseIntPipe) id: number,
-    @Body() body: { highlighted?: boolean; isPhishing?: boolean; isDemo?: boolean },
-  ) {
-    return this.service.update(id, body)
   }
 
   @Delete(":id")
