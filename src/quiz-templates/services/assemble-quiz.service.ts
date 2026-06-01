@@ -8,6 +8,8 @@ import { quizTemplates } from "../../db/schema/quiz-templates"
 import { quizQuestions } from "../../db/schema/quiz-questions"
 import { langTags } from "../../db/schema/lang-tags"
 import { quizLangTags } from "../../db/schema/quiz-lang-tags"
+import { tags } from "../../db/schema/tags"
+import { quizTags } from "../../db/schema/quiz-tags"
 
 @Injectable()
 export class AssembleQuizService {
@@ -34,10 +36,17 @@ export class AssembleQuizService {
       await this.db.insert(quizLangTags).values({ quizId, langTagId: langTag.id })
     }
 
+    const [tag] = await this.db.select().from(tags).orderBy(sql`RAND()`).limit(1)
+
+    if (tag) {
+      await this.db.insert(quizTags).values({ quizId, tagId: tag.id })
+    }
+
     return {
       quizId,
       questionCount: questions.length,
       langTag: langTag ?? null,
+      tag: tag ?? null,
     }
   }
 }

@@ -39,7 +39,7 @@ export class QuizTemplatesCommand {
     ],
   })
   async assembleQuiz({ title }: { title: string }) {
-    const { quizId, questionCount, langTag } = await this.assembleQuizService.assemble(title)
+    const { quizId, questionCount, langTag, tag } = await this.assembleQuizService.assemble(title)
 
     console.log(`Quiz #${quizId} "${title}" created`)
     console.log(`Questions linked: ${questionCount}`)
@@ -47,6 +47,11 @@ export class QuizTemplatesCommand {
       console.log(`Lang tag: ${langTag.name} (${langTag.code})`)
     } else {
       console.warn("No lang tags found — skipping lang tag assignment")
+    }
+    if (tag) {
+      console.log(`Tag: ${tag.name} (${tag.slug})`)
+    } else {
+      console.warn("No tags found — skipping tag assignment")
     }
     process.exit(0)
   }
