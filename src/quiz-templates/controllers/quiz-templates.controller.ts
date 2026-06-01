@@ -31,7 +31,7 @@ export class QuizTemplatesController {
   // @Roles("space-admin", "super-admin")
   @Get()
   async findAll(@Query() query: ListQuizTemplatesDto) {
-    return this.listService.findAll({
+    const results = await this.listService.findAll({
       search: query.search,
       filters: {
         langTags: query.langTags?.split(',').map((s) => s.trim()).filter(Boolean),
@@ -41,6 +41,8 @@ export class QuizTemplatesController {
       page: Math.max(1, parseInt(query.page ?? '1', 10) || 1),
       limit: Math.min(100, Math.max(1, parseInt(query.limit ?? '20', 10) || 20)),
     })
+
+    return results.data;
   }
 
   @Get(":id")
