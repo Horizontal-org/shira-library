@@ -11,7 +11,7 @@ import { DemoQuestionDto } from "../dto/import-demo-questions.dto"
 
 @Injectable()
 export class DemoQuestionTemplatesService {
-  constructor(@Inject(DRIZZLE) private readonly db: MySql2Database<typeof schema>) {}
+  constructor(@Inject(DRIZZLE) private readonly db: MySql2Database<typeof schema>) { }
 
   async importBatch(items: DemoQuestionDto[]) {
     const results = []
@@ -19,6 +19,9 @@ export class DemoQuestionTemplatesService {
     for (const item of items) {
       const [insertResult] = await this.db.insert(questionTemplates).values({
         name: item.name,
+        highlighted: false,
+        appType: item.app_type,
+        defaultApp: item.default_app,
         content: item.content,
         isPhishing: item.is_phishing,
         isDemo: true,
