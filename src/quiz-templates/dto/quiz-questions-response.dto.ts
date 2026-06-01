@@ -8,8 +8,8 @@ export class QuizQuestionDto {
   questionId: number
   questionName: string
   isPhishing: boolean
-  language: string | null
-  app: string | null
+  language: string
+  app: string
   content: string
   explanations: QuizQuestionExplanationDto[]
 }
