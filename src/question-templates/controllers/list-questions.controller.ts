@@ -3,7 +3,7 @@ import { Public } from "@/auth/public.decorator"
 import { ListQuestionTemplatesDto } from "../dto/list-question-templates.dto"
 import { ListQuestionTemplatesService } from "../services/list-question-templates.service"
 
-@Controller("questions")
+@Controller("question-templates")
 @Public()
 export class ListQuestionsController {
   constructor(private readonly listService: ListQuestionTemplatesService) { }
