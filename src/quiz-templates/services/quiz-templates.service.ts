@@ -1,9 +1,18 @@
-import { Inject, Injectable } from "@nestjs/common"
-import { and, asc, desc, eq, inArray, like, sql, SQL } from "drizzle-orm"
+import { Inject, Injectable, Logger } from "@nestjs/common"
+import { eq, inArray } from "drizzle-orm"
 import { MySql2Database } from "drizzle-orm/mysql2"
 import { DRIZZLE } from "../../db/drizzle.constants"
 import { quizTemplates } from "../../db/schema/quiz-templates"
 import * as schema from "../../db/schema"
+import { quizQuestions } from "../../db/schema/quiz-questions"
+import { questionTemplates } from "../../db/schema/question-templates"
+import { questionLangTags } from "../../db/schema/question-lang-tags"
+import { langTags } from "../../db/schema/lang-tags"
+import { explanationTemplates } from "../../db/schema/explanation-templates"
+import {
+  QuizQuestionDto,
+  QuizQuestionExplanationDto,
+} from "../dto/quiz-questions-response.dto"
 
 @Injectable()
 export class QuizTemplatesService {
@@ -12,6 +21,82 @@ export class QuizTemplatesService {
   async findOne(id: number) {
     const [result] = await this.db.select().from(quizTemplates).where(eq(quizTemplates.id, id))
     return result ?? null
+  }
+
+  async findQuestions(id: number): Promise<QuizQuestionDto[] | null> {
+    const quiz = await this.findOne(id)
+
+    if (!quiz) {
+      return null
+    }
+
+    const questionRows = await this.db
+      .select({
+        quizQuestionId: quizQuestions.id,
+        questionId: questionTemplates.id,
+        questionName: questionTemplates.name,
+        isPhishing: questionTemplates.isPhishing,
+        defaultApp: questionTemplates.defaultApp,
+        appType: questionTemplates.appType,
+        content: questionTemplates.content,
+      })
+      .from(quizQuestions)
+      .innerJoin(questionTemplates, eq(quizQuestions.questionId, questionTemplates.id))
+      .where(eq(quizQuestions.quizId, id))
+
+    if (questionRows.length === 0) {
+      return []
+    }
+
+    const questionIds = questionRows.map((row) => row.questionId)
+
+    const [languageRows, explanationRows] = await Promise.all([
+      this.db
+        .select({
+          questionId: questionLangTags.questionId,
+          language: langTags.name,
+        })
+        .from(questionLangTags)
+        .innerJoin(langTags, eq(questionLangTags.langTagId, langTags.id))
+        .where(inArray(questionLangTags.questionId, questionIds)),
+
+      this.db
+        .select({
+          questionId: explanationTemplates.questionId,
+          position: explanationTemplates.position,
+          index: explanationTemplates.positionIndex,
+          text: explanationTemplates.content,
+        })
+        .from(explanationTemplates)
+        .where(inArray(explanationTemplates.questionId, questionIds)),
+    ])
+
+    return questionRows
+      .sort((a, b) => (a.quizQuestionId ?? 0) - (b.quizQuestionId ?? 0))
+      .map((row) => {
+        const languages = languageRows.filter((languageRow) => languageRow.questionId === row.questionId)
+        const explanations: QuizQuestionExplanationDto[] = explanationRows
+          .filter((explanationRow) => explanationRow.questionId === row.questionId)
+          .sort((a, b) => String(a.index).localeCompare(String(b.index), undefined, { numeric: true }))
+          .map((explanationRow) => ({
+            position: explanationRow.position,
+            text: explanationRow.text,
+            index: explanationRow.index,
+          }))
+
+        const question: QuizQuestionDto = {
+          questionId: row.questionId,
+          questionName: row.questionName,
+          isPhishing: row.isPhishing,
+          language: languages[0]?.language ?? null,
+          appName: row.defaultApp ?? null,
+          appType: row.appType,
+          content: row.content,
+          explanations,
+        }
+
+        return question
+      })
   }
 
   async create(data: { title: string; description?: string; createdBy: string }) {
