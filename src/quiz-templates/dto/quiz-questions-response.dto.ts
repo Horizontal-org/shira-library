@@ -9,7 +9,8 @@ export class QuizQuestionDto {
   questionName: string
   isPhishing: boolean
   language: string
-  app: string
+  appName?: string | null
+  appType: string
   content: string
   explanations: QuizQuestionExplanationDto[]
 }

@@ -8,8 +8,6 @@ import { quizQuestions } from "../../db/schema/quiz-questions"
 import { questionTemplates } from "../../db/schema/question-templates"
 import { questionLangTags } from "../../db/schema/question-lang-tags"
 import { langTags } from "../../db/schema/lang-tags"
-import { questionTags } from "../../db/schema/question-tags"
-import { tags } from "../../db/schema/tags"
 import { explanationTemplates } from "../../db/schema/explanation-templates"
 import {
   QuizQuestionDto,
@@ -40,6 +38,8 @@ export class QuizTemplatesService {
         questionId: questionTemplates.id,
         questionName: questionTemplates.name,
         isPhishing: questionTemplates.isPhishing,
+        defaultApp: questionTemplates.defaultApp,
+        appType: questionTemplates.appType,
         content: questionTemplates.content,
       })
       .from(quizQuestions)
@@ -54,7 +54,7 @@ export class QuizTemplatesService {
 
     this.logger.debug(`${questionIds.length} questions found for quiz ${id}`)
 
-    const [languageRows, tagRows, explanationRows] = await Promise.all([
+    const [languageRows, explanationRows] = await Promise.all([
       this.db
         .select({
           questionId: questionLangTags.questionId,
@@ -63,15 +63,6 @@ export class QuizTemplatesService {
         .from(questionLangTags)
         .innerJoin(langTags, eq(questionLangTags.langTagId, langTags.id))
         .where(inArray(questionLangTags.questionId, questionIds)),
-
-      this.db
-        .select({
-          questionId: questionTags.questionId,
-          tagName: tags.name,
-        })
-        .from(questionTags)
-        .innerJoin(tags, eq(questionTags.tagId, tags.id))
-        .where(inArray(questionTags.questionId, questionIds)),
 
       this.db
         .select({
@@ -88,7 +79,6 @@ export class QuizTemplatesService {
       .sort((a, b) => (a.quizQuestionId ?? 0) - (b.quizQuestionId ?? 0))
       .map((row) => {
         const languages = languageRows.filter((languageRow) => languageRow.questionId === row.questionId)
-        const questionTagsForRow = tagRows.filter((tagRow) => tagRow.questionId === row.questionId)
         const explanations: QuizQuestionExplanationDto[] = explanationRows
           .filter((explanationRow) => explanationRow.questionId === row.questionId)
           .sort((a, b) => String(a.index).localeCompare(String(b.index), undefined, { numeric: true }))
@@ -103,7 +93,8 @@ export class QuizTemplatesService {
           questionName: row.questionName,
           isPhishing: row.isPhishing,
           language: languages[0]?.language ?? null,
-          app: questionTagsForRow[0]?.tagName ?? null,
+          appName: row.defaultApp ?? null,
+          appType: row.appType,
           content: row.content,
           explanations,
         }
