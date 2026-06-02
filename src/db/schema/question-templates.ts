@@ -1,6 +1,5 @@
 import { sql } from "drizzle-orm";
-import { mysqlTable, serial, bigint, boolean, timestamp, text, varchar } from "drizzle-orm/mysql-core";
-import { quizTemplates } from "./quiz-templates";
+import { mysqlTable, serial, boolean, timestamp, text, varchar } from "drizzle-orm/mysql-core";
 
 export const questionTemplates = mysqlTable("question_templates", {
   id: serial().primaryKey(),
