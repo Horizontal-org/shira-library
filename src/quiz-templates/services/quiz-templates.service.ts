@@ -18,8 +18,6 @@ import {
 export class QuizTemplatesService {
   constructor(@Inject(DRIZZLE) private readonly db: MySql2Database<typeof schema>) { }
 
-  private readonly logger = new Logger(QuizTemplatesService.name)
-
   async findOne(id: number) {
     const [result] = await this.db.select().from(quizTemplates).where(eq(quizTemplates.id, id))
     return result ?? null
@@ -51,8 +49,6 @@ export class QuizTemplatesService {
     }
 
     const questionIds = questionRows.map((row) => row.questionId)
-
-    this.logger.debug(`${questionIds.length} questions found for quiz ${id}`)
 
     const [languageRows, explanationRows] = await Promise.all([
       this.db
