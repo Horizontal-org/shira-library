@@ -8,6 +8,7 @@ import { QuizTemplatesModule } from "./quiz-templates/quiz-templates.module";
 import { QuestionTemplatesModule } from "./question-templates/question-templates.module";
 import { LangTagsModule } from "./lang-tags/lang-tags.module";
 import { ConsoleModule } from "nestjs-console";
+import { TagsModule } from "./tags/tags.module";
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { ConsoleModule } from "nestjs-console";
     QuizTemplatesModule,
     QuestionTemplatesModule,
     LangTagsModule,
+    TagsModule
   ],
   providers: [
     {
