@@ -6,8 +6,9 @@ import { JwtAuthGuard } from "./auth/jwt-auth.guard";
 import { DrizzleModule } from "./db/drizzle.module";
 import { QuizTemplatesModule } from "./quiz-templates/quiz-templates.module";
 import { QuestionTemplatesModule } from "./question-templates/question-templates.module";
-import { TagsModule } from "./tags/tags.module";
+import { LangTagsModule } from "./lang-tags/lang-tags.module";
 import { ConsoleModule } from "nestjs-console";
+import { TagsModule } from "./tags/tags.module";
 
 @Module({
   imports: [
@@ -17,7 +18,8 @@ import { ConsoleModule } from "nestjs-console";
     AuthModule,
     QuizTemplatesModule,
     QuestionTemplatesModule,
-    TagsModule,
+    LangTagsModule,
+    TagsModule
   ],
   providers: [
     {
@@ -26,4 +28,4 @@ import { ConsoleModule } from "nestjs-console";
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }

@@ -11,7 +11,7 @@
     "db:reset-migrations": "rm -f src/db/migrations/*.sql src/db/migrations/meta/*.json && echo '{\"version\":\"7\",\"dialect\":\"mysql\",\"entries\":[]}' > src/db/migrations/meta/_journal.json",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
-    "console": "ts-node src/console.ts"
+    "console": "ts-node -r tsconfig-paths/register src/console.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.0",
