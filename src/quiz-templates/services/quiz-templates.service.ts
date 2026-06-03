@@ -5,6 +5,9 @@ import { DRIZZLE } from "../../db/drizzle.constants"
 import { quizTemplates } from "../../db/schema/quiz-templates"
 import * as schema from "../../db/schema"
 import { quizQuestions } from "../../db/schema/quiz-questions"
+import { quizTags } from "../../db/schema/quiz-tags"
+import { quizLangTags } from "../../db/schema/quiz-lang-tags"
+import { tags } from "../../db/schema/tags"
 import { questionTemplates } from "../../db/schema/question-templates"
 import { questionLangTags } from "../../db/schema/question-lang-tags"
 import { langTags } from "../../db/schema/lang-tags"
@@ -21,6 +24,26 @@ export class QuizTemplatesService {
   async findOne(id: number) {
     const [result] = await this.db.select().from(quizTemplates).where(eq(quizTemplates.id, id))
     return result ?? null
+  }
+
+  async findOneEnriched(id: number) {
+    const quiz = await this.findOne(id)
+    if (!quiz) return null
+
+    const [langTagRows, tagRows] = await Promise.all([
+      this.db
+        .select({ id: langTags.id, name: langTags.name, code: langTags.code })
+        .from(quizLangTags)
+        .innerJoin(langTags, eq(quizLangTags.langTagId, langTags.id))
+        .where(eq(quizLangTags.quizId, id)),
+      this.db
+        .select({ id: tags.id, name: tags.name })
+        .from(quizTags)
+        .innerJoin(tags, eq(quizTags.tagId, tags.id))
+        .where(eq(quizTags.quizId, id)),
+    ])
+
+    return { ...quiz, langTags: langTagRows, tags: tagRows }
   }
 
   async findQuestions(id: number): Promise<QuizQuestionDto[] | null> {
@@ -99,7 +122,12 @@ export class QuizTemplatesService {
       })
   }
 
-  async create(data: { title: string; questionIds: number[] }) {
+  async create(data: {
+    title: string
+    questionIds: number[]
+    tagIds?: number[]
+    langTagIds?: number[]
+  }) {
     const [result] = await this.db.insert(quizTemplates).values({ title: data.title })
     const quizId = result.insertId
 
@@ -107,7 +135,49 @@ export class QuizTemplatesService {
       data.questionIds.map(questionId => ({ quizId, questionId }))
     )
 
+    if (data.tagIds?.length) {
+      await this.db.insert(quizTags).values(
+        data.tagIds.map(tagId => ({ quizId, tagId }))
+      )
+    }
+
+    if (data.langTagIds?.length) {
+      await this.db.insert(quizLangTags).values(
+        data.langTagIds.map(langTagId => ({ quizId, langTagId }))
+      )
+    }
+
     return this.findOne(quizId)
+  }
+
+  async update(id: number, data: {
+    title?: string
+    questionIds?: number[]
+    tagIds?: number[]
+    langTagIds?: number[]
+  }) {
+    if (data.title !== undefined) {
+      await this.db.update(quizTemplates).set({ title: data.title }).where(eq(quizTemplates.id, id))
+    }
+    if (data.questionIds !== undefined) {
+      await this.db.delete(quizQuestions).where(eq(quizQuestions.quizId, id))
+      if (data.questionIds.length) {
+        await this.db.insert(quizQuestions).values(data.questionIds.map(questionId => ({ quizId: id, questionId })))
+      }
+    }
+    if (data.tagIds !== undefined) {
+      await this.db.delete(quizTags).where(eq(quizTags.quizId, id))
+      if (data.tagIds.length) {
+        await this.db.insert(quizTags).values(data.tagIds.map(tagId => ({ quizId: id, tagId })))
+      }
+    }
+    if (data.langTagIds !== undefined) {
+      await this.db.delete(quizLangTags).where(eq(quizLangTags.quizId, id))
+      if (data.langTagIds.length) {
+        await this.db.insert(quizLangTags).values(data.langTagIds.map(langTagId => ({ quizId: id, langTagId })))
+      }
+    }
+    return this.findOneEnriched(id)
   }
 
   async remove(id: number) {

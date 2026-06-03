@@ -6,6 +6,7 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Query,
   UseGuards,
@@ -43,7 +44,7 @@ export class QuizTemplatesController {
 
   @Get(":id")
   async findOne(@Param("id", ParseIntPipe) id: number) {
-    return this.service.findOne(id)
+    return this.service.findOneEnriched(id)
   }
 
   @Get(":id/questions")
@@ -54,11 +55,24 @@ export class QuizTemplatesController {
   @Post()
   @UseGuards(RolesGuard)
   @Roles("super-admin")
-  async create(@Body() body: { title: string; questionIds: number[] }) {
+  async create(@Body() body: { title: string; questionIds: number[]; tagIds?: number[]; langTagIds?: number[] }) {
     if (!body.questionIds?.length) {
       throw new BadRequestException('A quiz must have at least one question')
     }
     return this.service.create(body)
+  }
+
+  @Patch(":id")
+  @UseGuards(RolesGuard)
+  @Roles("super-admin")
+  async update(
+    @Param("id", ParseIntPipe) id: number,
+    @Body() body: { title?: string; questionIds?: number[]; tagIds?: number[]; langTagIds?: number[] },
+  ) {
+    if (body.questionIds !== undefined && !body.questionIds.length) {
+      throw new BadRequestException('A quiz must have at least one question')
+    }
+    return this.service.update(id, body)
   }
 
   @Delete(":id")
