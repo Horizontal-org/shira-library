@@ -1,34 +1,30 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
   Get,
   Param,
   ParseIntPipe,
-  Patch,
   Post,
   Query,
-  Req,
   UseGuards,
 } from "@nestjs/common"
 import { Roles } from "../../auth/roles.decorator"
 import { RolesGuard } from "../../auth/roles.guard"
-import { AuthenticatedUser } from "../../auth/jwt.strategy"
 import { QuizTemplatesService } from "../services/quiz-templates.service"
 import { ListQuizTemplatesDto } from "../dto/list-quiz-templates.dto"
 import { ListQuizTemplatesService } from "../services/list-quiz.service"
 import { Public } from "@/auth/public.decorator"
 
+// @Public()
 @Controller("quiz-templates")
-@Public()
 export class QuizTemplatesController {
   constructor(
     private readonly service: QuizTemplatesService,
     private readonly listService: ListQuizTemplatesService,
   ) { }
 
-  // @UseGuards(RolesGuard)
-  // @Roles("space-admin", "super-admin")
   @Get()
   async findAll(@Query() query: ListQuizTemplatesDto) {
     const results = await this.listService.findAll({
@@ -53,6 +49,16 @@ export class QuizTemplatesController {
   @Get(":id/questions")
   async findQuestions(@Param("id", ParseIntPipe) id: number) {
     return this.service.findQuestions(id)
+  }
+
+  @Post()
+  @UseGuards(RolesGuard)
+  @Roles("super-admin")
+  async create(@Body() body: { title: string; questionIds: number[] }) {
+    if (!body.questionIds?.length) {
+      throw new BadRequestException('A quiz must have at least one question')
+    }
+    return this.service.create(body)
   }
 
   @Delete(":id")

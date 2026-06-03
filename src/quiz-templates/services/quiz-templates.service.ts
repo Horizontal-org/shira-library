@@ -99,14 +99,15 @@ export class QuizTemplatesService {
       })
   }
 
-  async create(data: { title: string; description?: string; createdBy: string }) {
-    const [result] = await this.db.insert(quizTemplates).values(data)
-    return this.findOne(result.insertId)
-  }
+  async create(data: { title: string; questionIds: number[] }) {
+    const [result] = await this.db.insert(quizTemplates).values({ title: data.title })
+    const quizId = result.insertId
 
-  async update(id: number, data: { title?: string; description?: string }) {
-    await this.db.update(quizTemplates).set(data).where(eq(quizTemplates.id, id))
-    return this.findOne(id)
+    await this.db.insert(quizQuestions).values(
+      data.questionIds.map(questionId => ({ quizId, questionId }))
+    )
+
+    return this.findOne(quizId)
   }
 
   async remove(id: number) {
