@@ -42,7 +42,7 @@ export class QuizTemplatesController {
       limit: Math.min(100, Math.max(1, parseInt(query.limit ?? '20', 10) || 20)),
     })
 
-    return results.data;
+    return results;
   }
 
   @Get(":id")
@@ -53,26 +53,6 @@ export class QuizTemplatesController {
   @Get(":id/questions")
   async findQuestions(@Param("id", ParseIntPipe) id: number) {
     return this.service.findQuestions(id)
-  }
-
-  @Post()
-  @UseGuards(RolesGuard)
-  @Roles("space-admin", "super-admin")
-  async create(
-    @Body() body: { title: string; description?: string },
-    @Req() req: { user: AuthenticatedUser },
-  ) {
-    return this.service.create({ ...body, createdBy: req.user.userId })
-  }
-
-  @Patch(":id")
-  @UseGuards(RolesGuard)
-  @Roles("space-admin", "super-admin")
-  async update(
-    @Param("id", ParseIntPipe) id: number,
-    @Body() body: { title?: string; description?: string },
-  ) {
-    return this.service.update(id, body)
   }
 
   @Delete(":id")
