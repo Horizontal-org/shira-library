@@ -18,7 +18,6 @@ import { ListQuizTemplatesDto } from "../dto/list-quiz-templates.dto"
 import { ListQuizTemplatesService } from "../services/list-quiz.service"
 import { Public } from "@/auth/public.decorator"
 
-// @Public()
 @Controller("quiz-templates")
 export class QuizTemplatesController {
   constructor(

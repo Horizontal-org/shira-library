@@ -1,12 +1,17 @@
-import { Controller, Get, Query } from "@nestjs/common"
-import { Public } from "@/auth/public.decorator"
-import { ListQuestionTemplatesDto } from "../dto/list-question-templates.dto"
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Query, UseGuards } from "@nestjs/common"
+import { Roles } from "../../auth/roles.decorator"
+import { RolesGuard } from "../../auth/roles.guard"
+import { QuestionTemplatesService } from "../services/question-templates.service"
 import { ListQuestionTemplatesService } from "../services/list-question-templates.service"
+import { ListQuestionTemplatesDto } from "../dto/list-question-templates.dto"
 
 @Controller("question-templates")
-@Public()
-export class ListQuestionsController {
-  constructor(private readonly listService: ListQuestionTemplatesService) { }
+export class QuestionTemplatesController {
+  constructor(
+    private readonly service: QuestionTemplatesService,
+    private readonly listService: ListQuestionTemplatesService
+  ) { }
+
 
   @Get()
   async findAll(@Query() query: ListQuestionTemplatesDto) {
@@ -23,5 +28,15 @@ export class ListQuestionsController {
       page: Math.max(1, parseInt(query.page ?? '1', 10) || 1),
       limit: Math.min(100, Math.max(1, parseInt(query.limit ?? '20', 10) || 20)),
     })
+  }
+
+  @Patch(":id")
+  @UseGuards(RolesGuard)
+  @Roles("super-admin")
+  async update(
+    @Param("id", ParseIntPipe) id: number,
+    @Body() body: { highlighted: boolean },
+  ) {
+    return this.service.update(id, { highlighted: body.highlighted })
   }
 }
