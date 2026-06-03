@@ -42,7 +42,7 @@ export class QuizTemplatesController {
       limit: Math.min(100, Math.max(1, parseInt(query.limit ?? '20', 10) || 20)),
     })
 
-    return results.data;
+    return results;
   }
 
   @Get(":id")
