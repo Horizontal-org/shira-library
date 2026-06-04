@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -11,6 +10,7 @@ import {
   Query,
   UseGuards,
 } from "@nestjs/common"
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger"
 import { Roles } from "../../auth/roles.decorator"
 import { RolesGuard } from "../../auth/roles.guard"
 import { QuizTemplatesService } from "../services/quiz-templates.service"
@@ -20,6 +20,8 @@ import { UpdateQuizTemplateDto } from "../dto/update-quiz-template.dto"
 import { ListQuizTemplatesService } from "../services/list-quiz.service"
 import { Public } from "@/auth/public.decorator"
 
+@ApiTags('quiz-templates')
+@ApiBearerAuth()
 @Controller("quiz-templates")
 export class QuizTemplatesController {
   constructor(
@@ -57,9 +59,6 @@ export class QuizTemplatesController {
   @UseGuards(RolesGuard)
   @Roles("super-admin")
   async create(@Body() body: CreateQuizTemplateDto) {
-    if (!body.questionIds?.length) {
-      throw new BadRequestException('A quiz must have at least one question')
-    }
     return this.service.create(body)
   }
 
@@ -70,9 +69,6 @@ export class QuizTemplatesController {
     @Param("id", ParseIntPipe) id: number,
     @Body() body: UpdateQuizTemplateDto,
   ) {
-    if (body.questionIds !== undefined && !body.questionIds.length) {
-      throw new BadRequestException('A quiz must have at least one question')
-    }
     return this.service.update(id, body)
   }
 

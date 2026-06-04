@@ -1,10 +1,14 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Patch, Query, UseGuards } from "@nestjs/common"
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger"
 import { Roles } from "../../auth/roles.decorator"
 import { RolesGuard } from "../../auth/roles.guard"
 import { QuestionTemplatesService } from "../services/question-templates.service"
 import { ListQuestionTemplatesService } from "../services/list-question-templates.service"
 import { ListQuestionTemplatesDto } from "../dto/list-question-templates.dto"
+import { UpdateQuestionTemplateDto } from "../dto/update-question-template.dto"
 
+@ApiTags('question-templates')
+@ApiBearerAuth()
 @Controller("question-templates")
 export class QuestionTemplatesController {
   constructor(
@@ -35,7 +39,7 @@ export class QuestionTemplatesController {
   @Roles("super-admin")
   async update(
     @Param("id", ParseIntPipe) id: number,
-    @Body() body: { highlighted: boolean },
+    @Body() body: UpdateQuestionTemplateDto,
   ) {
     return this.service.update(id, { highlighted: body.highlighted })
   }
