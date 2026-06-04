@@ -15,6 +15,8 @@ import { Roles } from "../../auth/roles.decorator"
 import { RolesGuard } from "../../auth/roles.guard"
 import { QuizTemplatesService } from "../services/quiz-templates.service"
 import { ListQuizTemplatesDto } from "../dto/list-quiz-templates.dto"
+import { CreateQuizTemplateDto } from "../dto/create-quiz-template.dto"
+import { UpdateQuizTemplateDto } from "../dto/update-quiz-template.dto"
 import { ListQuizTemplatesService } from "../services/list-quiz.service"
 import { Public } from "@/auth/public.decorator"
 
@@ -54,7 +56,7 @@ export class QuizTemplatesController {
   @Post()
   @UseGuards(RolesGuard)
   @Roles("super-admin")
-  async create(@Body() body: { title: string; questionIds: number[]; tagIds?: number[]; langTagIds?: number[] }) {
+  async create(@Body() body: CreateQuizTemplateDto) {
     if (!body.questionIds?.length) {
       throw new BadRequestException('A quiz must have at least one question')
     }
@@ -66,7 +68,7 @@ export class QuizTemplatesController {
   @Roles("super-admin")
   async update(
     @Param("id", ParseIntPipe) id: number,
-    @Body() body: { title?: string; questionIds?: number[]; tagIds?: number[]; langTagIds?: number[] },
+    @Body() body: UpdateQuizTemplateDto,
   ) {
     if (body.questionIds !== undefined && !body.questionIds.length) {
       throw new BadRequestException('A quiz must have at least one question')
