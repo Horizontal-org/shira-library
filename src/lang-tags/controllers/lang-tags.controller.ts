@@ -9,10 +9,14 @@ import {
   Post,
   UseGuards,
 } from "@nestjs/common"
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger"
 import { Roles } from "../../auth/roles.decorator"
 import { RolesGuard } from "../../auth/roles.guard"
 import { LangTagsService } from "../services/lang-tags.service"
+import { CreateLangTagDto } from "../dto/create-lang-tag.dto"
 
+@ApiTags('lang-tags')
+@ApiBearerAuth()
 @Controller("lang-tags")
 export class LangTagsController {
   constructor(private readonly service: LangTagsService) { }
@@ -36,7 +40,7 @@ export class LangTagsController {
   @Post()
   @UseGuards(RolesGuard)
   @Roles("super-admin")
-  async create(@Body() body: { name: string; code: string }) {
+  async create(@Body() body: CreateLangTagDto) {
     return this.service.create(body)
   }
 
