@@ -74,25 +74,6 @@ export class ListQuizTemplatesService {
     return { data, total: Number(total), page, limit }
   }
 
-  async findOne(id: number) {
-    const [result] = await this.db.select().from(quizTemplates).where(eq(quizTemplates.id, id))
-    return result ?? null
-  }
-
-  async create(data: { title: string; description?: string; createdBy: string }) {
-    const [result] = await this.db.insert(quizTemplates).values(data)
-    return this.findOne(result.insertId)
-  }
-
-  async update(id: number, data: { title?: string; description?: string }) {
-    await this.db.update(quizTemplates).set(data).where(eq(quizTemplates.id, id))
-    return this.findOne(id)
-  }
-
-  async remove(id: number) {
-    await this.db.delete(quizTemplates).where(eq(quizTemplates.id, id))
-  }
-
   private buildConditions(query: ListQuizTemplatesQuery): SQL[] {
     const conditions: SQL[] = []
 

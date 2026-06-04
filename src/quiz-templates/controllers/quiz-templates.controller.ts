@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -8,27 +9,24 @@ import {
   Patch,
   Post,
   Query,
-  Req,
   UseGuards,
 } from "@nestjs/common"
 import { Roles } from "../../auth/roles.decorator"
 import { RolesGuard } from "../../auth/roles.guard"
-import { AuthenticatedUser } from "../../auth/jwt.strategy"
 import { QuizTemplatesService } from "../services/quiz-templates.service"
 import { ListQuizTemplatesDto } from "../dto/list-quiz-templates.dto"
+import { CreateQuizTemplateDto } from "../dto/create-quiz-template.dto"
+import { UpdateQuizTemplateDto } from "../dto/update-quiz-template.dto"
 import { ListQuizTemplatesService } from "../services/list-quiz.service"
 import { Public } from "@/auth/public.decorator"
 
 @Controller("quiz-templates")
-@Public()
 export class QuizTemplatesController {
   constructor(
     private readonly service: QuizTemplatesService,
     private readonly listService: ListQuizTemplatesService,
   ) { }
 
-  // @UseGuards(RolesGuard)
-  // @Roles("space-admin", "super-admin")
   @Get()
   async findAll(@Query() query: ListQuizTemplatesDto) {
     const results = await this.listService.findAll({
@@ -47,12 +45,35 @@ export class QuizTemplatesController {
 
   @Get(":id")
   async findOne(@Param("id", ParseIntPipe) id: number) {
-    return this.service.findOne(id)
+    return this.service.findOneEnriched(id)
   }
 
   @Get(":id/questions")
   async findQuestions(@Param("id", ParseIntPipe) id: number) {
     return this.service.findQuestions(id)
+  }
+
+  @Post()
+  @UseGuards(RolesGuard)
+  @Roles("super-admin")
+  async create(@Body() body: CreateQuizTemplateDto) {
+    if (!body.questionIds?.length) {
+      throw new BadRequestException('A quiz must have at least one question')
+    }
+    return this.service.create(body)
+  }
+
+  @Patch(":id")
+  @UseGuards(RolesGuard)
+  @Roles("super-admin")
+  async update(
+    @Param("id", ParseIntPipe) id: number,
+    @Body() body: UpdateQuizTemplateDto,
+  ) {
+    if (body.questionIds !== undefined && !body.questionIds.length) {
+      throw new BadRequestException('A quiz must have at least one question')
+    }
+    return this.service.update(id, body)
   }
 
   @Delete(":id")
