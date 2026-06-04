@@ -11,7 +11,7 @@ export class ListQuizTemplatesDto {
 
   @IsOptional()
   @IsString()
-  tags?: string      // comma-separated IDs: "1,2"
+  tags?: string      // comma-separated slugs: "phishing,social-engineering"
 
   @IsOptional()
   @IsIn(['asc', 'desc'])
@@ -28,7 +28,7 @@ export class ListQuizTemplatesDto {
 
 export interface QuizTemplateFilters {
   langTags?: string[]
-  tags?: number[]
+  tags?: string[]
 }
 
 export interface ListQuizTemplatesQuery {
