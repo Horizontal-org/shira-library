@@ -1,4 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common"
+import { NotFoundQuizTemplateException } from "../exceptions/not-found.quiz-template.exception"
 import { eq, inArray } from "drizzle-orm"
 import { MySql2Database } from "drizzle-orm/mysql2"
 import { DRIZZLE } from "../../db/drizzle.constants"
@@ -25,14 +26,14 @@ import {
 export class QuizTemplatesService {
   constructor(@Inject(DRIZZLE) private readonly db: MySql2Database<typeof schema>) { }
 
-  async findOne(id: number): Promise<QuizTemplateResponseDto | null> {
+  async findOne(id: number): Promise<QuizTemplateResponseDto> {
     const [result] = await this.db.select().from(quizTemplates).where(eq(quizTemplates.id, id))
-    return result ?? null
+    if (!result) throw new NotFoundQuizTemplateException()
+    return result
   }
 
-  async findOneEnriched(id: number): Promise<QuizTemplateEnrichedResponseDto | null> {
+  async findOneEnriched(id: number): Promise<QuizTemplateEnrichedResponseDto> {
     const quiz = await this.findOne(id)
-    if (!quiz) return null
 
     const [langTagRows, tagRows] = await Promise.all([
       this.db
@@ -50,12 +51,8 @@ export class QuizTemplatesService {
     return { ...quiz, langTags: langTagRows, tags: tagRows }
   }
 
-  async findQuestions(id: number): Promise<QuizQuestionDto[] | null> {
-    const quiz = await this.findOne(id)
-
-    if (!quiz) {
-      return null
-    }
+  async findQuestions(id: number): Promise<QuizQuestionDto[]> {
+    await this.findOne(id)
 
     const questionRows = await this.db
       .select({
@@ -131,7 +128,7 @@ export class QuizTemplatesService {
     questionIds: number[]
     tagIds?: number[]
     langTagIds?: number[]
-  }): Promise<QuizTemplateResponseDto | null> {
+  }): Promise<QuizTemplateResponseDto> {
     const [result] = await this.db.insert(quizTemplates).values({ title: data.title })
     const quizId = result.insertId
 
@@ -159,7 +156,7 @@ export class QuizTemplatesService {
     questionIds?: number[]
     tagIds?: number[]
     langTagIds?: number[]
-  }): Promise<QuizTemplateEnrichedResponseDto | null> {
+  }): Promise<QuizTemplateEnrichedResponseDto> {
     if (data.title !== undefined) {
       await this.db.update(quizTemplates).set({ title: data.title }).where(eq(quizTemplates.id, id))
     }

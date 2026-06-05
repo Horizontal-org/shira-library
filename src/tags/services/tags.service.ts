@@ -1,4 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common"
+import { NotFoundTagException } from "../exceptions/not-found.tag.exception"
 import { eq } from "drizzle-orm"
 import { MySql2Database } from "drizzle-orm/mysql2"
 import { DRIZZLE } from "../../db/drizzle.constants"
@@ -15,7 +16,8 @@ export class TagsService {
 
   async findOne(id: number) {
     const [result] = await this.db.select().from(tags).where(eq(tags.id, id))
-    return result ?? null
+    if (!result) throw new NotFoundTagException()
+    return result
   }
 
   async create(data: { name: string; slug?: string }) {

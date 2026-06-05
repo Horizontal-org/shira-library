@@ -1,4 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common"
+import { NotFoundQuestionTemplateException } from "../exceptions/not-found.question-template.exception"
 import { eq } from "drizzle-orm"
 import { MySql2Database } from "drizzle-orm/mysql2"
 import { DRIZZLE } from "../../db/drizzle.constants"
@@ -14,9 +15,10 @@ export class QuestionTemplatesService {
     return this.db.select().from(questionTemplates)
   }
 
-  async findOne(id: number): Promise<QuestionTemplateResponseDto | null> {
+  async findOne(id: number): Promise<QuestionTemplateResponseDto> {
     const [result] = await this.db.select().from(questionTemplates).where(eq(questionTemplates.id, id))
-    return result ?? null
+    if (!result) throw new NotFoundQuestionTemplateException()
+    return result
   }
 
   async create(data: {
@@ -28,7 +30,7 @@ export class QuestionTemplatesService {
     isDemo: boolean
     appType: string
     defaultApp: string
-  }): Promise<QuestionTemplateResponseDto | null> {
+  }): Promise<QuestionTemplateResponseDto> {
     const [result] = await this.db.insert(questionTemplates).values(data)
     return this.findOne(result.insertId)
   }
@@ -40,7 +42,7 @@ export class QuestionTemplatesService {
       isPhishing?: boolean
       isDemo?: boolean
     },
-  ): Promise<QuestionTemplateResponseDto | null> {
+  ): Promise<QuestionTemplateResponseDto> {
     await this.db.update(questionTemplates).set(data).where(eq(questionTemplates.id, id))
     return this.findOne(id)
   }
