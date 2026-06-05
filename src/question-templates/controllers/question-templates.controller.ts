@@ -34,7 +34,7 @@ export class QuestionTemplatesController {
       search: query.search,
       filters: {
         langTags: query.langTags?.split(',').map((s) => s.trim()).filter(Boolean),
-        tags: query.tags?.split(',').map(Number).filter(Boolean),
+        tags: query.tags?.split(',').map((s) => s.trim()).filter(Boolean),
         appType: query.appType,
         isPhishing,
       },

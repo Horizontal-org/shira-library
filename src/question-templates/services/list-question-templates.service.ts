@@ -78,6 +78,8 @@ export class ListQuestionTemplatesService {
   private buildConditions(query: ListQuestionTemplatesQuery): SQL[] {
     const conditions: SQL[] = []
 
+    conditions.push(eq(questionTemplates.highlighted, true))
+
     if (query.search) {
       conditions.push(like(questionTemplates.name, `%${query.search}%`))
     }
@@ -106,14 +108,15 @@ export class ListQuestionTemplatesService {
     }
 
     if (query.filters.tags?.length) {
-      const tagIds = query.filters.tags
+      const slugs = query.filters.tags
       conditions.push(
         inArray(
           questionTemplates.id,
           this.db
             .select({ questionId: questionTags.questionId })
             .from(questionTags)
-            .where(inArray(questionTags.tagId, tagIds))
+            .innerJoin(tags, eq(questionTags.tagId, tags.id))
+            .where(inArray(tags.slug, slugs))
             .groupBy(questionTags.questionId),
         ),
       )

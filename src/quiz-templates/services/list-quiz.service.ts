@@ -98,14 +98,15 @@ export class ListQuizTemplatesService {
     }
 
     if (query.filters.tags?.length) {
-      const tagIds = query.filters.tags
+      const slugs = query.filters.tags
       conditions.push(
         inArray(
           quizTemplates.id,
           this.db
             .select({ quizId: quizTags.quizId })
             .from(quizTags)
-            .where(inArray(quizTags.tagId, tagIds))
+            .innerJoin(tags, eq(quizTags.tagId, tags.id))
+            .where(inArray(tags.slug, slugs))
             .groupBy(quizTags.quizId),
         ),
       )

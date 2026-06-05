@@ -11,7 +11,7 @@ export class ListQuestionTemplatesDto {
 
   @IsOptional()
   @IsString()
-  tags?: string      // comma-separated IDs: "1,2"
+  tags?: string      // comma-separated slugs: "phishing,social-engineering"
 
   @IsOptional()
   @IsString()
@@ -36,7 +36,7 @@ export class ListQuestionTemplatesDto {
 
 export interface QuestionTemplateFilters {
   langTags?: string[]
-  tags?: number[]
+  tags?: string[]
   appType?: string
   isPhishing?: boolean
 }
