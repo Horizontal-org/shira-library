@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from "@nestjs/common"
+import { Inject, Injectable } from "@nestjs/common"
 import { eq, inArray } from "drizzle-orm"
 import { MySql2Database } from "drizzle-orm/mysql2"
 import { DRIZZLE } from "../../db/drizzle.constants"
@@ -16,17 +16,21 @@ import {
   QuizQuestionDto,
   QuizQuestionExplanationDto,
 } from "../dto/quiz-questions-response.dto"
+import {
+  QuizTemplateEnrichedResponseDto,
+  QuizTemplateResponseDto,
+} from "../dto/quiz-template-response.dto"
 
 @Injectable()
 export class QuizTemplatesService {
   constructor(@Inject(DRIZZLE) private readonly db: MySql2Database<typeof schema>) { }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<QuizTemplateResponseDto | null> {
     const [result] = await this.db.select().from(quizTemplates).where(eq(quizTemplates.id, id))
     return result ?? null
   }
 
-  async findOneEnriched(id: number) {
+  async findOneEnriched(id: number): Promise<QuizTemplateEnrichedResponseDto | null> {
     const quiz = await this.findOne(id)
     if (!quiz) return null
 
@@ -127,7 +131,7 @@ export class QuizTemplatesService {
     questionIds: number[]
     tagIds?: number[]
     langTagIds?: number[]
-  }) {
+  }): Promise<QuizTemplateResponseDto | null> {
     const [result] = await this.db.insert(quizTemplates).values({ title: data.title })
     const quizId = result.insertId
 
@@ -155,7 +159,7 @@ export class QuizTemplatesService {
     questionIds?: number[]
     tagIds?: number[]
     langTagIds?: number[]
-  }) {
+  }): Promise<QuizTemplateEnrichedResponseDto | null> {
     if (data.title !== undefined) {
       await this.db.update(quizTemplates).set({ title: data.title }).where(eq(quizTemplates.id, id))
     }
@@ -180,7 +184,7 @@ export class QuizTemplatesService {
     return this.findOneEnriched(id)
   }
 
-  async remove(id: number) {
+  async remove(id: number): Promise<void> {
     await this.db.delete(quizTemplates).where(eq(quizTemplates.id, id))
   }
 }

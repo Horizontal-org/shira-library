@@ -9,12 +9,13 @@ import { langTags } from "../../db/schema/lang-tags"
 import { tags } from "../../db/schema/tags"
 import * as schema from "../../db/schema"
 import { ListQuestionTemplatesQuery } from "../dto/list-question-templates.dto"
+import { PaginatedQuestionTemplatesResponseDto } from "../dto/question-template-response.dto"
 
 @Injectable()
 export class ListQuestionTemplatesService {
   constructor(@Inject(DRIZZLE) private readonly db: MySql2Database<typeof schema>) { }
 
-  async findAll(query: ListQuestionTemplatesQuery) {
+  async findAll(query: ListQuestionTemplatesQuery): Promise<PaginatedQuestionTemplatesResponseDto> {
     const conditions = this.buildConditions(query)
     const where = conditions.length ? and(...conditions) : undefined
     const { page, limit } = query

@@ -27,7 +27,7 @@ export class QuizTemplateResponseDto {
   title: string
 
   @ApiProperty({ example: "2026-06-04T12:00:00.000Z", format: "date-time" })
-  createdAt: string
+  createdAt: Date
 }
 
 export class QuizTemplateEnrichedResponseDto extends QuizTemplateResponseDto {
