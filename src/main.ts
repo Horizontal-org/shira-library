@@ -9,18 +9,17 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true })
   app.useLogger(app.get(Logger))
 
+  const origins = [process.env.SPACE_URL, process.env.SUPERADMIN_URL].filter((url): url is string => !!url)
+  app.enableCors({
+    origin: origins,
+  })
+
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
     forbidNonWhitelisted: true,
     transform: true,
   }))
   app.useBodyParser("json", { limit: "50mb" })
-
-  const origins = [process.env.SPACE_URL, process.env.SUPERADMIN_URL].filter((url): url is string => !!url)
-  app.enableCors({
-    origin: origins,
-  })
-  console.log('CORS allowed origins:', origins);
 
   const config = new DocumentBuilder()
     .setTitle('Shira Library')
