@@ -1,11 +1,20 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Patch, Query, UseGuards } from "@nestjs/common"
-import { ApiBearerAuth, ApiTags } from "@nestjs/swagger"
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from "@nestjs/swagger"
 import { Roles } from "../../auth/roles.decorator"
 import { RolesGuard } from "../../auth/roles.guard"
 import { QuestionTemplatesService } from "../services/question-templates.service"
 import { ListQuestionTemplatesService } from "../services/list-question-templates.service"
 import { ListQuestionTemplatesDto } from "../dto/list-question-templates.dto"
 import { UpdateQuestionTemplateDto } from "../dto/update-question-template.dto"
+import {
+  PaginatedQuestionTemplatesResponseDto,
+  QuestionTemplateResponseDto,
+} from "../dto/question-template-response.dto"
 
 @ApiTags('question-templates')
 @ApiBearerAuth()
@@ -16,8 +25,9 @@ export class QuestionTemplatesController {
     private readonly listService: ListQuestionTemplatesService
   ) { }
 
-
   @Get()
+  @ApiOperation({ summary: "List question templates" })
+  @ApiOkResponse({ type: PaginatedQuestionTemplatesResponseDto })
   async findAll(@Query() query: ListQuestionTemplatesDto) {
     const isPhishing = query.isPhishing === 'true' ? true : query.isPhishing === 'false' ? false : undefined
     return this.listService.findAll({
@@ -37,6 +47,8 @@ export class QuestionTemplatesController {
   @Patch(":id")
   @UseGuards(RolesGuard)
   @Roles("super-admin")
+  @ApiOperation({ summary: "Update a question template" })
+  @ApiOkResponse({ type: QuestionTemplateResponseDto })
   async update(
     @Param("id", ParseIntPipe) id: number,
     @Body() body: UpdateQuestionTemplateDto,
