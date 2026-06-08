@@ -3,7 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  NotFoundException,
   Param,
   ParseIntPipe,
   Post,
@@ -32,9 +31,7 @@ export class TagsController {
   @UseGuards(RolesGuard)
   @Roles("super-admin", "space-admin")
   async findOne(@Param("id", ParseIntPipe) id: number) {
-    const tag = await this.service.findOne(id)
-    if (!tag) throw new NotFoundException()
-    return tag
+    return this.service.findOne(id)
   }
 
   @Post()
