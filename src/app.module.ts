@@ -9,10 +9,18 @@ import { QuestionTemplatesModule } from "./question-templates/question-templates
 import { LangTagsModule } from "./lang-tags/lang-tags.module";
 import { ConsoleModule } from "nestjs-console";
 import { TagsModule } from "./tags/tags.module";
+import { LoggerModule } from "nestjs-pino";
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    LoggerModule.forRoot({
+      pinoHttp: {
+        transport: process.env.NODE_ENV !== "production"
+          ? { target: "pino-pretty" }
+          : undefined,
+      },
+    }),
     ConsoleModule,
     DrizzleModule,
     AuthModule,

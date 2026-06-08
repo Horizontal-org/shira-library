@@ -3,13 +3,11 @@ import { AppModule } from "./app.module"
 import { NestExpressApplication } from "@nestjs/platform-express"
 import { ValidationPipe } from "@nestjs/common"
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger"
-import { ApiLogger } from "./utils/logger/api-logger.service"
-import { LoggingInterceptor } from "./utils/interceptors/logging.interceptor"
+import { Logger } from "nestjs-pino"
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule)
-
-  const apiLogger = new ApiLogger()
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true })
+  app.useLogger(app.get(Logger))
 
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
@@ -20,8 +18,6 @@ async function bootstrap() {
   app.enableCors({
     origin: [process.env.SPACE_URL, process.env.SUPERADMIN_URL].filter((url): url is string => !!url),
   })
-
-  app.useGlobalInterceptors(new LoggingInterceptor(apiLogger))
 
   const config = new DocumentBuilder()
     .setTitle('Shira Library')
@@ -34,7 +30,5 @@ async function bootstrap() {
 
   const port = process.env.PORT || 3000
   await app.listen(port)
-  apiLogger.log(`shira-library running on port ${port}`)
-  apiLogger.log(`Swagger UI available at http://localhost:${port}/swagger`)
 }
-bootstrap();
+bootstrap()
