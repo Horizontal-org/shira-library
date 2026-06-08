@@ -6,6 +6,7 @@
   "scripts": {
     "start:dev": "nest start --watch",
     "build": "nest build",
+    "docker-build": "nest build",
     "test": "jest",
     "db:generate": "drizzle-kit generate",
     "db:reset-migrations": "rm -f src/db/migrations/*.sql src/db/migrations/meta/*.json && echo '{\"version\":\"7\",\"dialect\":\"mysql\",\"entries\":[]}' > src/db/migrations/meta/_journal.json",
