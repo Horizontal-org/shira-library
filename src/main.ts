@@ -12,6 +12,8 @@ async function bootstrap() {
   const origins = [process.env.SPACE_URL, process.env.SUPERADMIN_URL].filter((url): url is string => !!url)
   app.enableCors({
     origin: origins,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Authorization', 'Content-Type', 'Accept'],
   })
 
   app.useGlobalPipes(new ValidationPipe({
