@@ -15,9 +15,12 @@ async function bootstrap() {
     transform: true,
   }))
   app.useBodyParser("json", { limit: "50mb" })
+
+  const origins = [process.env.SPACE_URL, process.env.SUPERADMIN_URL].filter((url): url is string => !!url)
   app.enableCors({
-    origin: [process.env.SPACE_URL, process.env.SUPERADMIN_URL].filter((url): url is string => !!url),
+    origin: origins,
   })
+  console.log('CORS allowed origins:', origins);
 
   const config = new DocumentBuilder()
     .setTitle('Shira Library')
