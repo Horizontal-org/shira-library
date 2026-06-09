@@ -21,7 +21,6 @@ import {
   QuizTemplateEnrichedResponseDto,
   QuizTemplateResponseDto,
 } from "../dto/quiz-template-response.dto"
-import { normalizeQuizTemplateTitle } from "../normalize-quiz-template-title"
 
 @Injectable()
 export class QuizTemplatesService {
