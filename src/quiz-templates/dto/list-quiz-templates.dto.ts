@@ -18,6 +18,10 @@ export class ListQuizTemplatesDto {
   sortOrder?: 'asc' | 'desc'
 
   @IsOptional()
+  @IsIn(['createdAt', 'title'])
+  sortBy?: 'createdAt' | 'title'
+
+  @IsOptional()
   @IsNumberString()
   page?: string
 
@@ -35,6 +39,7 @@ export interface ListQuizTemplatesQuery {
   search?: string
   filters: QuizTemplateFilters
   sortOrder?: 'asc' | 'desc'
+  sortBy?: 'createdAt' | 'title'
   page: number
   limit: number
 }

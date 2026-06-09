@@ -21,6 +21,7 @@ import {
   QuizTemplateEnrichedResponseDto,
   QuizTemplateResponseDto,
 } from "../dto/quiz-template-response.dto"
+import { normalizeQuizTemplateTitle } from "../normalize-quiz-template-title"
 
 @Injectable()
 export class QuizTemplatesService {
@@ -129,7 +130,9 @@ export class QuizTemplatesService {
     tagIds?: number[]
     langTagIds?: number[]
   }): Promise<QuizTemplateResponseDto> {
-    const [result] = await this.db.insert(quizTemplates).values({ title: data.title })
+    const [result] = await this.db.insert(quizTemplates).values({
+      title: data.title.trim(),
+    })
     const quizId = result.insertId
 
     await this.db.insert(quizQuestions).values(
@@ -158,7 +161,7 @@ export class QuizTemplatesService {
     langTagIds?: number[]
   }): Promise<QuizTemplateEnrichedResponseDto> {
     if (data.title !== undefined) {
-      await this.db.update(quizTemplates).set({ title: data.title }).where(eq(quizTemplates.id, id))
+      await this.db.update(quizTemplates).set({ title: data.title.trim() }).where(eq(quizTemplates.id, id))
     }
     if (data.questionIds !== undefined) {
       await this.db.delete(quizQuestions).where(eq(quizQuestions.quizId, id))

@@ -51,6 +51,7 @@ export class QuizTemplatesController {
         tags: query.tags?.split(',').map((s) => s.trim()).filter(Boolean),
       },
       sortOrder: query.sortOrder ?? 'desc',
+      sortBy: query.sortBy ?? 'createdAt',
       page: Math.max(1, parseInt(query.page ?? '1', 10) || 1),
       limit: Math.min(100, Math.max(1, parseInt(query.limit ?? '20', 10) || 20)),
     })
