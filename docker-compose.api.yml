@@ -1,0 +1,18 @@
+services:
+  library:
+    container_name: shira-library-prod
+    image: shira-library-prod:1.0.0
+    build:
+      context: .
+      target: production
+      dockerfile: ./Dockerfile.production
+    env_file:
+      - .env
+    ports:
+      - "127.0.0.1:3006:3006"
+    networks:
+      - shira-network
+    restart: unless-stopped
+networks:
+  shira-network:
+    external: true

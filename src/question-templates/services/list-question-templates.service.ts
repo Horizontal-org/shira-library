@@ -78,7 +78,9 @@ export class ListQuestionTemplatesService {
   private buildConditions(query: ListQuestionTemplatesQuery): SQL[] {
     const conditions: SQL[] = []
 
-    conditions.push(eq(questionTemplates.highlighted, true))
+    if (query.filters.highlighted !== undefined) {
+      conditions.push(eq(questionTemplates.highlighted, query.filters.highlighted))
+    }
 
     if (query.search) {
       conditions.push(like(questionTemplates.name, `%${query.search}%`))

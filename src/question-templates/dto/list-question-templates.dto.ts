@@ -39,6 +39,7 @@ export interface QuestionTemplateFilters {
   tags?: string[]
   appType?: string
   isPhishing?: boolean
+  highlighted?: boolean
 }
 
 export interface ListQuestionTemplatesQuery {
