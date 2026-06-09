@@ -19,13 +19,14 @@ export class ListQuizTemplatesService {
     const conditions = this.buildConditions(query)
     const where = conditions.length ? and(...conditions) : undefined
     const { page, limit } = query
+    const orderBy = this.buildOrderBy(query)
 
     const [quizzes, [{ total }]] = await Promise.all([
       this.db
         .select()
         .from(quizTemplates)
         .where(where)
-        .orderBy(query.sortOrder === 'asc' ? asc(quizTemplates.createdAt) : desc(quizTemplates.createdAt))
+        .orderBy(...orderBy)
         .limit(limit)
         .offset((page - 1) * limit),
 
@@ -73,6 +74,21 @@ export class ListQuizTemplatesService {
     }))
 
     return { data, total: Number(total), page, limit }
+  }
+
+  private buildOrderBy(query: ListQuizTemplatesQuery): SQL[] {
+    const sortDirection = query.sortOrder === 'asc' ? asc : desc
+    const isSortingByTitle = query.sortBy === 'title'
+
+    const quizSortByCriteria = isSortingByTitle
+      ? sortDirection(quizTemplates.title)
+      : sortDirection(quizTemplates.createdAt)
+
+    const quizSortOrder = isSortingByTitle
+      ? [desc(quizTemplates.createdAt), desc(quizTemplates.id)]
+      : [desc(quizTemplates.id)]
+
+    return [quizSortByCriteria, ...quizSortOrder] as const
   }
 
   private buildConditions(query: ListQuizTemplatesQuery): SQL[] {
