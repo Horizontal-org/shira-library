@@ -36,6 +36,28 @@ export class QuestionTemplatesController {
         langTags: query.langTags?.split(',').map((s) => s.trim()).filter(Boolean),
         tags: query.tags?.split(',').map((s) => s.trim()).filter(Boolean),
         appType: query.appType,
+        highlighted: true,
+        isPhishing,
+      },
+      sortOrder: query.sortOrder ?? 'desc',
+      page: Math.max(1, parseInt(query.page ?? '1', 10) || 1),
+      limit: Math.min(100, Math.max(1, parseInt(query.limit ?? '20', 10) || 20)),
+    })
+  }
+
+  @Get('super')
+  @UseGuards(RolesGuard)
+  @Roles("super-admin")
+  @ApiOperation({ summary: "Superadmin list question templates" })
+  @ApiOkResponse({ type: PaginatedQuestionTemplatesResponseDto })
+  async findAllSuper(@Query() query: ListQuestionTemplatesDto) {
+    const isPhishing = query.isPhishing === 'true' ? true : query.isPhishing === 'false' ? false : undefined
+    return this.listService.findAll({
+      search: query.search,
+      filters: {
+        langTags: query.langTags?.split(',').map((s) => s.trim()).filter(Boolean),
+        tags: query.tags?.split(',').map((s) => s.trim()).filter(Boolean),
+        appType: query.appType,
         isPhishing,
       },
       sortOrder: query.sortOrder ?? 'desc',
