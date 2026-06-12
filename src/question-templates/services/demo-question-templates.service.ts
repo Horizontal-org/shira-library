@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common"
-import { eq } from "drizzle-orm"
+import { and, eq } from "drizzle-orm"
 import { MySql2Database } from "drizzle-orm/mysql2"
 import { DRIZZLE } from "../../db/drizzle.constants"
 import * as schema from "../../db/schema"
@@ -14,9 +14,26 @@ export class DemoQuestionTemplatesService {
   constructor(@Inject(DRIZZLE) private readonly db: MySql2Database<typeof schema>) { }
 
   async importBatch(items: DemoQuestionDto[]) {
-    const results = []
+    const results = {
+      created: 0,
+      skipped: 0
+    }
+
+    const skipped = []
 
     for (const item of items) {
+      const [exists] = await this.db
+        .select({ id: questionTemplates.id })
+        .from(questionTemplates)
+        .innerJoin(questionLangTags, eq(questionLangTags.questionId, questionTemplates.id))
+        .innerJoin(langTags, eq(langTags.id, questionLangTags.langTagId))
+        .where(and(eq(questionTemplates.name, item.name), eq(langTags.code, item.lang.code)))
+
+      if (exists) {
+        results.skipped++
+        continue
+      }
+
       const [insertResult] = await this.db.insert(questionTemplates).values({
         name: item.name,
         highlighted: false,
@@ -44,12 +61,7 @@ export class DemoQuestionTemplatesService {
         )
       }
 
-      const [created] = await this.db
-        .select()
-        .from(questionTemplates)
-        .where(eq(questionTemplates.id, questionId))
-
-      results.push(created)
+      results.created++
     }
 
     return results
