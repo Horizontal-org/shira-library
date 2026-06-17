@@ -40,6 +40,7 @@ export class QuestionTemplatesController {
         isPhishing,
       },
       sortOrder: query.sortOrder ?? 'desc',
+      sortBy: query.sortBy ?? 'createdAt',
       page: Math.max(1, parseInt(query.page ?? '1', 10) || 1),
       limit: Math.min(100, Math.max(1, parseInt(query.limit ?? '20', 10) || 20)),
     })
@@ -60,6 +61,7 @@ export class QuestionTemplatesController {
         appType: query.appType,
         isPhishing,
       },
+      sortBy: query.sortBy ?? 'createdAt',
       sortOrder: query.sortOrder ?? 'desc',
       page: Math.max(1, parseInt(query.page ?? '1', 10) || 1),
       limit: Math.min(100, Math.max(1, parseInt(query.limit ?? '20', 10) || 20)),

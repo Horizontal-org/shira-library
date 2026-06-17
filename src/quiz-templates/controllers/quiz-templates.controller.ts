@@ -24,6 +24,7 @@ import { ListQuizTemplatesDto } from "../dto/list-quiz-templates.dto"
 import { CreateQuizTemplateDto } from "../dto/create-quiz-template.dto"
 import { UpdateQuizTemplateDto } from "../dto/update-quiz-template.dto"
 import { ListQuizTemplatesService } from "../services/list-quiz.service"
+import { QuizQuestionDto } from "../dto/quiz-questions-response.dto"
 import {
   DeleteQuizTemplateResponseDto,
   PaginatedQuizTemplatesResponseDto,
@@ -68,6 +69,7 @@ export class QuizTemplatesController {
 
   @Get(":id/questions")
   @ApiOperation({ summary: "List questions for a quiz template" })
+  @ApiOkResponse({ type: [QuizQuestionDto] })
   async findQuestions(@Param("id", ParseIntPipe) id: number) {
     return this.service.findQuestions(id)
   }

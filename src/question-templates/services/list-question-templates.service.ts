@@ -19,13 +19,14 @@ export class ListQuestionTemplatesService {
     const conditions = this.buildConditions(query)
     const where = conditions.length ? and(...conditions) : undefined
     const { page, limit } = query
+    const orderBy = this.buildOrderBy(query)
 
     const [questions, [{ total }]] = await Promise.all([
       this.db
         .select()
         .from(questionTemplates)
         .where(where)
-        .orderBy(query.sortOrder === 'asc' ? asc(questionTemplates.createdAt) : desc(questionTemplates.createdAt))
+        .orderBy(...orderBy)
         .limit(limit)
         .offset((page - 1) * limit),
 
@@ -73,6 +74,21 @@ export class ListQuestionTemplatesService {
     }))
 
     return { data, total: Number(total), page, limit }
+  }
+
+  private buildOrderBy(query: ListQuestionTemplatesQuery): SQL[] {
+    const sortDirection = query.sortOrder === 'asc' ? asc : desc
+    const isSortingByTitle = query.sortBy === 'title'
+
+    const questionSortByCriteria = isSortingByTitle
+      ? sortDirection(questionTemplates.name)
+      : sortDirection(questionTemplates.createdAt)
+
+    const questionSortOrder = isSortingByTitle
+      ? [desc(questionTemplates.createdAt), desc(questionTemplates.id)]
+      : [desc(questionTemplates.id)]
+
+    return [questionSortByCriteria, ...questionSortOrder] as const
   }
 
   private buildConditions(query: ListQuestionTemplatesQuery): SQL[] {
