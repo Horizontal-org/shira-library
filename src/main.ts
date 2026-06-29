@@ -5,10 +5,12 @@ import { ValidationPipe } from "@nestjs/common"
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger"
 import { Logger } from "nestjs-pino"
 import * as cookieParser from "cookie-parser"
+import helmet from "helmet"
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true })
   app.useLogger(app.get(Logger))
+  app.use(helmet())
   app.use(cookieParser())
 
   // TODO: CORS decision needed — public endpoints are now unauthenticated.
@@ -30,16 +32,18 @@ async function bootstrap() {
     forbidNonWhitelisted: true,
     transform: true,
   }))
-  app.useBodyParser("json", { limit: "50mb" })
+  app.useBodyParser("json", { limit: "1mb" })
 
-  const config = new DocumentBuilder()
-    .setTitle('Shira Library')
-    .setDescription('Quiz and question template management API')
-    .setVersion('1.0')
-    .addBearerAuth()
-    .build()
-  const document = SwaggerModule.createDocument(app, config)
-  SwaggerModule.setup('swagger', app, document)
+  if (process.env.NODE_ENV !== 'production') {
+    const config = new DocumentBuilder()
+      .setTitle('Shira Library')
+      .setDescription('Quiz and question template management API')
+      .setVersion('1.0')
+      .addBearerAuth()
+      .build()
+    const document = SwaggerModule.createDocument(app, config)
+    SwaggerModule.setup('swagger', app, document)
+  }
 
   const port = process.env.PORT || 3000
   await app.listen(port)
