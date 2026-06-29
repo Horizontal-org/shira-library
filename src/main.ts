@@ -11,6 +11,12 @@ async function bootstrap() {
   app.useLogger(app.get(Logger))
   app.use(cookieParser())
 
+  // TODO: CORS decision needed — public endpoints are now unauthenticated.
+  // Option A: keep the current allowlist (SPACE_URL + SUPERADMIN_URL) — fine if all
+  //           callers are known and controlled (e.g. your own frontend only).
+  // Option B: open to any origin (origin: '*') — required if third parties need to
+  //           fetch public endpoints from a browser. Cannot be combined with credentials: true.
+  // Option C: split config — '*' for public GET routes, allowlist for mutating routes.
   const origins = [process.env.SPACE_URL, process.env.SUPERADMIN_URL].filter((url): url is string => !!url)
   app.enableCors({
     origin: origins,

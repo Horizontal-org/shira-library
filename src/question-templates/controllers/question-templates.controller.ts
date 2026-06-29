@@ -7,6 +7,7 @@ import {
 } from "@nestjs/swagger"
 import { Roles } from "../../auth/roles.decorator"
 import { RolesGuard } from "../../auth/roles.guard"
+import { Public } from "../../auth/public.decorator"
 import { QuestionTemplatesService } from "../services/question-templates.service"
 import { ListQuestionTemplatesService } from "../services/list-question-templates.service"
 import { ListQuestionTemplatesDto } from "../dto/list-question-templates.dto"
@@ -26,6 +27,7 @@ export class QuestionTemplatesController {
   ) { }
 
   @Get()
+  @Public()
   @ApiOperation({ summary: "List question templates" })
   @ApiOkResponse({ type: PaginatedQuestionTemplatesResponseDto })
   async findAll(@Query() query: ListQuestionTemplatesDto) {

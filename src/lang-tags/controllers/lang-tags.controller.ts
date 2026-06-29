@@ -11,6 +11,7 @@ import {
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger"
 import { Roles } from "../../auth/roles.decorator"
 import { RolesGuard } from "../../auth/roles.guard"
+import { Public } from "../../auth/public.decorator"
 import { LangTagsService } from "../services/lang-tags.service"
 import { CreateLangTagDto } from "../dto/create-lang-tag.dto"
 
@@ -21,15 +22,13 @@ export class LangTagsController {
   constructor(private readonly service: LangTagsService) { }
 
   @Get()
-  @UseGuards(RolesGuard)
-  @Roles("super-admin", "space-admin")
+  @Public()
   async findAll() {
     return this.service.findAll()
   }
 
   @Get(":id")
-  @UseGuards(RolesGuard)
-  @Roles("super-admin", "space-admin")
+  @Public()
   async findOne(@Param("id", ParseIntPipe) id: number) {
     return this.service.findOne(id)
   }

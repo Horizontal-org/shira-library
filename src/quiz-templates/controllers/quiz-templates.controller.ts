@@ -19,6 +19,7 @@ import {
 } from "@nestjs/swagger"
 import { Roles } from "../../auth/roles.decorator"
 import { RolesGuard } from "../../auth/roles.guard"
+import { Public } from "../../auth/public.decorator"
 import { QuizTemplatesService } from "../services/quiz-templates.service"
 import { ListQuizTemplatesDto } from "../dto/list-quiz-templates.dto"
 import { CreateQuizTemplateDto } from "../dto/create-quiz-template.dto"
@@ -42,6 +43,7 @@ export class QuizTemplatesController {
   ) { }
 
   @Get()
+  @Public()
   @ApiOperation({ summary: "List quiz templates" })
   @ApiOkResponse({ type: PaginatedQuizTemplatesResponseDto })
   async findAll(@Query() query: ListQuizTemplatesDto) {
@@ -61,6 +63,7 @@ export class QuizTemplatesController {
   }
 
   @Get(":id")
+  @Public()
   @ApiOperation({ summary: "Get a quiz template by id" })
   @ApiOkResponse({ type: QuizTemplateEnrichedResponseDto })
   async findOne(@Param("id", ParseIntPipe) id: number) {
@@ -68,6 +71,7 @@ export class QuizTemplatesController {
   }
 
   @Get(":id/questions")
+  @Public()
   @ApiOperation({ summary: "List questions for a quiz template" })
   @ApiOkResponse({ type: [QuizQuestionDto] })
   async findQuestions(@Param("id", ParseIntPipe) id: number) {
