@@ -10,6 +10,7 @@ import helmet from "helmet"
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true })
   app.useLogger(app.get(Logger))
+  app.set('trust proxy', 1)
   app.use(helmet())
   app.use(cookieParser())
 
