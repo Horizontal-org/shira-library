@@ -48,12 +48,32 @@ export class QuestionTemplateResponseDto {
   createdAt: Date
 }
 
+export class ExplanationTemplateResponseDto {
+  @ApiProperty({ example: 1 })
+  id: number
+
+  @ApiProperty({ example: "1" })
+  position: string
+
+  @ApiProperty({ example: "0" })
+  positionIndex: string
+
+  @ApiProperty({ example: "This is a phishing email because..." })
+  content: string
+
+  @ApiProperty({ example: "2026-06-04T12:00:00.000Z", format: "date-time" })
+  createdAt: Date
+}
+
 export class QuestionTemplateWithRelationsResponseDto extends QuestionTemplateResponseDto {
   @ApiProperty({ type: [QuestionTemplateLangTagResponseDto] })
   langTags: QuestionTemplateLangTagResponseDto[]
 
   @ApiProperty({ type: [QuestionTemplateTagResponseDto] })
   tags: QuestionTemplateTagResponseDto[]
+
+  @ApiProperty({ type: [ExplanationTemplateResponseDto] })
+  explanations: ExplanationTemplateResponseDto[]
 }
 
 export class PaginatedQuestionTemplatesResponseDto {
