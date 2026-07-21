@@ -6,12 +6,15 @@ import * as schema from "../../db/schema"
 import { questionTemplates } from "../../db/schema/question-templates"
 import { langTags } from "../../db/schema/lang-tags"
 import { questionLangTags } from "../../db/schema/question-lang-tags"
-import { explanationTemplates } from "../../db/schema/explanation-templates"
 import { DemoQuestionDto } from "../dto/import-demo-questions.dto"
+import { CreateQuestionTemplatesService } from "./create.question-templates.service"
 
 @Injectable()
 export class DemoQuestionTemplatesService {
-  constructor(@Inject(DRIZZLE) private readonly db: MySql2Database<typeof schema>) { }
+  constructor(
+    @Inject(DRIZZLE) private readonly db: MySql2Database<typeof schema>,
+    private readonly createQuestionTemplatesService: CreateQuestionTemplatesService,
+  ) { }
 
   async importBatch(items: DemoQuestionDto[]) {
     const results = {
@@ -34,32 +37,23 @@ export class DemoQuestionTemplatesService {
         continue
       }
 
-      const [insertResult] = await this.db.insert(questionTemplates).values({
+      const questionId = await this.createQuestionTemplatesService.create({
         name: item.name,
-        highlighted: false,
+        content: item.content,
         appType: item.app_type,
         defaultApp: item.default_app,
-        content: item.content,
         isPhishing: item.is_phishing,
         isDemo: true,
+        explanations: item.explanations?.map((exp) => ({
+          position: exp.position,
+          positionIndex: String(exp.index),
+          content: exp.content,
+        })),
       })
-
-      const questionId = insertResult.insertId
 
       const langTagId = await this.resolveOrCreateLangTag(item.lang)
 
       await this.db.insert(questionLangTags).values({ questionId, langTagId })
-
-      if (item.explanations?.length) {
-        await this.db.insert(explanationTemplates).values(
-          item.explanations.map((exp) => ({
-            questionId,
-            position: exp.position,
-            positionIndex: String(exp.index),
-            content: exp.content,
-          })),
-        )
-      }
 
       results.created++
     }

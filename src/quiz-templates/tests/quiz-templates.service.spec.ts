@@ -1,9 +1,14 @@
 import { Test, TestingModule } from "@nestjs/testing"
 import { DRIZZLE } from "../../db/drizzle.constants"
 import { QuizTemplatesService } from "../services/quiz-templates.service"
+import { AuthorsService } from "../../authors/services/authors.service"
 
 describe("QuizTemplatesService", () => {
   let service: QuizTemplatesService
+
+  const mockAuthorsService = {
+    findOrCreate: jest.fn(),
+  }
 
   const mockDb = {
     select: jest.fn().mockReturnThis(),
@@ -34,6 +39,7 @@ describe("QuizTemplatesService", () => {
       providers: [
         QuizTemplatesService,
         { provide: DRIZZLE, useValue: mockDb },
+        { provide: AuthorsService, useValue: mockAuthorsService },
       ],
     }).compile()
 

@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
-import { mysqlTable, serial, boolean, timestamp, text, varchar } from "drizzle-orm/mysql-core";
+import { mysqlTable, serial, boolean, bigint, timestamp, text, varchar } from "drizzle-orm/mysql-core";
+import { authors } from "./authors";
 
 export const questionTemplates = mysqlTable("question_templates", {
   id: serial().primaryKey(),
@@ -10,6 +11,9 @@ export const questionTemplates = mysqlTable("question_templates", {
   appType: varchar("app_type", { length: 255 }).notNull(),
   defaultApp: varchar("default_app", { length: 255 }),
   isDemo: boolean("is_demo").notNull().default(false),
+  authorId: bigint("author_id", { mode: "number", unsigned: true })
+    .references(() => authors.id, { onDelete: "set null" }),
+  approved: boolean("approved").default(false).notNull(),
   createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
 });
 

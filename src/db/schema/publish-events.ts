@@ -1,13 +1,13 @@
 import { sql } from "drizzle-orm";
-import { mysqlTable, serial, varchar, timestamp } from "drizzle-orm/mysql-core";
+import { mysqlTable, serial, varchar, bigint, timestamp } from "drizzle-orm/mysql-core";
+import { authors } from "./authors";
 
 export const publishEvents = mysqlTable("publish_events", {
   id: serial().primaryKey(),
   resourceType: varchar("resource_type", { length: 50 }),
   resourceId: varchar("resource_id", { length: 255 }),
-  authorId: varchar("author_id", { length: 255 }),
-  authorName: varchar("author_name", { length: 255 }),
-  authorEmail: varchar("author_email", { length: 255 }),
+  authorId: bigint("author_id", { mode: "number", unsigned: true })
+    .references(() => authors.id, { onDelete: "set null" }),
   status: varchar("status", { length: 50 }),
   rejectedNote: varchar("rejected_note", { length: 1000 }),
   createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),

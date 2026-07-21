@@ -4,12 +4,20 @@ import { eq } from "drizzle-orm"
 import { MySql2Database } from "drizzle-orm/mysql2"
 import { DRIZZLE } from "../../db/drizzle.constants"
 import { questionTemplates } from "../../db/schema/question-templates"
+import { publishEvents } from "../../db/schema/publish-events"
+import { AuthorsService } from "../../authors/services/authors.service"
 import * as schema from "../../db/schema"
 import { QuestionTemplateResponseDto } from "../dto/question-template-response.dto"
+import { CreateQuestionTemplatesService } from "./create.question-templates.service"
+import { PublishAuthorDto, PublishExplanationDto, PublishQuestionTemplateDto } from "../dto/publish-question-template.dto"
 
 @Injectable()
 export class QuestionTemplatesService {
-  constructor(@Inject(DRIZZLE) private readonly db: MySql2Database<typeof schema>) { }
+  constructor(
+    @Inject(DRIZZLE) private readonly db: MySql2Database<typeof schema>,
+    private readonly authorsService: AuthorsService,
+    private readonly createQuestionTemplatesService: CreateQuestionTemplatesService,
+  ) { }
 
   async findAll(): Promise<QuestionTemplateResponseDto[]> {
     return this.db.select().from(questionTemplates)
@@ -33,6 +41,46 @@ export class QuestionTemplatesService {
   }): Promise<QuestionTemplateResponseDto> {
     const [result] = await this.db.insert(questionTemplates).values(data)
     return this.findOne(result.insertId)
+  }
+
+  async publish(data: PublishQuestionTemplateDto): Promise<QuestionTemplateResponseDto> {
+
+    const author = await this.authorsService.findOrCreate({
+      publicSpaceId: data.author.publicSpaceId,
+      spaceName: data.author.spaceName,
+      spaceDisplayName: data.author.spaceDisplayName,
+      organizationName: data.author.organizationName,
+    })
+
+    console.log("🚀 ~ QuestionTemplatesService ~ publish ~ author:", author)
+
+    const questionId = await this.createQuestionTemplatesService.create({
+      name: data.name,
+      content: data.content,
+      appType: data.appType,
+      defaultApp: data.defaultApp,
+      isPhishing: data.isPhishing,
+      isDemo: false,
+      highlighted: false,
+      approved: false,
+      authorId: author.id,
+      explanations: data.explanations?.map((exp) => ({
+        position: exp.position,
+        positionIndex: String(exp.index),
+        content: exp.content,
+      })),
+    })
+
+    // TODO add lang tags and tags if provided here
+
+    await this.db.insert(publishEvents).values({
+      resourceType: 'question_template',
+      resourceId: String(questionId),
+      authorId: author.id,
+      status: 'pending',
+    })
+
+    return this.findOne(questionId)
   }
 
   async update(

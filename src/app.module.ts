@@ -10,6 +10,7 @@ import { QuestionTemplatesModule } from "./question-templates/question-templates
 import { LangTagsModule } from "./lang-tags/lang-tags.module";
 import { ConsoleModule } from "nestjs-console";
 import { TagsModule } from "./tags/tags.module";
+import { AuthorsModule } from "./authors/authors.module";
 import { LoggerModule } from "nestjs-pino";
 
 @Module({
@@ -42,7 +43,8 @@ import { LoggerModule } from "nestjs-pino";
     QuizTemplatesModule,
     QuestionTemplatesModule,
     LangTagsModule,
-    TagsModule
+    TagsModule,
+    AuthorsModule
   ],
   providers: [
     {
