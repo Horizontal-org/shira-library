@@ -29,6 +29,7 @@ export class CreateQuestionTemplatesService {
   constructor(@Inject(DRIZZLE) private readonly db: MySql2Database<typeof schema>) { }
 
   async create(data: CreateQuestionTemplateInput): Promise<number> {
+
     const [result] = await this.db.insert(questionTemplates).values({
       name: data.name,
       content: data.content,
@@ -40,6 +41,7 @@ export class CreateQuestionTemplatesService {
       approved: data.approved ?? false,
       authorId: data.authorId,
     })
+
     const questionId = result.insertId
 
     if (data.explanations?.length) {

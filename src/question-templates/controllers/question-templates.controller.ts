@@ -77,7 +77,6 @@ export class QuestionTemplatesController {
   @Public()
   @Throttle({ strict: {} })
   @ApiOperation({ summary: "Publish a question template from a shira space" })
-  @ApiCreatedResponse({ type: QuestionTemplateResponseDto })
   async publish(@Body() body: PublishQuestionTemplateDto) {
     return this.service.publish(body)
   }

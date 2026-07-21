@@ -1,4 +1,4 @@
-import { IsArray, IsBoolean, IsInt, IsNotEmpty, IsOptional, IsString, MaxLength, ValidateNested } from 'class-validator'
+import { IsArray, IsBoolean, IsDefined, IsInt, IsNotEmpty, IsOptional, IsString, MaxLength, ValidateNested } from 'class-validator'
 import { Type } from 'class-transformer'
 
 export class PublishExplanationDto {
@@ -60,6 +60,8 @@ export class PublishQuestionTemplateDto {
   @IsBoolean()
   isPhishing: boolean
 
+  @IsDefined()
+  @ValidateNested()
   @Type(() => PublishAuthorDto)
   author: PublishAuthorDto
 
@@ -68,4 +70,14 @@ export class PublishQuestionTemplateDto {
   @ValidateNested({ each: true })
   @Type(() => PublishExplanationDto)
   explanations?: PublishExplanationDto[]
+
+  @IsOptional()
+  @IsArray()
+  @IsInt({ each: true })
+  tagIds?: number[]
+
+  @IsOptional()
+  @IsArray()
+  @IsInt({ each: true })
+  langTagIds?: number[]
 }

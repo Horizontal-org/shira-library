@@ -4,12 +4,16 @@ import { eq } from "drizzle-orm"
 import { MySql2Database } from "drizzle-orm/mysql2"
 import { DRIZZLE } from "../../db/drizzle.constants"
 import { questionTemplates } from "../../db/schema/question-templates"
+import { questionTags } from "../../db/schema/question-tags"
+import { questionLangTags } from "../../db/schema/question-lang-tags"
 import { publishEvents } from "../../db/schema/publish-events"
 import { AuthorsService } from "../../authors/services/authors.service"
+import { TagsService } from "../../tags/services/tags.service"
+import { LangTagsService } from "../../lang-tags/services/lang-tags.service"
 import * as schema from "../../db/schema"
 import { QuestionTemplateResponseDto } from "../dto/question-template-response.dto"
 import { CreateQuestionTemplatesService } from "./create.question-templates.service"
-import { PublishAuthorDto, PublishExplanationDto, PublishQuestionTemplateDto } from "../dto/publish-question-template.dto"
+import { PublishQuestionTemplateDto } from "../dto/publish-question-template.dto"
 
 @Injectable()
 export class QuestionTemplatesService {
@@ -17,6 +21,8 @@ export class QuestionTemplatesService {
     @Inject(DRIZZLE) private readonly db: MySql2Database<typeof schema>,
     private readonly authorsService: AuthorsService,
     private readonly createQuestionTemplatesService: CreateQuestionTemplatesService,
+    private readonly tagsService: TagsService,
+    private readonly langTagsService: LangTagsService,
   ) { }
 
   async findAll(): Promise<QuestionTemplateResponseDto[]> {
@@ -43,7 +49,11 @@ export class QuestionTemplatesService {
     return this.findOne(result.insertId)
   }
 
-  async publish(data: PublishQuestionTemplateDto): Promise<QuestionTemplateResponseDto> {
+  async publish(data: PublishQuestionTemplateDto): Promise<void> {
+    await Promise.all([
+      this.tagsService.validateIds(data.tagIds ?? []),
+      this.langTagsService.validateIds(data.langTagIds ?? []),
+    ])
 
     const author = await this.authorsService.findOrCreate({
       publicSpaceId: data.author.publicSpaceId,
@@ -51,8 +61,6 @@ export class QuestionTemplatesService {
       spaceDisplayName: data.author.spaceDisplayName,
       organizationName: data.author.organizationName,
     })
-
-    console.log("🚀 ~ QuestionTemplatesService ~ publish ~ author:", author)
 
     const questionId = await this.createQuestionTemplatesService.create({
       name: data.name,
@@ -71,16 +79,28 @@ export class QuestionTemplatesService {
       })),
     })
 
-    // TODO add lang tags and tags if provided here
+    console.log("🚀 ~ QuestionTemplatesService ~ publish ~ questionId:", questionId)
+
+    if (data.tagIds?.length) {
+      await this.db.insert(questionTags).values(
+        data.tagIds.map((tagId) => ({ questionId, tagId })),
+      )
+    }
+
+    if (data.langTagIds?.length) {
+      await this.db.insert(questionLangTags).values(
+        data.langTagIds.map((langTagId) => ({ questionId, langTagId })),
+      )
+    }
 
     await this.db.insert(publishEvents).values({
       resourceType: 'question_template',
       resourceId: String(questionId),
       authorId: author.id,
-      status: 'pending',
+      status: 'in_review',
     })
 
-    return this.findOne(questionId)
+    return
   }
 
   async update(

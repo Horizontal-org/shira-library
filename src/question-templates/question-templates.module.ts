@@ -7,9 +7,11 @@ import { DemoQuestionTemplatesService } from "./services/demo-question-templates
 import { QuestionTemplatesCommand } from "./question-templates.command"
 import { AuthorsModule } from "../authors/authors.module"
 import { CreateQuestionTemplatesService } from "./services/create.question-templates.service"
+import { TagsModule } from "../tags/tags.module"
+import { LangTagsModule } from "../lang-tags/lang-tags.module"
 
 @Module({
-  imports: [AuthorsModule],
+  imports: [AuthorsModule, TagsModule, LangTagsModule],
   controllers: [DemoQuestionTemplatesController, QuestionTemplatesController],
   providers: [
     QuestionTemplatesService,

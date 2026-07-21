@@ -5,5 +5,6 @@ import { LangTagsService } from "./services/lang-tags.service"
 @Module({
   controllers: [LangTagsController],
   providers: [LangTagsService],
+  exports: [LangTagsService],
 })
 export class LangTagsModule {}
