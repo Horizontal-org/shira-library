@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "start:dev": "nest start --watch",
+    "start:debug": "nest start --debug --watch",
     "build": "nest build",
     "docker-build": "nest build",
     "test": "jest",
