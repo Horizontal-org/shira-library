@@ -19,3 +19,8 @@ export class AuthorResponseDto {
   @ApiProperty({ example: "2026-06-04T12:00:00.000Z", format: "date-time" })
   createdAt: Date
 }
+
+export class DisplayNameAvailableResponseDto {
+  @ApiProperty({ example: true })
+  available: boolean
+}
