@@ -1,41 +1,7 @@
 import { IsArray, IsBoolean, IsDefined, IsInt, IsNotEmpty, IsOptional, IsString, MaxLength, ValidateNested } from 'class-validator'
 import { Type } from 'class-transformer'
-
-export class PublishExplanationDto {
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(255)
-  position: string
-
-  @IsInt()
-  index: number
-
-  @IsString()
-  @IsNotEmpty()
-  content: string
-}
-
-export class PublishAuthorDto {
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(27)
-  publicSpaceId: string
-
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(255)
-  spaceName: string
-
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(255)
-  spaceDisplayName: string
-
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(255)
-  organizationName: string
-}
+import { ExplanationDto } from './explanation.dto'
+import { PublishAuthorDto } from '@/authors/dto/author-publish.dto'
 
 export class PublishQuestionTemplateDto {
   @IsString()
@@ -68,8 +34,8 @@ export class PublishQuestionTemplateDto {
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => PublishExplanationDto)
-  explanations?: PublishExplanationDto[]
+  @Type(() => ExplanationDto)
+  explanations?: ExplanationDto[]
 
   @IsOptional()
   @IsArray()

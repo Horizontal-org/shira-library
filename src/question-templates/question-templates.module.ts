@@ -9,6 +9,7 @@ import { AuthorsModule } from "../authors/authors.module"
 import { CreateQuestionTemplatesService } from "./services/create.question-templates.service"
 import { TagsModule } from "../tags/tags.module"
 import { LangTagsModule } from "../lang-tags/lang-tags.module"
+import { PublishQuestionTemplatesService } from "./services/publish-question-templates.service"
 
 @Module({
   imports: [AuthorsModule, TagsModule, LangTagsModule],
@@ -19,6 +20,10 @@ import { LangTagsModule } from "../lang-tags/lang-tags.module"
     QuestionTemplatesCommand,
     ListQuestionTemplatesService,
     CreateQuestionTemplatesService,
+    PublishQuestionTemplatesService
   ],
+  exports: [
+    CreateQuestionTemplatesService
+  ]
 })
 export class QuestionTemplatesModule { }

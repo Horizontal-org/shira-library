@@ -34,6 +34,7 @@ import {
   QuizTemplateEnrichedResponseDto,
   QuizTemplateResponseDto,
 } from "../dto/quiz-template-response.dto"
+import { PublishQuizTemplatesService } from "../services/publish-quiz.service"
 
 @ApiTags('quiz-templates')
 @ApiBearerAuth()
@@ -42,6 +43,7 @@ export class QuizTemplatesController {
   constructor(
     private readonly service: QuizTemplatesService,
     private readonly listService: ListQuizTemplatesService,
+    private readonly publishService: PublishQuizTemplatesService
   ) { }
 
   @Get()
@@ -80,6 +82,17 @@ export class QuizTemplatesController {
     return this.service.findQuestions(id)
   }
 
+  @Post("publish")
+  @Public()
+  @Throttle({ strict: {} })
+  @ApiOperation({ summary: "Publish a quiz template from a shira space" })
+  @ApiCreatedResponse({ type: QuizTemplateResponseDto })
+  async publish(@Body() body: PublishQuizTemplateDto) {
+    return this.publishService.publish(body)
+  }
+
+  //super-admin routes
+
   @Post()
   @UseGuards(RolesGuard)
   @Roles("super-admin")
@@ -88,16 +101,6 @@ export class QuizTemplatesController {
   async create(@Body() body: CreateQuizTemplateDto) {
     return this.service.create(body)
   }
-
-  @Post("publish")
-  @Public()
-  @Throttle({ strict: {} })
-  @ApiOperation({ summary: "Publish a quiz template from a shira space" })
-  @ApiCreatedResponse({ type: QuizTemplateResponseDto })
-  async publish(@Body() body: PublishQuizTemplateDto) {
-    return this.service.publish(body)
-  }
-
   @Patch(":id")
   @UseGuards(RolesGuard)
   @Roles("super-admin")

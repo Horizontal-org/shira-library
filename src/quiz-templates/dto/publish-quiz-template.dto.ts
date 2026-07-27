@@ -1,4 +1,37 @@
-import { IsArray, IsInt, IsNotEmpty, IsOptional, IsString, ArrayMinSize, MaxLength } from 'class-validator'
+import { PublishAuthorDto } from '@/authors/dto/author-publish.dto'
+import { ExplanationDto } from '@/question-templates/dto/explanation.dto'
+import { Type } from 'class-transformer'
+import { IsArray, IsInt, IsNotEmpty, IsOptional, IsString, ArrayMinSize, MaxLength, IsBoolean, ValidateNested, IsDefined } from 'class-validator'
+
+class QuizQuestionTemplateDto {
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(255)
+  name: string
+
+  @IsString()
+  @IsNotEmpty()
+  content: string
+
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(255)
+  appType: string
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(255)
+  defaultApp?: string
+
+  @IsBoolean()
+  isPhishing: boolean
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ExplanationDto)
+  explanations?: ExplanationDto[]
+}
 
 export class PublishQuizTemplateDto {
   @IsString()
@@ -7,8 +40,9 @@ export class PublishQuizTemplateDto {
 
   @IsArray()
   @ArrayMinSize(1)
-  @IsInt({ each: true })
-  questionIds: number[]
+  @ValidateNested({ each: true })
+  @Type(() => QuizQuestionTemplateDto)
+  questions: QuizQuestionTemplateDto[]
 
   @IsOptional()
   @IsArray()
@@ -20,23 +54,8 @@ export class PublishQuizTemplateDto {
   @IsInt({ each: true })
   langTagIds?: number[]
 
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(27)
-  publicSpaceId: string
-
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(255)
-  spaceName: string
-
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(255)
-  spaceDisplayName: string
-
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(255)
-  organizationName: string
+  @IsDefined()
+  @ValidateNested()
+  @Type(() => PublishAuthorDto)
+  author: PublishAuthorDto
 }

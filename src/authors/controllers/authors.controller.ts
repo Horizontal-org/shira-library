@@ -1,19 +1,27 @@
-import { Controller, Get } from "@nestjs/common"
+import { Controller, Get, Param, Query } from "@nestjs/common"
 import { ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger"
 import { Public } from "../../auth/public.decorator"
-import { AuthorsService } from "../services/authors.service"
-import { AuthorResponseDto } from "../dto/author-response.dto"
+import { ListAuthorSubmissionsService } from "../services/list-author-submissions.service"
+import { PaginatedAuthorSubmissionsResponseDto } from "../dto/author-submission-response.dto"
+import { ListAuthorSubmissionsDto } from "../dto/list-author-submissions.dto"
 
 @ApiTags('authors')
 @Controller("authors")
 export class AuthorsController {
-  constructor(private readonly service: AuthorsService) { }
+  constructor(
+    private readonly listAuthorSubmissionsService: ListAuthorSubmissionsService,
+  ) { }
 
-  @Get()
+  @Get(":publicSpaceId/submissions")
   @Public()
-  @ApiOperation({ summary: "List authors (publishing spaces)" })
-  @ApiOkResponse({ type: [AuthorResponseDto] })
-  async findAll() {
-    return this.service.findAll()
+  @ApiOperation({ summary: "List a space's submitted question templates and their review status" })
+  @ApiOkResponse({ type: PaginatedAuthorSubmissionsResponseDto })
+  async findSubmissions(
+    @Param("publicSpaceId") publicSpaceId: string,
+    @Query() query: ListAuthorSubmissionsDto,
+  ) {
+    const page = Math.max(1, parseInt(query.page ?? '1', 10) || 1)
+    const limit = Math.min(100, Math.max(1, parseInt(query.limit ?? '20', 10) || 20))
+    return this.listAuthorSubmissionsService.findAllQuestionTemplatesForAuthor(publicSpaceId, page, limit)
   }
 }

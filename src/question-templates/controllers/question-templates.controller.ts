@@ -19,6 +19,7 @@ import {
   PaginatedQuestionTemplatesResponseDto,
   QuestionTemplateResponseDto,
 } from "../dto/question-template-response.dto"
+import { PublishQuestionTemplatesService } from "../services/publish-question-templates.service"
 
 @ApiTags('question-templates')
 @ApiBearerAuth()
@@ -26,7 +27,8 @@ import {
 export class QuestionTemplatesController {
   constructor(
     private readonly service: QuestionTemplatesService,
-    private readonly listService: ListQuestionTemplatesService
+    private readonly listService: ListQuestionTemplatesService,
+    private readonly publishService: PublishQuestionTemplatesService
   ) { }
 
   @Get()
@@ -78,7 +80,7 @@ export class QuestionTemplatesController {
   @Throttle({ strict: {} })
   @ApiOperation({ summary: "Publish a question template from a shira space" })
   async publish(@Body() body: PublishQuestionTemplateDto) {
-    return this.service.publish(body)
+    return this.publishService.publish(body)
   }
 
   @Patch(":id")

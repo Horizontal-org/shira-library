@@ -13,8 +13,7 @@ import { questionTemplates } from "../../db/schema/question-templates"
 import { questionLangTags } from "../../db/schema/question-lang-tags"
 import { langTags } from "../../db/schema/lang-tags"
 import { explanationTemplates } from "../../db/schema/explanation-templates"
-import { publishEvents } from "../../db/schema/publish-events"
-import { AuthorsService } from "../../authors/services/authors.service"
+
 import {
   QuizQuestionDto,
   QuizQuestionExplanationDto,
@@ -28,7 +27,6 @@ import {
 export class QuizTemplatesService {
   constructor(
     @Inject(DRIZZLE) private readonly db: MySql2Database<typeof schema>,
-    private readonly authorsService: AuthorsService,
   ) { }
 
   async findOne(id: number): Promise<QuizTemplateResponseDto> {
@@ -145,43 +143,7 @@ export class QuizTemplatesService {
     return this.findOne(quizId)
   }
 
-  async publish(data: {
-    title: string
-    questionIds: number[]
-    tagIds?: number[]
-    langTagIds?: number[]
-    publicSpaceId: string
-    spaceName: string
-    spaceDisplayName: string
-    organizationName: string
-  }): Promise<QuizTemplateResponseDto> {
-    const author = await this.authorsService.findOrCreate({
-      publicSpaceId: data.publicSpaceId,
-      spaceName: data.spaceName,
-      spaceDisplayName: data.spaceDisplayName,
-      organizationName: data.organizationName,
-    })
-
-    const [result] = await this.db.insert(quizTemplates).values({
-      title: data.title.trim(),
-      authorId: author.id,
-      approved: false,
-    })
-    const quizId = result.insertId
-
-    await this.linkQuizRelations(quizId, data)
-
-    await this.db.insert(publishEvents).values({
-      resourceType: 'quiz_template',
-      resourceId: String(quizId),
-      authorId: author.id,
-      status: 'pending',
-    })
-
-    return this.findOne(quizId)
-  }
-
-  private async linkQuizRelations(quizId: number, data: {
+  async linkQuizRelations(quizId: number, data: {
     questionIds: number[]
     tagIds?: number[]
     langTagIds?: number[]
