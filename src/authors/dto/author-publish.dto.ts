@@ -3,7 +3,7 @@ import { IsNotEmpty, IsString, MaxLength } from "class-validator"
 export class PublishAuthorDto {
   @IsString()
   @IsNotEmpty()
-  @MaxLength(27)
+  @MaxLength(31)
   publicSpaceId: string
 
   @IsString()

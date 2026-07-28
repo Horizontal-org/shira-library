@@ -40,7 +40,9 @@ describe("ListAuthorSubmissionsService", () => {
     it("throws NotFoundAuthorException when the publicSpaceId does not match an author", async () => {
       mockDb.where.mockResolvedValueOnce([])
 
-      await expect(service.findAllQuestionTemplatesForAuthor("unknown-space", 1, 20)).rejects.toThrow(NotFoundAuthorException)
+      await expect(
+        service.findAllQuestionTemplatesForAuthor("unknown-space", 1, 20),
+      ).rejects.toThrow(NotFoundAuthorException)
     })
 
     it("maps rows, omitting reason when there is none, and returns pagination info", async () => {
@@ -60,7 +62,11 @@ describe("ListAuthorSubmissionsService", () => {
         },
       ])
 
-      const result = await service.findAllQuestionTemplatesForAuthor("01HZY3K6X4G8VZJ2E9QWERTY12", 1, 20)
+      const result = await service.findAllQuestionTemplatesForAuthor(
+        "01HZY3K6X4G8VZJ2E9QWERTY12",
+        1,
+        20,
+      )
 
       expect(result).toEqual({
         data: [
@@ -69,6 +75,7 @@ describe("ListAuthorSubmissionsService", () => {
             questionName: "Anti-virus marketing",
             dateSubmitted: "2026-07-21",
             status: "in_review",
+            reason: "",
           },
         ],
         total: 1,
@@ -94,7 +101,11 @@ describe("ListAuthorSubmissionsService", () => {
         },
       ])
 
-      const result = await service.findAllQuestionTemplatesForAuthor("01HZY3K6X4G8VZJ2E9QWERTY12", 2, 1)
+      const result = await service.findAllQuestionTemplatesForAuthor(
+        "01HZY3K6X4G8VZJ2E9QWERTY12",
+        2,
+        1,
+      )
 
       expect(result).toEqual({
         data: [
@@ -117,7 +128,9 @@ describe("ListAuthorSubmissionsService", () => {
     it("throws NotFoundAuthorException when the publicSpaceId does not match an author", async () => {
       mockDb.where.mockResolvedValueOnce([])
 
-      await expect(service.findAllQuizTemplatesForAuthor("unknown-space", 1, 20)).rejects.toThrow(NotFoundAuthorException)
+      await expect(
+        service.findAllQuizTemplatesForAuthor("unknown-space", 1, 20),
+      ).rejects.toThrow(NotFoundAuthorException)
     })
 
     it("maps rows, omitting reason when there is none, and returns pagination info", async () => {
@@ -130,22 +143,27 @@ describe("ListAuthorSubmissionsService", () => {
       mockDb.offset.mockResolvedValueOnce([
         {
           id: 1,
-          quizTitle: "Cybersecurity basics",
+          quizTitle: "Anti-virus marketing quiz",
           createdAt: new Date("2026-07-21T10:00:00.000Z"),
           status: "in_review",
           rejectedNote: null,
         },
       ])
 
-      const result = await service.findAllQuizTemplatesForAuthor("01HZY3K6X4G8VZJ2E9QWERTY12", 1, 20)
+      const result = await service.findAllQuizTemplatesForAuthor(
+        "01HZY3K6X4G8VZJ2E9QWERTY12",
+        1,
+        20,
+      )
 
       expect(result).toEqual({
         data: [
           {
             id: "1",
-            quizTitle: "Cybersecurity basics",
+            quizTitle: "Anti-virus marketing quiz",
             dateSubmitted: "2026-07-21",
             status: "in_review",
+            reason: "",
           },
         ],
         total: 1,
@@ -164,20 +182,24 @@ describe("ListAuthorSubmissionsService", () => {
       mockDb.offset.mockResolvedValueOnce([
         {
           id: 3,
-          quizTitle: "Healthcare compliance quiz",
+          quizTitle: "Healthcare providers quiz",
           createdAt: new Date("2026-07-03T10:00:00.000Z"),
           status: "rejected",
           rejectedNote: "does not apply",
         },
       ])
 
-      const result = await service.findAllQuizTemplatesForAuthor("01HZY3K6X4G8VZJ2E9QWERTY12", 2, 1)
+      const result = await service.findAllQuizTemplatesForAuthor(
+        "01HZY3K6X4G8VZJ2E9QWERTY12",
+        2,
+        1,
+      )
 
       expect(result).toEqual({
         data: [
           {
             id: "3",
-            quizTitle: "Healthcare compliance quiz",
+            quizTitle: "Healthcare providers quiz",
             dateSubmitted: "2026-07-03",
             status: "rejected",
             reason: "does not apply",
