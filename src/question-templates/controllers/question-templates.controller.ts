@@ -17,7 +17,7 @@ import { UpdateQuestionTemplateDto } from "../dto/update-question-template.dto"
 import { PublishQuestionTemplateDto } from "../dto/publish-question-template.dto"
 import {
   PaginatedQuestionTemplatesResponseDto,
-  QuestionTemplateResponseDto,
+  QuestionTemplateWithRelationsResponseDto,
 } from "../dto/question-template-response.dto"
 import { PublishQuestionTemplatesService } from "../services/publish-question-templates.service"
 
@@ -75,6 +75,14 @@ export class QuestionTemplatesController {
     })
   }
 
+  @Get(":id")
+  @Public()
+  @ApiOperation({ summary: "Get a question template by id" })
+  @ApiOkResponse({ type: QuestionTemplateWithRelationsResponseDto })
+  async findOne(@Param("id", ParseIntPipe) id: number) {
+    return this.service.findOneEnriched(id)
+  }
+
   @Post("publish")
   @Public()
   @Throttle({ strict: {} })
@@ -87,11 +95,15 @@ export class QuestionTemplatesController {
   @UseGuards(RolesGuard)
   @Roles("super-admin")
   @ApiOperation({ summary: "Update a question template" })
-  @ApiOkResponse({ type: QuestionTemplateResponseDto })
+  @ApiOkResponse({ type: QuestionTemplateWithRelationsResponseDto })
   async update(
     @Param("id", ParseIntPipe) id: number,
     @Body() body: UpdateQuestionTemplateDto,
   ) {
-    return this.service.update(id, { highlighted: body.highlighted })
+    return this.service.update(id, {
+      ...(body.highlighted !== undefined && { highlighted: body.highlighted }),
+      ...(body.tagIds !== undefined && { tagIds: body.tagIds }),
+      ...(body.langTagIds !== undefined && { langTagIds: body.langTagIds }),
+    })
   }
 }

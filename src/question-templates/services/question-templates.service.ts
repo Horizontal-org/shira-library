@@ -4,8 +4,13 @@ import { eq } from "drizzle-orm"
 import { MySql2Database } from "drizzle-orm/mysql2"
 import { DRIZZLE } from "../../db/drizzle.constants"
 import { questionTemplates } from "../../db/schema/question-templates"
+import { questionTags } from "../../db/schema/question-tags"
+import { questionLangTags } from "../../db/schema/question-lang-tags"
+import { tags } from "../../db/schema/tags"
+import { langTags } from "../../db/schema/lang-tags"
+import { explanationTemplates } from "../../db/schema/explanation-templates"
 import * as schema from "../../db/schema"
-import { QuestionTemplateResponseDto } from "../dto/question-template-response.dto"
+import { QuestionTemplateResponseDto, QuestionTemplateWithRelationsResponseDto } from "../dto/question-template-response.dto"
 
 @Injectable()
 export class QuestionTemplatesService {
@@ -23,16 +28,65 @@ export class QuestionTemplatesService {
     return result
   }
 
+  async findOneEnriched(id: number): Promise<QuestionTemplateWithRelationsResponseDto> {
+    const question = await this.findOne(id)
+
+    const [langTagRows, tagRows, explanationRows] = await Promise.all([
+      this.db
+        .select({ id: langTags.id, name: langTags.name, code: langTags.code })
+        .from(questionLangTags)
+        .innerJoin(langTags, eq(questionLangTags.langTagId, langTags.id))
+        .where(eq(questionLangTags.questionId, id)),
+      this.db
+        .select({ id: tags.id, name: tags.name })
+        .from(questionTags)
+        .innerJoin(tags, eq(questionTags.tagId, tags.id))
+        .where(eq(questionTags.questionId, id)),
+      this.db
+        .select({
+          id: explanationTemplates.id,
+          position: explanationTemplates.position,
+          positionIndex: explanationTemplates.positionIndex,
+          content: explanationTemplates.content,
+          createdAt: explanationTemplates.createdAt,
+        })
+        .from(explanationTemplates)
+        .where(eq(explanationTemplates.questionId, id)),
+    ])
+
+    return { ...question, langTags: langTagRows, tags: tagRows, explanations: explanationRows }
+  }
+
   async update(
     id: number,
     data: {
       highlighted?: boolean
       isPhishing?: boolean
       isDemo?: boolean
+      tagIds?: number[]
+      langTagIds?: number[]
     },
-  ): Promise<QuestionTemplateResponseDto> {
-    await this.db.update(questionTemplates).set(data).where(eq(questionTemplates.id, id))
-    return this.findOne(id)
+  ): Promise<QuestionTemplateWithRelationsResponseDto> {
+    const { tagIds, langTagIds, ...columns } = data
+    if (Object.keys(columns).length > 0) {
+      await this.db.update(questionTemplates).set(columns).where(eq(questionTemplates.id, id))
+    }
+
+    if (tagIds !== undefined) {
+      await this.db.delete(questionTags).where(eq(questionTags.questionId, id))
+      if (tagIds.length) {
+        await this.db.insert(questionTags).values(tagIds.map(tagId => ({ questionId: id, tagId })))
+      }
+    }
+
+    if (langTagIds !== undefined) {
+      await this.db.delete(questionLangTags).where(eq(questionLangTags.questionId, id))
+      if (langTagIds.length) {
+        await this.db.insert(questionLangTags).values(langTagIds.map(langTagId => ({ questionId: id, langTagId })))
+      }
+    }
+
+    return this.findOneEnriched(id)
   }
 
   async remove(id: number): Promise<void> {
