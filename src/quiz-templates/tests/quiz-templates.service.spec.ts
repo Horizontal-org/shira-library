@@ -2,6 +2,7 @@ import { Test, TestingModule } from "@nestjs/testing"
 import { DRIZZLE } from "../../db/drizzle.constants"
 import { QuizTemplatesService } from "../services/quiz-templates.service"
 import { AuthorsService } from "../../authors/services/authors.service"
+import { NotFoundQuizTemplateException } from "../exceptions/not-found.quiz-template.exception"
 
 describe("QuizTemplatesService", () => {
   let service: QuizTemplatesService
@@ -59,11 +60,10 @@ describe("QuizTemplatesService", () => {
       expect(result).toEqual(quiz)
     })
 
-    it("should return null when not found", async () => {
+    it("should throw NotFoundQuizTemplateException when not found", async () => {
       mockDb.where.mockResolvedValueOnce([])
 
-      const result = await service.findOne(999)
-      expect(result).toBeNull()
+      await expect(service.findOne(999)).rejects.toThrow(NotFoundQuizTemplateException)
     })
   })
 
