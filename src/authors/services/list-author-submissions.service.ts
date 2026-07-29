@@ -31,6 +31,7 @@ export class ListAuthorSubmissionsService {
       this.db
         .select({
           id: publishEvents.id,
+          resourceId: publishEvents.resourceId,
           questionName: questionTemplates.name,
           createdAt: publishEvents.createdAt,
           status: publishEvents.status,
@@ -51,6 +52,7 @@ export class ListAuthorSubmissionsService {
 
     const data = rows.map((row) => ({
       id: String(row.id),
+      resourceId: row.resourceId,
       questionName: row.questionName,
       dateSubmitted: row.createdAt.toISOString().slice(0, 10),
       status: row.status as string,
@@ -76,6 +78,7 @@ export class ListAuthorSubmissionsService {
       this.db
         .select({
           id: publishEvents.id,
+          resourceId: publishEvents.resourceId,
           quizTitle: quizTemplates.title,
           createdAt: publishEvents.createdAt,
           status: publishEvents.status,
@@ -96,6 +99,7 @@ export class ListAuthorSubmissionsService {
 
     const data = rows.map((row) => ({
       id: String(row.id),
+      resourceId: row.resourceId,
       quizTitle: row.quizTitle,
       dateSubmitted: row.createdAt.toISOString().slice(0, 10),
       status: row.status as string,
