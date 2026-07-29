@@ -7,6 +7,9 @@ export class AuthorSubmissionResponseDto {
   @ApiProperty({ example: "25" })
   resourceId: string
 
+  @ApiProperty({ example: "question_template" })
+  resourceType: string
+
   @ApiProperty({ example: "Anti-virus marketing" })
   questionName: string
 
