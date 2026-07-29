@@ -4,7 +4,7 @@ import { authors } from "./authors";
 
 export const publishEvents = mysqlTable("publish_events", {
   id: serial().primaryKey(),
-  resourceType: varchar("resource_type", { length: 50 }),
+  resourceType: varchar("resource_type", { length: 50 }).notNull(),
   resourceId: varchar("resource_id", { length: 255 }).notNull(),
   authorId: bigint("author_id", { mode: "number", unsigned: true })
     .references(() => authors.id, { onDelete: "set null" }),
