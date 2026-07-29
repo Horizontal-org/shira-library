@@ -1,5 +1,6 @@
 export { quizTemplates } from "./quiz-templates";
 export { questionTemplates } from "./question-templates";
+export { authors } from "./authors";
 export { explanationTemplates } from "./explanation-templates";
 export { tags } from "./tags";
 export { langTags } from "./lang-tags";

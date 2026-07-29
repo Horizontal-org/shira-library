@@ -57,6 +57,20 @@
       "when": 1780328613260,
       "tag": "0007_goofy_wilson_fisk",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1784564618455,
+      "tag": "0008_public_loki",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1785254877726,
+      "tag": "0009_clean_surge",
+      "breakpoints": true
     }
   ]
 }

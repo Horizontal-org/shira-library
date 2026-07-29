@@ -92,7 +92,7 @@ export class ListQuizTemplatesService {
   }
 
   private buildConditions(query: ListQuizTemplatesQuery): SQL[] {
-    const conditions: SQL[] = []
+    const conditions: SQL[] = [eq(quizTemplates.approved, true)]
 
     if (query.search) {
       conditions.push(like(quizTemplates.title, `%${query.search}%`))

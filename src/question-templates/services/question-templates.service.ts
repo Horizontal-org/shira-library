@@ -9,7 +9,9 @@ import { QuestionTemplateResponseDto } from "../dto/question-template-response.d
 
 @Injectable()
 export class QuestionTemplatesService {
-  constructor(@Inject(DRIZZLE) private readonly db: MySql2Database<typeof schema>) { }
+  constructor(
+    @Inject(DRIZZLE) private readonly db: MySql2Database<typeof schema>,
+  ) { }
 
   async findAll(): Promise<QuestionTemplateResponseDto[]> {
     return this.db.select().from(questionTemplates)
@@ -19,20 +21,6 @@ export class QuestionTemplatesService {
     const [result] = await this.db.select().from(questionTemplates).where(eq(questionTemplates.id, id))
     if (!result) throw new NotFoundQuestionTemplateException()
     return result
-  }
-
-  async create(data: {
-    quizId: number
-    name: string
-    content: string
-    highlighted: boolean
-    isPhishing: boolean
-    isDemo: boolean
-    appType: string
-    defaultApp: string
-  }): Promise<QuestionTemplateResponseDto> {
-    const [result] = await this.db.insert(questionTemplates).values(data)
-    return this.findOne(result.insertId)
   }
 
   async update(

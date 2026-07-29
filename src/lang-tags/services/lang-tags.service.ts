@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common"
 import { NotFoundLangTagException } from "../exceptions/not-found.lang-tag.exception"
-import { eq } from "drizzle-orm"
+import { eq, inArray } from "drizzle-orm"
 import { MySql2Database } from "drizzle-orm/mysql2"
 import { DRIZZLE } from "../../db/drizzle.constants"
 import { langTags } from "../../db/schema/lang-tags"
@@ -18,6 +18,13 @@ export class LangTagsService {
     const [result] = await this.db.select().from(langTags).where(eq(langTags.id, id))
     if (!result) throw new NotFoundLangTagException()
     return result
+  }
+
+  async validateIds(ids: number[]): Promise<void> {
+    if (!ids.length) return
+    const uniqueIds = [...new Set(ids)]
+    const found = await this.db.select({ id: langTags.id }).from(langTags).where(inArray(langTags.id, uniqueIds))
+    if (found.length !== uniqueIds.length) throw new NotFoundLangTagException()
   }
 
   async create(data: { name: string; code: string }) {

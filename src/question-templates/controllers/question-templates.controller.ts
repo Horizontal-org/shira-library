@@ -1,20 +1,25 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Query, UseGuards } from "@nestjs/common"
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from "@nestjs/common"
 import {
   ApiBearerAuth,
+  ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
 } from "@nestjs/swagger"
+import { Throttle } from "@nestjs/throttler"
 import { Roles } from "../../auth/roles.decorator"
 import { RolesGuard } from "../../auth/roles.guard"
+import { Public } from "../../auth/public.decorator"
 import { QuestionTemplatesService } from "../services/question-templates.service"
 import { ListQuestionTemplatesService } from "../services/list-question-templates.service"
 import { ListQuestionTemplatesDto } from "../dto/list-question-templates.dto"
 import { UpdateQuestionTemplateDto } from "../dto/update-question-template.dto"
+import { PublishQuestionTemplateDto } from "../dto/publish-question-template.dto"
 import {
   PaginatedQuestionTemplatesResponseDto,
   QuestionTemplateResponseDto,
 } from "../dto/question-template-response.dto"
+import { PublishQuestionTemplatesService } from "../services/publish-question-templates.service"
 
 @ApiTags('question-templates')
 @ApiBearerAuth()
@@ -22,10 +27,12 @@ import {
 export class QuestionTemplatesController {
   constructor(
     private readonly service: QuestionTemplatesService,
-    private readonly listService: ListQuestionTemplatesService
+    private readonly listService: ListQuestionTemplatesService,
+    private readonly publishService: PublishQuestionTemplatesService
   ) { }
 
   @Get()
+  @Public()
   @ApiOperation({ summary: "List question templates" })
   @ApiOkResponse({ type: PaginatedQuestionTemplatesResponseDto })
   async findAll(@Query() query: ListQuestionTemplatesDto) {
@@ -66,6 +73,14 @@ export class QuestionTemplatesController {
       page: Math.max(1, parseInt(query.page ?? '1', 10) || 1),
       limit: Math.min(100, Math.max(1, parseInt(query.limit ?? '20', 10) || 20)),
     })
+  }
+
+  @Post("publish")
+  @Public()
+  @Throttle({ strict: {} })
+  @ApiOperation({ summary: "Publish a question template from a shira space" })
+  async publish(@Body() body: PublishQuestionTemplateDto) {
+    return this.publishService.publish(body)
   }
 
   @Patch(":id")

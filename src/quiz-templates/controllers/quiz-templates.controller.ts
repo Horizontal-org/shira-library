@@ -17,11 +17,14 @@ import {
   ApiOperation,
   ApiTags,
 } from "@nestjs/swagger"
+import { Throttle } from "@nestjs/throttler"
 import { Roles } from "../../auth/roles.decorator"
 import { RolesGuard } from "../../auth/roles.guard"
+import { Public } from "../../auth/public.decorator"
 import { QuizTemplatesService } from "../services/quiz-templates.service"
 import { ListQuizTemplatesDto } from "../dto/list-quiz-templates.dto"
 import { CreateQuizTemplateDto } from "../dto/create-quiz-template.dto"
+import { PublishQuizTemplateDto } from "../dto/publish-quiz-template.dto"
 import { UpdateQuizTemplateDto } from "../dto/update-quiz-template.dto"
 import { ListQuizTemplatesService } from "../services/list-quiz.service"
 import { QuizQuestionDto } from "../dto/quiz-questions-response.dto"
@@ -31,6 +34,7 @@ import {
   QuizTemplateEnrichedResponseDto,
   QuizTemplateResponseDto,
 } from "../dto/quiz-template-response.dto"
+import { PublishQuizTemplatesService } from "../services/publish-quiz.service"
 
 @ApiTags('quiz-templates')
 @ApiBearerAuth()
@@ -39,9 +43,11 @@ export class QuizTemplatesController {
   constructor(
     private readonly service: QuizTemplatesService,
     private readonly listService: ListQuizTemplatesService,
+    private readonly publishService: PublishQuizTemplatesService
   ) { }
 
   @Get()
+  @Public()
   @ApiOperation({ summary: "List quiz templates" })
   @ApiOkResponse({ type: PaginatedQuizTemplatesResponseDto })
   async findAll(@Query() query: ListQuizTemplatesDto) {
@@ -61,6 +67,7 @@ export class QuizTemplatesController {
   }
 
   @Get(":id")
+  @Public()
   @ApiOperation({ summary: "Get a quiz template by id" })
   @ApiOkResponse({ type: QuizTemplateEnrichedResponseDto })
   async findOne(@Param("id", ParseIntPipe) id: number) {
@@ -68,11 +75,23 @@ export class QuizTemplatesController {
   }
 
   @Get(":id/questions")
+  @Public()
   @ApiOperation({ summary: "List questions for a quiz template" })
   @ApiOkResponse({ type: [QuizQuestionDto] })
   async findQuestions(@Param("id", ParseIntPipe) id: number) {
     return this.service.findQuestions(id)
   }
+
+  @Post("publish")
+  @Public()
+  @Throttle({ strict: {} })
+  @ApiOperation({ summary: "Publish a quiz template from a shira space" })
+  @ApiCreatedResponse({ type: QuizTemplateResponseDto })
+  async publish(@Body() body: PublishQuizTemplateDto) {
+    return this.publishService.publish(body)
+  }
+
+  //super-admin routes
 
   @Post()
   @UseGuards(RolesGuard)
@@ -82,7 +101,6 @@ export class QuizTemplatesController {
   async create(@Body() body: CreateQuizTemplateDto) {
     return this.service.create(body)
   }
-
   @Patch(":id")
   @UseGuards(RolesGuard)
   @Roles("super-admin")

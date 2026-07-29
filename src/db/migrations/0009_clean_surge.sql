@@ -1,0 +1,1 @@
+ALTER TABLE `authors` MODIFY COLUMN `public_space_id` varchar(31) NOT NULL;
