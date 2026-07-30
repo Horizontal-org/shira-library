@@ -29,14 +29,15 @@ export class QuizTemplatesService {
     @Inject(DRIZZLE) private readonly db: MySql2Database<typeof schema>,
   ) { }
 
-  async findOne(id: number): Promise<QuizTemplateResponseDto> {
+  async findOne(id: number, opts?: { requireApproved?: boolean }): Promise<QuizTemplateResponseDto> {
     const [result] = await this.db.select().from(quizTemplates).where(eq(quizTemplates.id, id))
     if (!result) throw new NotFoundQuizTemplateException()
+    if (opts?.requireApproved && !result.approved) throw new NotFoundQuizTemplateException()
     return result
   }
 
-  async findOneEnriched(id: number): Promise<QuizTemplateEnrichedResponseDto> {
-    const quiz = await this.findOne(id)
+  async findOneEnriched(id: number, opts?: { requireApproved?: boolean }): Promise<QuizTemplateEnrichedResponseDto> {
+    const quiz = await this.findOne(id, opts)
 
     const [langTagRows, tagRows] = await Promise.all([
       this.db
@@ -54,8 +55,8 @@ export class QuizTemplatesService {
     return { ...quiz, langTags: langTagRows, tags: tagRows }
   }
 
-  async findQuestions(id: number): Promise<QuizQuestionDto[]> {
-    await this.findOne(id)
+  async findQuestions(id: number, opts?: { requireApproved?: boolean }): Promise<QuizQuestionDto[]> {
+    await this.findOne(id, opts)
 
     const questionRows = await this.db
       .select({

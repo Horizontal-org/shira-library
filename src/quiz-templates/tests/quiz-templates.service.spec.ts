@@ -65,6 +65,28 @@ describe("QuizTemplatesService", () => {
 
       await expect(service.findOne(999)).rejects.toThrow(NotFoundQuizTemplateException)
     })
+
+    it("should throw NotFoundQuizTemplateException when not approved and requireApproved is set", async () => {
+      mockDb.where.mockResolvedValueOnce([{ id: 1, approved: false }])
+
+      await expect(
+        service.findOne(1, { requireApproved: true }),
+      ).rejects.toThrow(NotFoundQuizTemplateException)
+    })
+
+    it("should return the quiz template when approved and requireApproved is set", async () => {
+      const quiz = { id: 1, approved: true }
+      mockDb.where.mockResolvedValueOnce([quiz])
+
+      await expect(service.findOne(1, { requireApproved: true })).resolves.toEqual(quiz)
+    })
+
+    it("should not require approval when the flag is omitted", async () => {
+      const quiz = { id: 1, approved: false }
+      mockDb.where.mockResolvedValueOnce([quiz])
+
+      await expect(service.findOne(1)).resolves.toEqual(quiz)
+    })
   })
 
   describe("create", () => {

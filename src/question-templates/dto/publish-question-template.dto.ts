@@ -46,4 +46,9 @@ export class PublishQuestionTemplateDto {
   @IsArray()
   @IsInt({ each: true })
   langTagIds?: number[]
+
+  @IsOptional()
+  @IsArray()
+  @IsInt({ each: true })
+  templateImageIds?: number[]
 }

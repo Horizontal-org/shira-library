@@ -1,11 +1,12 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { MySql2Database } from "drizzle-orm/mysql2";
-import { DRIZZLE } from "@/db/drizzle.constants";
+import { DRIZZLE } from "../../db/drizzle.constants";
 import { CreateQuestionTemplatesService } from "./create.question-templates.service";
-import { AuthorsService } from "@/authors/services/authors.service";
+import { AuthorsService } from "../../authors/services/authors.service";
 import { PublishQuestionTemplateDto } from "../dto/publish-question-template.dto";
-import { TagsService } from "@/tags/services/tags.service";
-import { LangTagsService } from "@/lang-tags/services/lang-tags.service";
+import { TagsService } from "../../tags/services/tags.service";
+import { LangTagsService } from "../../lang-tags/services/lang-tags.service";
+import { ImagesService } from "../../images/services/images.service";
 
 import * as schema from "../../db/schema"
 import { questionTags } from "../../db/schema/question-tags"
@@ -20,6 +21,7 @@ export class PublishQuestionTemplatesService {
     private readonly createQuestionTemplatesService: CreateQuestionTemplatesService,
     private readonly tagsService: TagsService,
     private readonly langTagsService: LangTagsService,
+    private readonly imagesService: ImagesService,
   ) { }
 
   async publish(data: PublishQuestionTemplateDto): Promise<void> {
@@ -63,6 +65,8 @@ export class PublishQuestionTemplatesService {
         data.langTagIds.map((langTagId) => ({ questionId, langTagId })),
       )
     }
+
+    await this.imagesService.linkToQuestion(data.templateImageIds ?? [], questionId)
 
     await this.db.insert(publishEvents).values({
       resourceType: 'question_template',

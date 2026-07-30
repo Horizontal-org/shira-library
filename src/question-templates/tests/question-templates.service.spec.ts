@@ -1,16 +1,24 @@
 import { Test, TestingModule } from "@nestjs/testing"
 import { DRIZZLE } from "../../db/drizzle.constants"
+import { NotFoundQuestionTemplateException } from "../exceptions/not-found.question-template.exception"
 import { QuestionTemplatesService } from "../services/question-templates.service"
 import { AuthorsService } from "../../authors/services/authors.service"
 import { CreateQuestionTemplatesService } from "../services/create.question-templates.service"
 import { TagsService } from "../../tags/services/tags.service"
 import { LangTagsService } from "../../lang-tags/services/lang-tags.service"
+import { ImagesService } from "../../images/services/images.service"
 
 describe("QuestionTemplatesService", () => {
   let service: QuestionTemplatesService
 
   const mockAuthorsService = {
     findOrCreate: jest.fn(),
+  }
+
+  const mockImagesService = {
+    findByQuestionId: jest.fn(),
+    getPresignedUrl: jest.fn(),
+    linkToQuestion: jest.fn(),
   }
 
   const mockCreateQuestionTemplatesService = {
@@ -46,6 +54,7 @@ describe("QuestionTemplatesService", () => {
         { provide: CreateQuestionTemplatesService, useValue: mockCreateQuestionTemplatesService },
         { provide: TagsService, useValue: mockTagsService },
         { provide: LangTagsService, useValue: mockLangTagsService },
+        { provide: ImagesService, useValue: mockImagesService },
       ],
     }).compile()
 
@@ -54,5 +63,29 @@ describe("QuestionTemplatesService", () => {
 
   it("should be defined", () => {
     expect(service).toBeDefined()
+  })
+
+  describe("findOne with requireApproved", () => {
+    it("throws not found when the template is not approved", async () => {
+      mockDb.where.mockResolvedValueOnce([{ id: 1, approved: false }])
+
+      await expect(
+        service.findOne(1, { requireApproved: true }),
+      ).rejects.toThrow(NotFoundQuestionTemplateException)
+    })
+
+    it("returns the template when it is approved", async () => {
+      mockDb.where.mockResolvedValueOnce([{ id: 1, approved: true }])
+
+      await expect(
+        service.findOne(1, { requireApproved: true }),
+      ).resolves.toEqual({ id: 1, approved: true })
+    })
+
+    it("does not require approval when the flag is omitted", async () => {
+      mockDb.where.mockResolvedValueOnce([{ id: 1, approved: false }])
+
+      await expect(service.findOne(1)).resolves.toEqual({ id: 1, approved: false })
+    })
   })
 })
