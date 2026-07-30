@@ -12,6 +12,7 @@ import { ConsoleModule } from "nestjs-console";
 import { TagsModule } from "./tags/tags.module";
 import { AuthorsModule } from "./authors/authors.module";
 import { LoggerModule } from "nestjs-pino";
+import pretty from "pino-pretty";
 
 @Module({
   imports: [
@@ -32,8 +33,8 @@ import { LoggerModule } from "nestjs-pino";
     ]),
     LoggerModule.forRoot({
       pinoHttp: {
-        transport: process.env.NODE_ENV !== "production"
-          ? { target: "pino-pretty" }
+        stream: process.env.NODE_ENV !== "production"
+          ? pretty()
           : undefined,
       },
     }),
