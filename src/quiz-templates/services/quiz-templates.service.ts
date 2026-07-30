@@ -174,30 +174,35 @@ export class QuizTemplatesService {
     tagIds?: number[]
     langTagIds?: number[]
   }): Promise<QuizTemplateEnrichedResponseDto> {
-    if (data.title !== undefined || data.description !== undefined) {
-      await this.db.update(quizTemplates).set({
-        ...(data.title !== undefined ? { title: data.title.trim() } : {}),
-        ...(data.description !== undefined ? { description: data.description.trim() } : {}),
-      }).where(eq(quizTemplates.id, id))
+    if (data.title !== undefined) {
+      await this.db.update(quizTemplates).set({ title: data.title.trim() }).where(eq(quizTemplates.id, id))
     }
+
+    if (data.description !== undefined) {
+      await this.db.update(quizTemplates).set({ description: data.description.trim() }).where(eq(quizTemplates.id, id))
+    }
+
     if (data.questionIds !== undefined) {
       await this.db.delete(quizQuestions).where(eq(quizQuestions.quizId, id))
       if (data.questionIds.length) {
         await this.db.insert(quizQuestions).values(data.questionIds.map(questionId => ({ quizId: id, questionId })))
       }
     }
+
     if (data.tagIds !== undefined) {
       await this.db.delete(quizTags).where(eq(quizTags.quizId, id))
       if (data.tagIds.length) {
         await this.db.insert(quizTags).values(data.tagIds.map(tagId => ({ quizId: id, tagId })))
       }
     }
+
     if (data.langTagIds !== undefined) {
       await this.db.delete(quizLangTags).where(eq(quizLangTags.quizId, id))
       if (data.langTagIds.length) {
         await this.db.insert(quizLangTags).values(data.langTagIds.map(langTagId => ({ quizId: id, langTagId })))
       }
     }
+
     return this.findOneEnriched(id)
   }
 
