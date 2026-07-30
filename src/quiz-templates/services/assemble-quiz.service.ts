@@ -22,7 +22,10 @@ export class AssembleQuizService {
       .orderBy(sql`RAND()`)
       .limit(10)
 
-    const [{ insertId: quizId }] = await this.db.insert(quizTemplates).values({ title })
+    const [{ insertId: quizId }] = await this.db.insert(quizTemplates).values({
+      title,
+      description: '',
+    })
 
     if (questions.length > 0) {
       await this.db.insert(quizQuestions).values(

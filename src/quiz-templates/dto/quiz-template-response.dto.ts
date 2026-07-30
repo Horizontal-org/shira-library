@@ -26,6 +26,9 @@ export class QuizTemplateResponseDto {
   @ApiProperty({ example: "Banking Safety Basics" })
   title: string
 
+  @ApiProperty({ example: "Email phishing attempts targeted towards doctors and nurses." })
+  description: string
+
   @ApiProperty({ example: "2026-06-04T12:00:00.000Z", format: "date-time" })
   createdAt: Date
 }

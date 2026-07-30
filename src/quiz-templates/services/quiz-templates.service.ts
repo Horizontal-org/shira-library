@@ -128,12 +128,14 @@ export class QuizTemplatesService {
 
   async create(data: {
     title: string
+    description: string
     questionIds: number[]
     tagIds?: number[]
     langTagIds?: number[]
   }): Promise<QuizTemplateResponseDto> {
     const [result] = await this.db.insert(quizTemplates).values({
       title: data.title.trim(),
+      description: data.description.trim(),
       approved: true,
     })
     const quizId = result.insertId
@@ -167,12 +169,16 @@ export class QuizTemplatesService {
 
   async update(id: number, data: {
     title?: string
+    description?: string
     questionIds?: number[]
     tagIds?: number[]
     langTagIds?: number[]
   }): Promise<QuizTemplateEnrichedResponseDto> {
-    if (data.title !== undefined) {
-      await this.db.update(quizTemplates).set({ title: data.title.trim() }).where(eq(quizTemplates.id, id))
+    if (data.title !== undefined || data.description !== undefined) {
+      await this.db.update(quizTemplates).set({
+        ...(data.title !== undefined ? { title: data.title.trim() } : {}),
+        ...(data.description !== undefined ? { description: data.description.trim() } : {}),
+      }).where(eq(quizTemplates.id, id))
     }
     if (data.questionIds !== undefined) {
       await this.db.delete(quizQuestions).where(eq(quizQuestions.quizId, id))
