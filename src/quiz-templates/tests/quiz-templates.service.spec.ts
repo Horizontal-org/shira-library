@@ -75,7 +75,11 @@ describe("QuizTemplatesService", () => {
         .mockResolvedValueOnce(undefined)
       mockDb.where.mockResolvedValueOnce([quiz])
 
-      const result = await service.create({ title: "New Quiz", questionIds: [10, 20] })
+      const result = await service.create({
+        title: "New Quiz",
+        description: "A new quiz",
+        questionIds: [10, 20],
+      })
 
       expect(result).toEqual(quiz)
       expect(mockDb.insert).toHaveBeenCalledTimes(2)
