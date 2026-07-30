@@ -37,6 +37,7 @@ export class PublishQuestionTemplatesService {
 
     const questionId = await this.createQuestionTemplatesService.create({
       name: data.name,
+      description: data.description,
       content: data.content,
       appType: data.appType,
       defaultApp: data.defaultApp,

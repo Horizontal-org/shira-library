@@ -13,6 +13,7 @@ export type CreateQuestionExplanationInput = {
 
 export type CreateQuestionTemplateInput = {
   name: string
+  description?: string
   content: string
   appType: string
   defaultApp?: string
@@ -32,6 +33,7 @@ export class CreateQuestionTemplatesService {
 
     const [result] = await this.db.insert(questionTemplates).values({
       name: data.name,
+      description: data.description,
       content: data.content,
       appType: data.appType,
       defaultApp: data.defaultApp,
