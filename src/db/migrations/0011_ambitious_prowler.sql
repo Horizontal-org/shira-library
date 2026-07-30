@@ -1,0 +1,1 @@
+ALTER TABLE `publish_events` MODIFY COLUMN `resource_type` varchar(50) NOT NULL;
