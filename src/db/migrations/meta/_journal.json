@@ -71,6 +71,20 @@
       "when": 1785254877726,
       "tag": "0009_clean_surge",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1785345280260,
+      "tag": "0010_careless_miracleman",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "5",
+      "when": 1785345836786,
+      "tag": "0011_ambitious_prowler",
+      "breakpoints": true
     }
   ]
 }
