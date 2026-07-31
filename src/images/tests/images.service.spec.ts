@@ -1,6 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing"
 import { ConfigService } from "@nestjs/config"
 import { createHash } from "crypto"
+import { EventEmitter } from "events"
 import { DRIZZLE } from "../../db/drizzle.constants"
 import { ImagesService } from "../services/images.service"
 import { InvalidFileTypeImageException } from "../exceptions/invalid-file-type.image.exception"
@@ -26,6 +27,8 @@ describe("ImagesService", () => {
   const mockMinio = {
     putObject: jest.fn(),
     presignedUrl: jest.fn(),
+    bucketExists: jest.fn(),
+    listObjectsV2: jest.fn(),
   }
 
   const mockConfigService = {
@@ -204,6 +207,55 @@ describe("ImagesService", () => {
 
       expect(url).toBe("https://example.com/signed")
       expect(mockMinio.presignedUrl).toHaveBeenCalledWith("GET", "library-images", "question-template-images/foo.png")
+    })
+  })
+
+  describe("testConnection", () => {
+    it("resolves true when the bucket exists", async () => {
+      mockMinio.bucketExists.mockResolvedValueOnce(true)
+
+      await expect(service.testConnection()).resolves.toBe(true)
+      expect(mockMinio.bucketExists).toHaveBeenCalledWith("library-images")
+    })
+
+    it("resolves false when the bucket does not exist", async () => {
+      mockMinio.bucketExists.mockResolvedValueOnce(false)
+
+      await expect(service.testConnection()).resolves.toBe(false)
+    })
+
+    it("rejects when the connection fails", async () => {
+      mockMinio.bucketExists.mockRejectedValueOnce(new Error("connect ECONNREFUSED"))
+
+      await expect(service.testConnection()).rejects.toThrow("connect ECONNREFUSED")
+    })
+  })
+
+  describe("countObjects", () => {
+    class FakeStream extends EventEmitter { }
+
+    it("resolves with the number of objects emitted by the stream", async () => {
+      const stream = new FakeStream()
+      mockMinio.listObjectsV2.mockReturnValueOnce(stream)
+
+      const resultPromise = service.countObjects()
+      stream.emit("data", {})
+      stream.emit("data", {})
+      stream.emit("data", {})
+      stream.emit("end")
+
+      await expect(resultPromise).resolves.toBe(3)
+      expect(mockMinio.listObjectsV2).toHaveBeenCalledWith("library-images", "", true)
+    })
+
+    it("rejects when the stream emits an error", async () => {
+      const stream = new FakeStream()
+      mockMinio.listObjectsV2.mockReturnValueOnce(stream)
+
+      const resultPromise = service.countObjects()
+      stream.emit("error", new Error("stream failed"))
+
+      await expect(resultPromise).rejects.toThrow("stream failed")
     })
   })
 })

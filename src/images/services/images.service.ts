@@ -85,6 +85,20 @@ export class ImagesService {
     return this.minioService.presignedUrl("GET", this.bucketName, relativePath);
   }
 
+  async testConnection(): Promise<boolean> {
+    return this.minioService.bucketExists(this.bucketName);
+  }
+
+  async countObjects(): Promise<number> {
+    return new Promise((resolve, reject) => {
+      let count = 0;
+      const stream = this.minioService.listObjectsV2(this.bucketName, "", true);
+      stream.on("data", () => { count += 1; });
+      stream.on("error", reject);
+      stream.on("end", () => resolve(count));
+    });
+  }
+
   private async storeNewImage(file: Express.Multer.File, hash: string) {
     const relativePath = this.buildRelativePath(file.originalname);
     await this.minioService.putObject(this.bucketName, relativePath, file.buffer, file.size);

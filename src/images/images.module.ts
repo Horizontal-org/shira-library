@@ -3,12 +3,14 @@ import { ConfigService } from "@nestjs/config";
 import * as Minio from "minio";
 import { ImagesController } from "./controllers/images.controller";
 import { ImagesService } from "./services/images.service";
+import { ImagesCommand } from "./images.command";
 import { MINIO_TOKEN } from "./decorators/minio.decorator";
 
 @Module({
   controllers: [ImagesController],
   providers: [
     ImagesService,
+    ImagesCommand,
     {
       provide: MINIO_TOKEN,
       inject: [ConfigService],
