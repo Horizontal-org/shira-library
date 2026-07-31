@@ -60,6 +60,7 @@ export class QuestionTemplatesService {
   async update(
     id: number,
     data: {
+      description?: string
       highlighted?: boolean
       isPhishing?: boolean
       isDemo?: boolean

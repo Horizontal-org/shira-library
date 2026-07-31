@@ -26,6 +26,9 @@ export class QuestionTemplateResponseDto {
   @ApiProperty({ example: "Suspicious SMS" })
   name: string
 
+  @ApiProperty({ example: "Suspicious text message impersonating a bank.", nullable: true })
+  description: string | null
+
   @ApiProperty({ example: false })
   highlighted: boolean
 

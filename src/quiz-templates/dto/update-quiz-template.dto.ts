@@ -7,6 +7,11 @@ export class UpdateQuizTemplateDto {
   title?: string
 
   @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  description?: string
+
+  @IsOptional()
   @IsArray()
   @ArrayMinSize(1)
   @IsInt({ each: true })

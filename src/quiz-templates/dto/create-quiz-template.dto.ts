@@ -5,6 +5,10 @@ export class CreateQuizTemplateDto {
   @IsNotEmpty()
   title: string
 
+  @IsString()
+  @IsNotEmpty()
+  description: string
+
   @IsArray()
   @ArrayMinSize(1)
   @IsInt({ each: true })
