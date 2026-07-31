@@ -20,10 +20,10 @@ export class QuestionTemplateLangTagResponseDto {
 }
 
 export class QuestionTemplateAuthorResponseDto {
-  @ApiProperty({ example: "spc_123456789" })
+  @ApiProperty({ example: "spc_3HFaYCJHtpukPwNYuVXSDXqRwQU" })
   publicSpaceId: string
 
-  @ApiProperty({ example: "Acme Security" })
+  @ApiProperty({ example: "Green Security" })
   displayName: string
 }
 
