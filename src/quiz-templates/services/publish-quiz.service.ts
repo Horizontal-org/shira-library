@@ -1,15 +1,16 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { PublishQuizTemplateDto } from "../dto/publish-quiz-template.dto";
 import { QuizTemplateResponseDto } from "../dto/quiz-template-response.dto";
-import { DRIZZLE } from "@/db/drizzle.constants";
+import { DRIZZLE } from "../../db/drizzle.constants";
 import { MySql2Database } from "drizzle-orm/mysql2";
-import { AuthorsService } from "@/authors/services/authors.service";
-import { publishEvents, quizTemplates } from "@/db/schema";
+import { AuthorsService } from "../../authors/services/authors.service";
+import { publishEvents, quizTemplates } from "../../db/schema";
 import * as schema from "../../db/schema"
 import { QuizTemplatesService } from "./quiz-templates.service";
-import { CreateQuestionTemplatesService } from "@/question-templates/services/create.question-templates.service";
-import { TagsService } from "@/tags/services/tags.service";
-import { LangTagsService } from "@/lang-tags/services/lang-tags.service";
+import { CreateQuestionTemplatesService } from "../../question-templates/services/create.question-templates.service";
+import { TagsService } from "../../tags/services/tags.service";
+import { LangTagsService } from "../../lang-tags/services/lang-tags.service";
+import { ImagesService } from "../../images/services/images.service";
 
 @Injectable()
 export class PublishQuizTemplatesService {
@@ -20,6 +21,7 @@ export class PublishQuizTemplatesService {
     private readonly createQuestionService: CreateQuestionTemplatesService,
     private readonly tagsService: TagsService,
     private readonly langTagsService: LangTagsService,
+    private readonly imagesService: ImagesService,
   ) { }
 
 
@@ -65,7 +67,9 @@ export class PublishQuizTemplatesService {
     )
 
 
-    console.log("🚀 ~ PublishQuizTemplatesService ~ publish ~ questionIdsToLink:", questionIdsToLink)
+    await Promise.all(
+      data.questions.map((q, i) => this.imagesService.linkToQuestion(q.templateImageIds ?? [], questionIdsToLink[i])),
+    )
 
     await this.quizService.linkQuizRelations(quizId, {
       questionIds: questionIdsToLink,

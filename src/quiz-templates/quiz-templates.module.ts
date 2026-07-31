@@ -9,13 +9,15 @@ import { PublishQuizTemplatesService } from "./services/publish-quiz.service"
 import { QuestionTemplatesModule } from "@/question-templates/question-templates.module"
 import { LangTagsModule } from "@/lang-tags/lang-tags.module"
 import { TagsModule } from "@/tags/tags.module"
+import { ImagesModule } from "@/images/images.module"
 
 @Module({
   imports: [
     AuthorsModule,
     QuestionTemplatesModule,
     LangTagsModule,
-    TagsModule
+    TagsModule,
+    ImagesModule
   ],
   controllers: [QuizTemplatesController],
   providers: [
