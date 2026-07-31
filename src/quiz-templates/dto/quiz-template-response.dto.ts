@@ -19,6 +19,14 @@ export class QuizTemplateLangTagResponseDto {
   code: string
 }
 
+export class QuizTemplateAuthorResponseDto {
+  @ApiProperty({ example: "spc_123456789" })
+  publicSpaceId: string
+
+  @ApiProperty({ example: "Acme Security" })
+  displayName: string
+}
+
 export class QuizTemplateResponseDto {
   @ApiProperty({ example: 12 })
   id: number
@@ -28,6 +36,9 @@ export class QuizTemplateResponseDto {
 
   @ApiProperty({ example: "Email phishing attempts targeted towards doctors and nurses." })
   description: string
+
+  @ApiProperty({ type: QuizTemplateAuthorResponseDto, nullable: true })
+  author: QuizTemplateAuthorResponseDto | null
 
   @ApiProperty({ example: "2026-06-04T12:00:00.000Z", format: "date-time" })
   createdAt: Date

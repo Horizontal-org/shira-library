@@ -19,6 +19,14 @@ export class QuestionTemplateLangTagResponseDto {
   code: string
 }
 
+export class QuestionTemplateAuthorResponseDto {
+  @ApiProperty({ example: "spc_123456789" })
+  publicSpaceId: string
+
+  @ApiProperty({ example: "Acme Security" })
+  displayName: string
+}
+
 export class QuestionTemplateResponseDto {
   @ApiProperty({ example: 25 })
   id: number
@@ -46,6 +54,9 @@ export class QuestionTemplateResponseDto {
 
   @ApiProperty({ example: false })
   isDemo: boolean
+
+  @ApiProperty({ type: QuestionTemplateAuthorResponseDto, nullable: true })
+  author: QuestionTemplateAuthorResponseDto | null
 
   @ApiProperty({ example: "2026-06-04T12:00:00.000Z", format: "date-time" })
   createdAt: Date

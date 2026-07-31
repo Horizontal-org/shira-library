@@ -13,6 +13,7 @@ import { questionTemplates } from "../../db/schema/question-templates"
 import { questionLangTags } from "../../db/schema/question-lang-tags"
 import { langTags } from "../../db/schema/lang-tags"
 import { explanationTemplates } from "../../db/schema/explanation-templates"
+import { authors } from "../../db/schema/authors"
 
 import {
   QuizQuestionDto,
@@ -30,9 +31,21 @@ export class QuizTemplatesService {
   ) { }
 
   async findOne(id: number): Promise<QuizTemplateResponseDto> {
-    const [result] = await this.db.select().from(quizTemplates).where(eq(quizTemplates.id, id))
+    const [result] = await this.db
+      .select({ quiz: quizTemplates, author: authors })
+      .from(quizTemplates)
+      .leftJoin(authors, eq(quizTemplates.authorId, authors.id))
+      .where(eq(quizTemplates.id, id))
     if (!result) throw new NotFoundQuizTemplateException()
-    return result
+    return {
+      ...result.quiz,
+      author: result.author
+        ? {
+          publicSpaceId: result.author.publicSpaceId,
+          displayName: result.author.spaceDisplayName,
+        }
+        : null,
+    }
   }
 
   async findOneEnriched(id: number): Promise<QuizTemplateEnrichedResponseDto> {

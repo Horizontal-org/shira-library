@@ -9,6 +9,7 @@ import { questionLangTags } from "../../db/schema/question-lang-tags"
 import { tags } from "../../db/schema/tags"
 import { langTags } from "../../db/schema/lang-tags"
 import { explanationTemplates } from "../../db/schema/explanation-templates"
+import { authors } from "../../db/schema/authors"
 import * as schema from "../../db/schema"
 import { QuestionTemplateResponseDto, QuestionTemplateWithRelationsResponseDto } from "../dto/question-template-response.dto"
 
@@ -19,13 +20,38 @@ export class QuestionTemplatesService {
   ) { }
 
   async findAll(): Promise<QuestionTemplateResponseDto[]> {
-    return this.db.select().from(questionTemplates)
+    const rows = await this.db
+      .select({ question: questionTemplates, author: authors })
+      .from(questionTemplates)
+      .leftJoin(authors, eq(questionTemplates.authorId, authors.id))
+
+    return rows.map(({ question, author }) => ({
+      ...question,
+      author: author
+        ? {
+          publicSpaceId: author.publicSpaceId,
+          displayName: author.spaceDisplayName,
+        }
+        : null,
+    }))
   }
 
   async findOne(id: number): Promise<QuestionTemplateResponseDto> {
-    const [result] = await this.db.select().from(questionTemplates).where(eq(questionTemplates.id, id))
+    const [result] = await this.db
+      .select({ question: questionTemplates, author: authors })
+      .from(questionTemplates)
+      .leftJoin(authors, eq(questionTemplates.authorId, authors.id))
+      .where(eq(questionTemplates.id, id))
     if (!result) throw new NotFoundQuestionTemplateException()
-    return result
+    return {
+      ...result.question,
+      author: result.author
+        ? {
+          publicSpaceId: result.author.publicSpaceId,
+          displayName: result.author.spaceDisplayName,
+        }
+        : null,
+    }
   }
 
   async findOneEnriched(id: number): Promise<QuestionTemplateWithRelationsResponseDto> {

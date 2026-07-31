@@ -7,6 +7,7 @@ import { quizLangTags } from "../../db/schema/quiz-lang-tags"
 import { quizTags } from "../../db/schema/quiz-tags"
 import { langTags } from "../../db/schema/lang-tags"
 import { tags } from "../../db/schema/tags"
+import { authors } from "../../db/schema/authors"
 import * as schema from "../../db/schema"
 import { ListQuizTemplatesQuery } from "../dto/list-quiz-templates.dto"
 import { PaginatedQuizTemplatesResponseDto } from "../dto/quiz-template-response.dto"
@@ -23,8 +24,9 @@ export class ListQuizTemplatesService {
 
     const [quizzes, [{ total }]] = await Promise.all([
       this.db
-        .select()
+        .select({ quiz: quizTemplates, author: authors })
         .from(quizTemplates)
+        .leftJoin(authors, eq(quizTemplates.authorId, authors.id))
         .where(where)
         .orderBy(...orderBy)
         .limit(limit)
@@ -38,7 +40,7 @@ export class ListQuizTemplatesService {
 
     if (quizzes.length === 0) return { data: [], total: Number(total), page, limit }
 
-    const quizIds = quizzes.map((q) => q.id)
+    const quizIds = quizzes.map(({ quiz }) => quiz.id)
 
     const [langTagRows, tagRows] = await Promise.all([
       this.db
@@ -63,8 +65,14 @@ export class ListQuizTemplatesService {
         .where(inArray(quizTags.quizId, quizIds)),
     ])
 
-    const data = quizzes.map((quiz) => ({
+    const data = quizzes.map(({ quiz, author }) => ({
       ...quiz,
+      author: author
+        ? {
+          publicSpaceId: author.publicSpaceId,
+          displayName: author.spaceDisplayName,
+        }
+        : null,
       langTags: langTagRows
         .filter((r) => r.quizId === quiz.id)
         .map(({ quizId: _, ...lt }) => lt),
