@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "b56f3034-145e-476f-89f9-1b1837f280bb",
+  "id": "28246ec3-e7b4-4d98-81d2-e5ad860b0dea",
   "prevId": "5a2c9264-b407-462d-b279-6c783d704a91",
   "tables": {
     "authors": {
@@ -212,7 +212,7 @@
           "name": "resource_id",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "author_id": {
@@ -384,73 +384,6 @@
           "columns": [
             "question_id",
             "tag_id"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "checkConstraint": {}
-    },
-    "question_template_images": {
-      "name": "question_template_images",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
-        },
-        "question_id": {
-          "name": "question_id",
-          "type": "bigint unsigned",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "relative_path": {
-          "name": "relative_path",
-          "type": "varchar(512)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "CURRENT_TIMESTAMP"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "question_template_images_question_id_question_templates_id_fk": {
-          "name": "question_template_images_question_id_question_templates_id_fk",
-          "tableFrom": "question_template_images",
-          "tableTo": "question_templates",
-          "columnsFrom": [
-            "question_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "question_template_images_id": {
-          "name": "question_template_images_id",
-          "columns": [
-            "id"
           ]
         }
       },

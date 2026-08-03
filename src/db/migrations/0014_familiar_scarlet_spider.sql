@@ -1,3 +1,13 @@
+CREATE TABLE `images` (
+	`id` serial AUTO_INCREMENT NOT NULL,
+	`hash` varchar(64) NOT NULL,
+	`relative_path` varchar(512) NOT NULL,
+	`name` varchar(255) NOT NULL,
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	CONSTRAINT `images_id` PRIMARY KEY(`id`),
+	CONSTRAINT `images_hash_unique` UNIQUE(`hash`)
+);
+--> statement-breakpoint
 CREATE TABLE `question_template_images` (
 	`question_id` bigint unsigned NOT NULL,
 	`image_id` bigint unsigned NOT NULL,

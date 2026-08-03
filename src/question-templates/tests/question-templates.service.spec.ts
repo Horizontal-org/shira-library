@@ -36,6 +36,7 @@ describe("QuestionTemplatesService", () => {
   const mockDb = {
     select: jest.fn().mockReturnThis(),
     from: jest.fn().mockReturnThis(),
+    leftJoin: jest.fn().mockReturnThis(),
     where: jest.fn().mockReturnThis(),
     orderBy: jest.fn().mockReturnThis(),
     insert: jest.fn().mockReturnThis(),
@@ -67,7 +68,7 @@ describe("QuestionTemplatesService", () => {
 
   describe("findOne with requireApproved", () => {
     it("throws not found when the template is not approved", async () => {
-      mockDb.where.mockResolvedValueOnce([{ id: 1, approved: false }])
+      mockDb.where.mockResolvedValueOnce([{ question: { id: 1, approved: false }, author: null }])
 
       await expect(
         service.findOne(1, { requireApproved: true }),
@@ -75,17 +76,17 @@ describe("QuestionTemplatesService", () => {
     })
 
     it("returns the template when it is approved", async () => {
-      mockDb.where.mockResolvedValueOnce([{ id: 1, approved: true }])
+      mockDb.where.mockResolvedValueOnce([{ question: { id: 1, approved: true }, author: null }])
 
       await expect(
         service.findOne(1, { requireApproved: true }),
-      ).resolves.toEqual({ id: 1, approved: true })
+      ).resolves.toEqual({ id: 1, approved: true, author: null })
     })
 
     it("does not require approval when the flag is omitted", async () => {
-      mockDb.where.mockResolvedValueOnce([{ id: 1, approved: false }])
+      mockDb.where.mockResolvedValueOnce([{ question: { id: 1, approved: false }, author: null }])
 
-      await expect(service.findOne(1)).resolves.toEqual({ id: 1, approved: false })
+      await expect(service.findOne(1)).resolves.toEqual({ id: 1, approved: false, author: null })
     })
   })
 })

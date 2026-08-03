@@ -40,6 +40,7 @@ export class PublishQuizTemplatesService {
 
     const [result] = await this.db.insert(quizTemplates).values({
       title: data.title.trim(),
+      description: data.description.trim(),
       authorId: author.id,
       approved: false,
     })

@@ -81,6 +81,7 @@ describe("PublishQuizTemplatesService", () => {
 
     await service.publish({
       title: "Phishing basics",
+      description: "A quiz about phishing basics",
       author,
       questions: [
         {
@@ -109,6 +110,7 @@ describe("PublishQuizTemplatesService", () => {
 
     await service.publish({
       title: "Phishing basics",
+      description: "A quiz about phishing basics",
       author,
       questions: [
         {

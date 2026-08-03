@@ -43,6 +43,10 @@ export class PublishQuizTemplateDto {
   @IsNotEmpty()
   title: string
 
+  @IsString()
+  @IsNotEmpty()
+  description: string
+
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })

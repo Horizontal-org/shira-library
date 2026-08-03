@@ -1,7 +1,6 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from "@nestjs/common"
 import {
   ApiBearerAuth,
-  ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -101,6 +100,7 @@ export class QuestionTemplatesController {
     @Body() body: UpdateQuestionTemplateDto,
   ) {
     return this.service.update(id, {
+      ...(body.description !== undefined && { description: body.description }),
       ...(body.highlighted !== undefined && { highlighted: body.highlighted }),
       ...(body.tagIds !== undefined && { tagIds: body.tagIds }),
       ...(body.langTagIds !== undefined && { langTagIds: body.langTagIds }),

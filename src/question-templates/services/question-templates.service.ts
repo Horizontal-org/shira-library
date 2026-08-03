@@ -9,6 +9,7 @@ import { questionLangTags } from "../../db/schema/question-lang-tags"
 import { tags } from "../../db/schema/tags"
 import { langTags } from "../../db/schema/lang-tags"
 import { explanationTemplates } from "../../db/schema/explanation-templates"
+import { authors } from "../../db/schema/authors"
 import * as schema from "../../db/schema"
 import { QuestionTemplateResponseDto, QuestionTemplateWithRelationsResponseDto } from "../dto/question-template-response.dto"
 import { ImagesService } from "../../images/services/images.service"
@@ -21,14 +22,39 @@ export class QuestionTemplatesService {
   ) { }
 
   async findAll(): Promise<QuestionTemplateResponseDto[]> {
-    return this.db.select().from(questionTemplates)
+    const rows = await this.db
+      .select({ question: questionTemplates, author: authors })
+      .from(questionTemplates)
+      .leftJoin(authors, eq(questionTemplates.authorId, authors.id))
+
+    return rows.map(({ question, author }) => ({
+      ...question,
+      author: author
+        ? {
+          publicSpaceId: author.publicSpaceId,
+          displayName: author.spaceDisplayName,
+        }
+        : null,
+    }))
   }
 
   async findOne(id: number, opts?: { requireApproved?: boolean }): Promise<QuestionTemplateResponseDto> {
-    const [result] = await this.db.select().from(questionTemplates).where(eq(questionTemplates.id, id))
+    const [result] = await this.db
+      .select({ question: questionTemplates, author: authors })
+      .from(questionTemplates)
+      .leftJoin(authors, eq(questionTemplates.authorId, authors.id))
+      .where(eq(questionTemplates.id, id))
     if (!result) throw new NotFoundQuestionTemplateException()
-    if (opts?.requireApproved && !result.approved) throw new NotFoundQuestionTemplateException()
-    return result
+    if (opts?.requireApproved && !result.question.approved) throw new NotFoundQuestionTemplateException()
+    return {
+      ...result.question,
+      author: result.author
+        ? {
+          publicSpaceId: result.author.publicSpaceId,
+          displayName: result.author.spaceDisplayName,
+        }
+        : null,
+    }
   }
 
   async findOneEnriched(id: number, opts?: { requireApproved?: boolean }): Promise<QuestionTemplateWithRelationsResponseDto> {
@@ -72,6 +98,7 @@ export class QuestionTemplatesService {
   async update(
     id: number,
     data: {
+      description?: string
       highlighted?: boolean
       isPhishing?: boolean
       isDemo?: boolean

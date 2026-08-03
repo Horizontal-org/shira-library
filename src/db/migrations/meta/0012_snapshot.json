@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "806c578d-beeb-42d3-bd31-8ba333955fdf",
-  "prevId": "63cac6cc-0ba9-424d-91bb-8f3dcd73a75e",
+  "id": "3949b4f0-08cd-435f-a9b7-dd1d77b6af32",
+  "prevId": "3cf8f888-a879-4c1d-aee2-81c4532ac892",
   "tables": {
     "authors": {
       "name": "authors",
@@ -145,66 +145,6 @@
       "uniqueConstraints": {},
       "checkConstraint": {}
     },
-    "images": {
-      "name": "images",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
-        },
-        "hash": {
-          "name": "hash",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "relative_path": {
-          "name": "relative_path",
-          "type": "varchar(512)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "CURRENT_TIMESTAMP"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "images_id": {
-          "name": "images_id",
-          "columns": [
-            "id"
-          ]
-        }
-      },
-      "uniqueConstraints": {
-        "images_hash_unique": {
-          "name": "images_hash_unique",
-          "columns": [
-            "hash"
-          ]
-        }
-      },
-      "checkConstraint": {}
-    },
     "lang_tags": {
       "name": "lang_tags",
       "columns": {
@@ -265,14 +205,14 @@
           "name": "resource_type",
           "type": "varchar(50)",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "resource_id": {
           "name": "resource_id",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "author_id": {
@@ -444,65 +384,6 @@
           "columns": [
             "question_id",
             "tag_id"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "checkConstraint": {}
-    },
-    "question_template_images": {
-      "name": "question_template_images",
-      "columns": {
-        "question_id": {
-          "name": "question_id",
-          "type": "bigint unsigned",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "image_id": {
-          "name": "image_id",
-          "type": "bigint unsigned",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "question_template_images_question_id_question_templates_id_fk": {
-          "name": "question_template_images_question_id_question_templates_id_fk",
-          "tableFrom": "question_template_images",
-          "tableTo": "question_templates",
-          "columnsFrom": [
-            "question_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "question_template_images_image_id_images_id_fk": {
-          "name": "question_template_images_image_id_images_id_fk",
-          "tableFrom": "question_template_images",
-          "tableTo": "images",
-          "columnsFrom": [
-            "image_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "question_template_images_question_id_image_id_pk": {
-          "name": "question_template_images_question_id_image_id_pk",
-          "columns": [
-            "question_id",
-            "image_id"
           ]
         }
       },
@@ -818,6 +699,13 @@
         "title": {
           "name": "title",
           "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false

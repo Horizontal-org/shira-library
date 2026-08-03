@@ -19,12 +19,23 @@ export class QuestionTemplateLangTagResponseDto {
   code: string
 }
 
+export class QuestionTemplateAuthorResponseDto {
+  @ApiProperty({ example: "spc_3HFaYCJHtpukPwNYuVXSDXqRwQU" })
+  publicSpaceId: string
+
+  @ApiProperty({ example: "Green Security" })
+  displayName: string
+}
+
 export class QuestionTemplateResponseDto {
   @ApiProperty({ example: 25 })
   id: number
 
   @ApiProperty({ example: "Suspicious SMS" })
   name: string
+
+  @ApiProperty({ example: "Suspicious text message impersonating a bank.", nullable: true })
+  description: string | null
 
   @ApiProperty({ example: false })
   highlighted: boolean
@@ -43,6 +54,9 @@ export class QuestionTemplateResponseDto {
 
   @ApiProperty({ example: false })
   isDemo: boolean
+
+  @ApiProperty({ type: QuestionTemplateAuthorResponseDto, nullable: true })
+  author: QuestionTemplateAuthorResponseDto | null
 
   @ApiProperty({ example: "2026-06-04T12:00:00.000Z", format: "date-time" })
   createdAt: Date

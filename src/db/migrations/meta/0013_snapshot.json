@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "3cf8f888-a879-4c1d-aee2-81c4532ac892",
-  "prevId": "28246ec3-e7b4-4d98-81d2-e5ad860b0dea",
+  "id": "3961c5d4-d47a-4814-8864-8417bbb5ee02",
+  "prevId": "3949b4f0-08cd-435f-a9b7-dd1d77b6af32",
   "tables": {
     "authors": {
       "name": "authors",
@@ -407,6 +407,13 @@
           "notNull": true,
           "autoincrement": false
         },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "highlighted": {
           "name": "highlighted",
           "type": "boolean",
@@ -699,6 +706,13 @@
         "title": {
           "name": "title",
           "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false

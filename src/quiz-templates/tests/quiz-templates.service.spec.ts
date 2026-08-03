@@ -21,6 +21,7 @@ describe("QuizTemplatesService", () => {
     select: jest.fn().mockReturnThis(),
     from: jest.fn().mockReturnThis(),
     innerJoin: jest.fn().mockReturnThis(),
+    leftJoin: jest.fn().mockReturnThis(),
     where: jest.fn().mockResolvedValue([]),
     insert: jest.fn().mockReturnThis(),
     values: jest.fn().mockResolvedValue([{ insertId: 1 }]),
@@ -36,6 +37,7 @@ describe("QuizTemplatesService", () => {
     mockDb.select.mockReturnThis()
     mockDb.from.mockReturnThis()
     mockDb.innerJoin.mockReturnThis()
+    mockDb.leftJoin.mockReturnThis()
     mockDb.where.mockResolvedValue([])
     mockDb.insert.mockReturnThis()
     mockDb.values.mockResolvedValue([{ insertId: 1 }])
@@ -62,10 +64,10 @@ describe("QuizTemplatesService", () => {
   describe("findOne", () => {
     it("should return the quiz template when found", async () => {
       const quiz = { id: 1, title: "Test Quiz", createdAt: new Date() }
-      mockDb.where.mockResolvedValueOnce([quiz])
+      mockDb.where.mockResolvedValueOnce([{ quiz, author: null }])
 
       const result = await service.findOne(1)
-      expect(result).toEqual(quiz)
+      expect(result).toEqual({ ...quiz, author: null })
     })
 
     it("should throw NotFoundQuizTemplateException when not found", async () => {
@@ -75,7 +77,7 @@ describe("QuizTemplatesService", () => {
     })
 
     it("should throw NotFoundQuizTemplateException when not approved and requireApproved is set", async () => {
-      mockDb.where.mockResolvedValueOnce([{ id: 1, approved: false }])
+      mockDb.where.mockResolvedValueOnce([{ quiz: { id: 1, approved: false }, author: null }])
 
       await expect(
         service.findOne(1, { requireApproved: true }),
@@ -84,16 +86,16 @@ describe("QuizTemplatesService", () => {
 
     it("should return the quiz template when approved and requireApproved is set", async () => {
       const quiz = { id: 1, approved: true }
-      mockDb.where.mockResolvedValueOnce([quiz])
+      mockDb.where.mockResolvedValueOnce([{ quiz, author: null }])
 
-      await expect(service.findOne(1, { requireApproved: true })).resolves.toEqual(quiz)
+      await expect(service.findOne(1, { requireApproved: true })).resolves.toEqual({ ...quiz, author: null })
     })
 
     it("should not require approval when the flag is omitted", async () => {
       const quiz = { id: 1, approved: false }
-      mockDb.where.mockResolvedValueOnce([quiz])
+      mockDb.where.mockResolvedValueOnce([{ quiz, author: null }])
 
-      await expect(service.findOne(1)).resolves.toEqual(quiz)
+      await expect(service.findOne(1)).resolves.toEqual({ ...quiz, author: null })
     })
   })
 
@@ -103,11 +105,15 @@ describe("QuizTemplatesService", () => {
       mockDb.values
         .mockResolvedValueOnce([{ insertId: 1 }])
         .mockResolvedValueOnce(undefined)
-      mockDb.where.mockResolvedValueOnce([quiz])
+      mockDb.where.mockResolvedValueOnce([{ quiz, author: null }])
 
-      const result = await service.create({ title: "New Quiz", questionIds: [10, 20] })
+      const result = await service.create({
+        title: "New Quiz",
+        description: "A new quiz",
+        questionIds: [10, 20],
+      })
 
-      expect(result).toEqual(quiz)
+      expect(result).toEqual({ ...quiz, author: null })
       expect(mockDb.insert).toHaveBeenCalledTimes(2)
     })
   })
@@ -115,7 +121,7 @@ describe("QuizTemplatesService", () => {
   describe("findQuestions", () => {
     it("attaches images grouped per question with presigned urls", async () => {
       mockDb.where
-        .mockResolvedValueOnce([{ id: 1, title: "Quiz", approved: true }]) // findOne
+        .mockResolvedValueOnce([{ quiz: { id: 1, title: "Quiz", approved: true }, author: null }]) // findOne
         .mockResolvedValueOnce([
           { quizQuestionId: 1, questionId: 10, questionName: "Q1", isPhishing: true, defaultApp: "Gmail", appType: "email", content: "<p>c1</p>" },
           { quizQuestionId: 2, questionId: 20, questionName: "Q2", isPhishing: false, defaultApp: null, appType: "sms", content: "<p>c2</p>" },
@@ -142,7 +148,7 @@ describe("QuizTemplatesService", () => {
 
     it("returns an empty images array when a question has no images", async () => {
       mockDb.where
-        .mockResolvedValueOnce([{ id: 1, title: "Quiz", approved: true }])
+        .mockResolvedValueOnce([{ quiz: { id: 1, title: "Quiz", approved: true }, author: null }])
         .mockResolvedValueOnce([
           { quizQuestionId: 1, questionId: 10, questionName: "Q1", isPhishing: true, defaultApp: "Gmail", appType: "email", content: "<p>c1</p>" },
         ])

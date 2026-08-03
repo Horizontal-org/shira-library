@@ -9,6 +9,10 @@ export class PublishQuestionTemplateDto {
   @MaxLength(255)
   name: string
 
+  @IsOptional()
+  @IsString()
+  description?: string
+
   @IsString()
   @IsNotEmpty()
   content: string

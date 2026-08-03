@@ -5,6 +5,7 @@ import { authors } from "./authors";
 export const questionTemplates = mysqlTable("question_templates", {
   id: serial().primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
   highlighted: boolean("highlighted").notNull().default(false),
   isPhishing: boolean("is_phishing").notNull(),
   content: text("content").notNull(),

@@ -1,0 +1,1 @@
+ALTER TABLE `quiz_templates` ADD `description` text NOT NULL;
