@@ -122,4 +122,32 @@ export class QuizTemplatesController {
     await this.service.remove(id)
     return { deleted: true }
   }
+
+  @Get("super")
+  @UseGuards(RolesGuard)
+  @Roles("super-admin")
+  @ApiOperation({ summary: "List quiz templates (super admin)" })
+  async findAllSuper(@Query() query: ListQuizTemplatesDto) {
+    return this.listService.findAll({
+      search: query.search,
+      filters: {
+        langTags: query.langTags?.split(',').map((s) => s.trim()).filter(Boolean),
+        tags: query.tags?.split(',').map((s) => s.trim()).filter(Boolean),
+      },
+      sortOrder: query.sortOrder ?? 'desc',
+      sortBy: query.sortBy ?? 'createdAt',
+      page: Math.max(1, parseInt(query.page ?? '1', 10) || 1),
+      limit: Math.min(100, Math.max(1, parseInt(query.limit ?? '20', 10) || 20)),
+    })
+  }
+
+  @Get("super/:id/questions")
+  @UseGuards(RolesGuard)
+  @Roles("super-admin")
+  @ApiOperation({ summary: "List questions for a quiz template (super admin)" })
+  @ApiOkResponse({ type: [QuizQuestionDto] })
+  async findQuestionsSuper(@Param("id", ParseIntPipe) id: number) {
+    return this.service.findQuestions(id)
+  }
+
 }
