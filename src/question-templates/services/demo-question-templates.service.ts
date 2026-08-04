@@ -44,6 +44,7 @@ export class DemoQuestionTemplatesService {
         defaultApp: item.default_app,
         isPhishing: item.is_phishing,
         isDemo: true,
+        approved: true,
         explanations: item.explanations?.map((exp) => ({
           position: exp.position,
           positionIndex: String(exp.index),
