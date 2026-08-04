@@ -11,6 +11,7 @@ import { LangTagsModule } from "./lang-tags/lang-tags.module";
 import { ConsoleModule } from "nestjs-console";
 import { TagsModule } from "./tags/tags.module";
 import { AuthorsModule } from "./authors/authors.module";
+import { ImagesModule } from "./images/images.module";
 import { LoggerModule } from "nestjs-pino";
 import pretty from "pino-pretty";
 
@@ -45,7 +46,8 @@ import pretty from "pino-pretty";
     QuestionTemplatesModule,
     LangTagsModule,
     TagsModule,
-    AuthorsModule
+    AuthorsModule,
+    ImagesModule,
   ],
   providers: [
     {

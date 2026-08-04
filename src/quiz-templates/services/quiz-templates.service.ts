@@ -13,6 +13,7 @@ import { questionTemplates } from "../../db/schema/question-templates"
 import { questionLangTags } from "../../db/schema/question-lang-tags"
 import { langTags } from "../../db/schema/lang-tags"
 import { explanationTemplates } from "../../db/schema/explanation-templates"
+import { ImagesService } from "../../images/services/images.service"
 import { authors } from "../../db/schema/authors"
 
 import {
@@ -28,15 +29,17 @@ import {
 export class QuizTemplatesService {
   constructor(
     @Inject(DRIZZLE) private readonly db: MySql2Database<typeof schema>,
+    private readonly imagesService: ImagesService,
   ) { }
 
-  async findOne(id: number): Promise<QuizTemplateResponseDto> {
+  async findOne(id: number, opts?: { requireApproved?: boolean }): Promise<QuizTemplateResponseDto> {
     const [result] = await this.db
       .select({ quiz: quizTemplates, author: authors })
       .from(quizTemplates)
       .leftJoin(authors, eq(quizTemplates.authorId, authors.id))
       .where(eq(quizTemplates.id, id))
     if (!result) throw new NotFoundQuizTemplateException()
+    if (opts?.requireApproved && !result.quiz.approved) throw new NotFoundQuizTemplateException()
     return {
       ...result.quiz,
       author: result.author
@@ -48,8 +51,8 @@ export class QuizTemplatesService {
     }
   }
 
-  async findOneEnriched(id: number): Promise<QuizTemplateEnrichedResponseDto> {
-    const quiz = await this.findOne(id)
+  async findOneEnriched(id: number, opts?: { requireApproved?: boolean }): Promise<QuizTemplateEnrichedResponseDto> {
+    const quiz = await this.findOne(id, opts)
 
     const [langTagRows, tagRows] = await Promise.all([
       this.db
@@ -67,8 +70,8 @@ export class QuizTemplatesService {
     return { ...quiz, langTags: langTagRows, tags: tagRows }
   }
 
-  async findQuestions(id: number): Promise<QuizQuestionDto[]> {
-    await this.findOne(id)
+  async findQuestions(id: number, opts?: { requireApproved?: boolean }): Promise<QuizQuestionDto[]> {
+    await this.findOne(id, opts)
 
     const questionRows = await this.db
       .select({
@@ -90,7 +93,7 @@ export class QuizTemplatesService {
 
     const questionIds = questionRows.map((row) => row.questionId)
 
-    const [languageRows, explanationRows] = await Promise.all([
+    const [languageRows, explanationRows, imageRows] = await Promise.all([
       this.db
         .select({
           questionId: questionLangTags.questionId,
@@ -109,34 +112,49 @@ export class QuizTemplatesService {
         })
         .from(explanationTemplates)
         .where(inArray(explanationTemplates.questionId, questionIds)),
+
+      this.imagesService.findByQuestionIds(questionIds),
     ])
 
-    return questionRows
-      .sort((a, b) => (a.quizQuestionId ?? 0) - (b.quizQuestionId ?? 0))
-      .map((row) => {
-        const languages = languageRows.filter((languageRow) => languageRow.questionId === row.questionId)
-        const explanations: QuizQuestionExplanationDto[] = explanationRows
-          .filter((explanationRow) => explanationRow.questionId === row.questionId)
-          .sort((a, b) => String(a.index).localeCompare(String(b.index), undefined, { numeric: true }))
-          .map((explanationRow) => ({
-            position: explanationRow.position,
-            text: explanationRow.text,
-            index: explanationRow.index,
-          }))
+    return Promise.all(
+      questionRows
+        .sort((a, b) => (a.quizQuestionId ?? 0) - (b.quizQuestionId ?? 0))
+        .map(async (row) => {
+          const languages = languageRows.filter((languageRow) => languageRow.questionId === row.questionId)
+          const explanations: QuizQuestionExplanationDto[] = explanationRows
+            .filter((explanationRow) => explanationRow.questionId === row.questionId)
+            .sort((a, b) => String(a.index).localeCompare(String(b.index), undefined, { numeric: true }))
+            .map((explanationRow) => ({
+              position: explanationRow.position,
+              text: explanationRow.text,
+              index: explanationRow.index,
+            }))
 
-        const question: QuizQuestionDto = {
-          questionId: row.questionId,
-          questionName: row.questionName,
-          isPhishing: row.isPhishing,
-          language: languages[0]?.language ?? null,
-          appName: row.defaultApp ?? null,
-          appType: row.appType,
-          content: row.content,
-          explanations,
-        }
+          const images = await Promise.all(
+            imageRows
+              .filter((imageRow) => imageRow.questionId === row.questionId)
+              .map(async (image) => ({
+                id: image.id,
+                name: image.name,
+                url: await this.imagesService.getPresignedUrl(image.relativePath),
+              })),
+          )
 
-        return question
-      })
+          const question: QuizQuestionDto = {
+            questionId: row.questionId,
+            questionName: row.questionName,
+            isPhishing: row.isPhishing,
+            language: languages[0]?.language ?? null,
+            appName: row.defaultApp ?? null,
+            appType: row.appType,
+            content: row.content,
+            explanations,
+            images,
+          }
+
+          return question
+        }),
+    )
   }
 
   async create(data: {

@@ -12,11 +12,13 @@ import { explanationTemplates } from "../../db/schema/explanation-templates"
 import { authors } from "../../db/schema/authors"
 import * as schema from "../../db/schema"
 import { QuestionTemplateResponseDto, QuestionTemplateWithRelationsResponseDto } from "../dto/question-template-response.dto"
+import { ImagesService } from "../../images/services/images.service"
 
 @Injectable()
 export class QuestionTemplatesService {
   constructor(
     @Inject(DRIZZLE) private readonly db: MySql2Database<typeof schema>,
+    private readonly imagesService: ImagesService,
   ) { }
 
   async findAll(): Promise<QuestionTemplateResponseDto[]> {
@@ -36,13 +38,14 @@ export class QuestionTemplatesService {
     }))
   }
 
-  async findOne(id: number): Promise<QuestionTemplateResponseDto> {
+  async findOne(id: number, opts?: { requireApproved?: boolean }): Promise<QuestionTemplateResponseDto> {
     const [result] = await this.db
       .select({ question: questionTemplates, author: authors })
       .from(questionTemplates)
       .leftJoin(authors, eq(questionTemplates.authorId, authors.id))
       .where(eq(questionTemplates.id, id))
     if (!result) throw new NotFoundQuestionTemplateException()
+    if (opts?.requireApproved && !result.question.approved) throw new NotFoundQuestionTemplateException()
     return {
       ...result.question,
       author: result.author
@@ -54,10 +57,10 @@ export class QuestionTemplatesService {
     }
   }
 
-  async findOneEnriched(id: number): Promise<QuestionTemplateWithRelationsResponseDto> {
-    const question = await this.findOne(id)
+  async findOneEnriched(id: number, opts?: { requireApproved?: boolean }): Promise<QuestionTemplateWithRelationsResponseDto> {
+    const question = await this.findOne(id, opts)
 
-    const [langTagRows, tagRows, explanationRows] = await Promise.all([
+    const [langTagRows, tagRows, explanationRows, imageRows] = await Promise.all([
       this.db
         .select({ id: langTags.id, name: langTags.name, code: langTags.code })
         .from(questionLangTags)
@@ -78,9 +81,18 @@ export class QuestionTemplatesService {
         })
         .from(explanationTemplates)
         .where(eq(explanationTemplates.questionId, id)),
+      this.imagesService.findByQuestionId(id),
     ])
 
-    return { ...question, langTags: langTagRows, tags: tagRows, explanations: explanationRows }
+    const images = await Promise.all(
+      imageRows.map(async (image) => ({
+        id: image.id,
+        name: image.name,
+        url: await this.imagesService.getPresignedUrl(image.relativePath),
+      })),
+    )
+
+    return { ...question, langTags: langTagRows, tags: tagRows, explanations: explanationRows, images }
   }
 
   async update(

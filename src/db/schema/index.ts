@@ -2,6 +2,8 @@ export { quizTemplates } from "./quiz-templates";
 export { questionTemplates } from "./question-templates";
 export { authors } from "./authors";
 export { explanationTemplates } from "./explanation-templates";
+export { images } from "./images";
+export { questionTemplateImages } from "./question-template-images";
 export { tags } from "./tags";
 export { langTags } from "./lang-tags";
 export { publishEvents } from "./publish-events";

@@ -1,4 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger"
+import { ImageResponseDto } from "@/question-templates/dto/question-template-response.dto"
 
 export class QuizQuestionExplanationDto {
   @ApiProperty({ example: "top" })
@@ -35,4 +36,7 @@ export class QuizQuestionDto {
 
   @ApiProperty({ type: [QuizQuestionExplanationDto] })
   explanations: QuizQuestionExplanationDto[]
+
+  @ApiProperty({ type: [ImageResponseDto] })
+  images: ImageResponseDto[]
 }

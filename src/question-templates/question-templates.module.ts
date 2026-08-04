@@ -10,9 +10,10 @@ import { CreateQuestionTemplatesService } from "./services/create.question-templ
 import { TagsModule } from "../tags/tags.module"
 import { LangTagsModule } from "../lang-tags/lang-tags.module"
 import { PublishQuestionTemplatesService } from "./services/publish-question-templates.service"
+import { ImagesModule } from "../images/images.module"
 
 @Module({
-  imports: [AuthorsModule, TagsModule, LangTagsModule],
+  imports: [AuthorsModule, TagsModule, LangTagsModule, ImagesModule],
   controllers: [DemoQuestionTemplatesController, QuestionTemplatesController],
   providers: [
     QuestionTemplatesService,

@@ -31,6 +31,11 @@ class QuizQuestionTemplateDto {
   @ValidateNested({ each: true })
   @Type(() => ExplanationDto)
   explanations?: ExplanationDto[]
+
+  @IsOptional()
+  @IsArray()
+  @IsInt({ each: true })
+  templateImageIds?: number[]
 }
 
 export class PublishQuizTemplateDto {

@@ -79,6 +79,17 @@ export class ExplanationTemplateResponseDto {
   createdAt: Date
 }
 
+export class ImageResponseDto {
+  @ApiProperty({ example: 12 })
+  id: number
+
+  @ApiProperty({ example: "screenshot.png" })
+  name: string
+
+  @ApiProperty({ example: "https://library-images.example.com/question-template-images/..." })
+  url: string
+}
+
 export class QuestionTemplateWithRelationsResponseDto extends QuestionTemplateResponseDto {
   @ApiProperty({ type: [QuestionTemplateLangTagResponseDto] })
   langTags: QuestionTemplateLangTagResponseDto[]
@@ -88,6 +99,9 @@ export class QuestionTemplateWithRelationsResponseDto extends QuestionTemplateRe
 
   @ApiProperty({ type: [ExplanationTemplateResponseDto] })
   explanations: ExplanationTemplateResponseDto[]
+
+  @ApiProperty({ type: [ImageResponseDto] })
+  images: ImageResponseDto[]
 }
 
 export class PaginatedQuestionTemplatesResponseDto {

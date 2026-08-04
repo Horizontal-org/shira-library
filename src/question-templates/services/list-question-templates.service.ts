@@ -12,10 +12,14 @@ import { authors } from "../../db/schema/authors"
 import * as schema from "../../db/schema"
 import { ListQuestionTemplatesQuery } from "../dto/list-question-templates.dto"
 import { PaginatedQuestionTemplatesResponseDto } from "../dto/question-template-response.dto"
+import { ImagesService } from "../../images/services/images.service"
 
 @Injectable()
 export class ListQuestionTemplatesService {
-  constructor(@Inject(DRIZZLE) private readonly db: MySql2Database<typeof schema>) { }
+  constructor(
+    @Inject(DRIZZLE) private readonly db: MySql2Database<typeof schema>,
+    private readonly imagesService: ImagesService,
+  ) { }
 
   async findAll(query: ListQuestionTemplatesQuery): Promise<PaginatedQuestionTemplatesResponseDto> {
     const conditions = this.buildConditions(query)
@@ -43,7 +47,7 @@ export class ListQuestionTemplatesService {
 
     const questionIds = questions.map(({ question }) => question.id)
 
-    const [langTagRows, tagRows, explanationRows] = await Promise.all([
+    const [langTagRows, tagRows, explanationRows, imageRows] = await Promise.all([
       this.db
         .select({
           questionId: questionLangTags.questionId,
@@ -76,9 +80,11 @@ export class ListQuestionTemplatesService {
         })
         .from(explanationTemplates)
         .where(inArray(explanationTemplates.questionId, questionIds)),
+
+      this.imagesService.findByQuestionIds(questionIds),
     ])
 
-    const data = questions.map(({ question, author }) => ({
+    const data = await Promise.all(questions.map(async ({ question, author }) => ({
       ...question,
       author: author
         ? {
@@ -95,7 +101,16 @@ export class ListQuestionTemplatesService {
       explanations: explanationRows
         .filter((r) => r.questionId === question.id)
         .map(({ questionId: _, ...e }) => e),
-    }))
+      images: await Promise.all(
+        imageRows
+          .filter((r) => r.questionId === question.id)
+          .map(async (image) => ({
+            id: image.id,
+            name: image.name,
+            url: await this.imagesService.getPresignedUrl(image.relativePath),
+          })),
+      ),
+    })))
 
     return { data, total: Number(total), page, limit }
   }
