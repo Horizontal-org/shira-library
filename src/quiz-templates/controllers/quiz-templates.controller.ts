@@ -66,6 +66,7 @@ export class QuizTemplatesController {
     return results;
   }
 
+
   @Get(":id")
   @Public()
   @ApiOperation({ summary: "Get a quiz template by id" })
@@ -93,6 +94,34 @@ export class QuizTemplatesController {
 
   //super-admin routes
 
+  @Get("super")
+  @UseGuards(RolesGuard)
+  @Roles("super-admin")
+  @ApiOperation({ summary: "List quiz templates" })
+  async findAllSuper(@Query() query: ListQuizTemplatesDto) {
+    return this.listService.findAll({
+      search: query.search,
+      filters: {
+        langTags: query.langTags?.split(',').map((s) => s.trim()).filter(Boolean),
+        tags: query.tags?.split(',').map((s) => s.trim()).filter(Boolean),
+      },
+      includeUnapproved: true,
+      sortOrder: query.sortOrder ?? 'desc',
+      sortBy: query.sortBy ?? 'createdAt',
+      page: Math.max(1, parseInt(query.page ?? '1', 10) || 1),
+      limit: Math.min(100, Math.max(1, parseInt(query.limit ?? '20', 10) || 20)),
+    })
+  }
+
+  @Get("super/:id")
+  @UseGuards(RolesGuard)
+  @Roles("super-admin")
+  @ApiOperation({ summary: "Get a quiz template for superadmin review" })
+  @ApiOkResponse({ type: QuizTemplateEnrichedResponseDto })
+  async findOneSuper(@Param("id", ParseIntPipe) id: number) {
+    return this.service.findOneEnriched(id)
+  }
+
   @Post()
   @UseGuards(RolesGuard)
   @Roles("super-admin")
@@ -101,6 +130,7 @@ export class QuizTemplatesController {
   async create(@Body() body: CreateQuizTemplateDto) {
     return this.service.create(body)
   }
+
   @Patch(":id")
   @UseGuards(RolesGuard)
   @Roles("super-admin")
@@ -123,28 +153,10 @@ export class QuizTemplatesController {
     return { deleted: true }
   }
 
-  @Get("super")
-  @UseGuards(RolesGuard)
-  @Roles("super-admin")
-  @ApiOperation({ summary: "List quiz templates (super admin)" })
-  async findAllSuper(@Query() query: ListQuizTemplatesDto) {
-    return this.listService.findAll({
-      search: query.search,
-      filters: {
-        langTags: query.langTags?.split(',').map((s) => s.trim()).filter(Boolean),
-        tags: query.tags?.split(',').map((s) => s.trim()).filter(Boolean),
-      },
-      sortOrder: query.sortOrder ?? 'desc',
-      sortBy: query.sortBy ?? 'createdAt',
-      page: Math.max(1, parseInt(query.page ?? '1', 10) || 1),
-      limit: Math.min(100, Math.max(1, parseInt(query.limit ?? '20', 10) || 20)),
-    })
-  }
-
   @Get("super/:id/questions")
   @UseGuards(RolesGuard)
   @Roles("super-admin")
-  @ApiOperation({ summary: "List questions for a quiz template (super admin)" })
+  @ApiOperation({ summary: "List questions for a quiz template" })
   @ApiOkResponse({ type: [QuizQuestionDto] })
   async findQuestionsSuper(@Param("id", ParseIntPipe) id: number) {
     return this.service.findQuestions(id)

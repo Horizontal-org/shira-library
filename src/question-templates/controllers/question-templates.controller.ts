@@ -52,7 +52,9 @@ export class QuestionTemplatesController {
     })
   }
 
-  @Get('super')
+  //super-admin routes
+
+  @Get("super")
   @UseGuards(RolesGuard)
   @Roles("super-admin")
   @ApiOperation({ summary: "Superadmin list question templates" })
@@ -67,6 +69,7 @@ export class QuestionTemplatesController {
         appType: query.appType,
         isPhishing,
       },
+      includeUnapproved: true,
       sortBy: query.sortBy ?? 'createdAt',
       sortOrder: query.sortOrder ?? 'desc',
       page: Math.max(1, parseInt(query.page ?? '1', 10) || 1),
@@ -88,6 +91,15 @@ export class QuestionTemplatesController {
   @ApiOperation({ summary: "Publish a question template from a shira space" })
   async publish(@Body() body: PublishQuestionTemplateDto) {
     return this.publishService.publish(body)
+  }
+
+  @Get("super/:id")
+  @UseGuards(RolesGuard)
+  @Roles("super-admin")
+  @ApiOperation({ summary: "Get a question template for superadmin review" })
+  @ApiOkResponse({ type: QuestionTemplateWithRelationsResponseDto })
+  async findOneSuper(@Param("id", ParseIntPipe) id: number) {
+    return this.service.findOneEnriched(id)
   }
 
   @Patch(":id")

@@ -55,6 +55,7 @@ export interface QuestionTemplateFilters {
 export interface ListQuestionTemplatesQuery {
   search?: string
   filters: QuestionTemplateFilters
+  includeUnapproved?: boolean
   sortOrder?: 'asc' | 'desc'
   sortBy?: 'createdAt' | 'title'
   page: number

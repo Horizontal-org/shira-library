@@ -43,6 +43,7 @@ export interface QuizTemplateFilters {
 export interface ListQuizTemplatesQuery {
   search?: string
   filters: QuizTemplateFilters
+  includeUnapproved?: boolean
   sortOrder?: 'asc' | 'desc'
   sortBy?: 'createdAt' | 'title'
   page: number

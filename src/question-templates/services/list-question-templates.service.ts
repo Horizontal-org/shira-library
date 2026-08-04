@@ -131,7 +131,7 @@ export class ListQuestionTemplatesService {
   }
 
   private buildConditions(query: ListQuestionTemplatesQuery): SQL[] {
-    const conditions: SQL[] = [eq(questionTemplates.approved, true)]
+    const conditions: SQL[] = query.includeUnapproved ? [] : [eq(questionTemplates.approved, true)]
 
     if (query.filters.highlighted !== undefined) {
       conditions.push(eq(questionTemplates.highlighted, query.filters.highlighted))
