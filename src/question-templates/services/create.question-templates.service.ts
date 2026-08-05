@@ -4,6 +4,7 @@ import { DRIZZLE } from "../../db/drizzle.constants"
 import * as schema from "../../db/schema"
 import { questionTemplates } from "../../db/schema/question-templates"
 import { explanationTemplates } from "../../db/schema/explanation-templates"
+import { sanitizeQuestionContent } from "../../utils/sanitize-html.util"
 
 export type CreateQuestionExplanationInput = {
   position: string
@@ -33,8 +34,8 @@ export class CreateQuestionTemplatesService {
 
     const [result] = await this.db.insert(questionTemplates).values({
       name: data.name,
-      description: data.description,
-      content: data.content,
+      description: data.description ? sanitizeQuestionContent(data.description) : data.description,
+      content: sanitizeQuestionContent(data.content),
       appType: data.appType,
       defaultApp: data.defaultApp,
       isPhishing: data.isPhishing,
@@ -52,7 +53,7 @@ export class CreateQuestionTemplatesService {
           questionId,
           position: exp.position,
           positionIndex: exp.positionIndex,
-          content: exp.content,
+          content: sanitizeQuestionContent(exp.content),
         })),
       )
     }

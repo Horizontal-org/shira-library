@@ -15,6 +15,7 @@ import { langTags } from "../../db/schema/lang-tags"
 import { explanationTemplates } from "../../db/schema/explanation-templates"
 import { ImagesService } from "../../images/services/images.service"
 import { authors } from "../../db/schema/authors"
+import { sanitizeQuestionContent } from "../../utils/sanitize-html.util"
 
 import {
   QuizQuestionDto,
@@ -169,7 +170,7 @@ export class QuizTemplatesService {
   }): Promise<QuizTemplateResponseDto> {
     const [result] = await this.db.insert(quizTemplates).values({
       title: data.title.trim(),
-      description: data.description.trim(),
+      description: sanitizeQuestionContent(data.description.trim()),
       approved: true,
     })
     const quizId = result.insertId
@@ -213,7 +214,7 @@ export class QuizTemplatesService {
     }
 
     if (data.description !== undefined) {
-      await this.db.update(quizTemplates).set({ description: data.description.trim() }).where(eq(quizTemplates.id, id))
+      await this.db.update(quizTemplates).set({ description: sanitizeQuestionContent(data.description.trim()) }).where(eq(quizTemplates.id, id))
     }
 
     if (data.questionIds !== undefined) {
