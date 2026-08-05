@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common"
-import { and, asc, count, desc, eq, inArray, like, SQL } from "drizzle-orm"
+import { and, asc, count, desc, eq, inArray, like, notInArray, or, sql, SQL } from "drizzle-orm"
 import { MySql2Database } from "drizzle-orm/mysql2"
 import { DRIZZLE } from "../../db/drizzle.constants"
 import { quizTemplates } from "../../db/schema/quiz-templates"
@@ -8,6 +8,7 @@ import { quizTags } from "../../db/schema/quiz-tags"
 import { langTags } from "../../db/schema/lang-tags"
 import { tags } from "../../db/schema/tags"
 import { authors } from "../../db/schema/authors"
+import { publishEvents } from "../../db/schema/publish-events"
 import * as schema from "../../db/schema"
 import { ListQuizTemplatesQuery } from "../dto/list-quiz-templates.dto"
 import { PaginatedQuizTemplatesResponseDto } from "../dto/quiz-template-response.dto"
@@ -42,7 +43,7 @@ export class ListQuizTemplatesService {
 
     const quizIds = quizzes.map(({ quiz }) => quiz.id)
 
-    const [langTagRows, tagRows] = await Promise.all([
+    const [langTagRows, tagRows, submissionRows] = await Promise.all([
       this.db
         .select({
           quizId: quizLangTags.quizId,
@@ -63,7 +64,26 @@ export class ListQuizTemplatesService {
         .from(quizTags)
         .innerJoin(tags, eq(quizTags.tagId, tags.id))
         .where(inArray(quizTags.quizId, quizIds)),
+
+      this.db
+        .select({
+          resourceId: publishEvents.resourceId,
+          status: publishEvents.status,
+        })
+        .from(publishEvents)
+        .where(and(
+          eq(publishEvents.resourceType, "quiz_template"),
+          inArray(publishEvents.resourceId, quizIds.map(String)),
+        ))
+        .orderBy(desc(publishEvents.createdAt), desc(publishEvents.id)),
     ])
+
+    const submissionStatusByQuizId = new Map<string, string | null>()
+    for (const submission of submissionRows) {
+      if (!submissionStatusByQuizId.has(submission.resourceId)) {
+        submissionStatusByQuizId.set(submission.resourceId, submission.status)
+      }
+    }
 
     const data = quizzes.map(({ quiz, author }) => ({
       ...quiz,
@@ -79,6 +99,7 @@ export class ListQuizTemplatesService {
       tags: tagRows
         .filter((r) => r.quizId === quiz.id)
         .map(({ quizId: _, ...t }) => t),
+      submissionStatus: submissionStatusByQuizId.get(String(quiz.id)) ?? null,
     }))
 
     return { data, total: Number(total), page, limit }
@@ -100,10 +121,38 @@ export class ListQuizTemplatesService {
   }
 
   private buildConditions(query: ListQuizTemplatesQuery): SQL[] {
-    const conditions: SQL[] = query.includeUnapproved ? [] : [eq(quizTemplates.approved, true)]
+    const conditions: SQL[] = query.filters.status?.length ? [] : [eq(quizTemplates.approved, true)]
 
     if (query.search) {
       conditions.push(like(quizTemplates.title, `%${query.search}%`))
+    }
+
+    if (query.filters.status?.length) {
+      const submissionStatusCondition =
+        inArray(
+          quizTemplates.id,
+          this.db
+            .select({ resourceId: sql<number>`CAST(${publishEvents.resourceId} AS UNSIGNED)` })
+            .from(publishEvents)
+            .where(and(
+              eq(publishEvents.resourceType, "quiz_template"),
+              inArray(publishEvents.status, query.filters.status),
+            )),
+        )
+
+      const submissionResourceIds = this.db
+        .select({ resourceId: sql<number>`CAST(${publishEvents.resourceId} AS UNSIGNED)` })
+        .from(publishEvents)
+        .where(eq(publishEvents.resourceType, "quiz_template"))
+
+      conditions.push(
+        query.filters.status.includes("approved")
+          ? or(
+            and(eq(quizTemplates.approved, true), notInArray(quizTemplates.id, submissionResourceIds)),
+            submissionStatusCondition,
+          )!
+          : submissionStatusCondition,
+      )
     }
 
     if (query.filters.langTags?.length) {

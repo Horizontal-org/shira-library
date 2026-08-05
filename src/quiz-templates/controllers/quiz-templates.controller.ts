@@ -78,8 +78,8 @@ export class QuizTemplatesController {
       filters: {
         langTags: query.langTags?.split(',').map((s) => s.trim()).filter(Boolean),
         tags: query.tags?.split(',').map((s) => s.trim()).filter(Boolean),
+        status: query.status?.split(',').map((status) => status.trim()).filter(Boolean) as ('in_review' | 'approved' | 'rejected')[] | undefined,
       },
-      includeUnapproved: true,
       sortOrder: query.sortOrder ?? 'desc',
       sortBy: query.sortBy ?? 'createdAt',
       page: Math.max(1, parseInt(query.page ?? '1', 10) || 1),

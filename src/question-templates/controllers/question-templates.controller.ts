@@ -61,6 +61,7 @@ export class QuestionTemplatesController {
   @ApiOkResponse({ type: PaginatedQuestionTemplatesResponseDto })
   async findAllSuper(@Query() query: ListQuestionTemplatesDto) {
     const isPhishing = query.isPhishing === 'true' ? true : query.isPhishing === 'false' ? false : undefined
+
     return this.listService.findAll({
       search: query.search,
       filters: {
@@ -68,8 +69,8 @@ export class QuestionTemplatesController {
         tags: query.tags?.split(',').map((s) => s.trim()).filter(Boolean),
         appType: query.appType,
         isPhishing,
+        status: query.status?.split(',').map((status) => status.trim()).filter(Boolean) as ('in_review' | 'approved' | 'rejected')[] | undefined,
       },
-      includeUnapproved: true,
       sortBy: query.sortBy ?? 'createdAt',
       sortOrder: query.sortOrder ?? 'desc',
       page: Math.max(1, parseInt(query.page ?? '1', 10) || 1),

@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common"
-import { and, asc, count, desc, eq, inArray, like, SQL } from "drizzle-orm"
+import { and, asc, count, desc, eq, inArray, like, notInArray, or, sql, SQL } from "drizzle-orm"
 import { MySql2Database } from "drizzle-orm/mysql2"
 import { DRIZZLE } from "../../db/drizzle.constants"
 import { questionTemplates } from "../../db/schema/question-templates"
@@ -9,6 +9,7 @@ import { langTags } from "../../db/schema/lang-tags"
 import { tags } from "../../db/schema/tags"
 import { explanationTemplates } from "../../db/schema/explanation-templates"
 import { authors } from "../../db/schema/authors"
+import { publishEvents } from "../../db/schema/publish-events"
 import * as schema from "../../db/schema"
 import { ListQuestionTemplatesQuery } from "../dto/list-question-templates.dto"
 import { PaginatedQuestionTemplatesResponseDto } from "../dto/question-template-response.dto"
@@ -47,7 +48,7 @@ export class ListQuestionTemplatesService {
 
     const questionIds = questions.map(({ question }) => question.id)
 
-    const [langTagRows, tagRows, explanationRows, imageRows] = await Promise.all([
+    const [langTagRows, tagRows, explanationRows, imageRows, submissionRows] = await Promise.all([
       this.db
         .select({
           questionId: questionLangTags.questionId,
@@ -82,7 +83,26 @@ export class ListQuestionTemplatesService {
         .where(inArray(explanationTemplates.questionId, questionIds)),
 
       this.imagesService.findByQuestionIds(questionIds),
+
+      this.db
+        .select({
+          resourceId: publishEvents.resourceId,
+          status: publishEvents.status,
+        })
+        .from(publishEvents)
+        .where(and(
+          eq(publishEvents.resourceType, "question_template"),
+          inArray(publishEvents.resourceId, questionIds.map(String)),
+        ))
+        .orderBy(desc(publishEvents.createdAt), desc(publishEvents.id)),
     ])
+
+    const submissionStatusByQuestionId = new Map<string, string | null>()
+    for (const submission of submissionRows) {
+      if (!submissionStatusByQuestionId.has(submission.resourceId)) {
+        submissionStatusByQuestionId.set(submission.resourceId, submission.status)
+      }
+    }
 
     const data = await Promise.all(questions.map(async ({ question, author }) => ({
       ...question,
@@ -110,6 +130,7 @@ export class ListQuestionTemplatesService {
             url: await this.imagesService.getPresignedUrl(image.relativePath),
           })),
       ),
+      submissionStatus: submissionStatusByQuestionId.get(String(question.id)) ?? null,
     })))
 
     return { data, total: Number(total), page, limit }
@@ -131,7 +152,7 @@ export class ListQuestionTemplatesService {
   }
 
   private buildConditions(query: ListQuestionTemplatesQuery): SQL[] {
-    const conditions: SQL[] = query.includeUnapproved ? [] : [eq(questionTemplates.approved, true)]
+    const conditions: SQL[] = query.filters.status?.length ? [] : [eq(questionTemplates.approved, true)]
 
     if (query.filters.highlighted !== undefined) {
       conditions.push(eq(questionTemplates.highlighted, query.filters.highlighted))
@@ -147,6 +168,34 @@ export class ListQuestionTemplatesService {
 
     if (query.filters.isPhishing !== undefined) {
       conditions.push(eq(questionTemplates.isPhishing, query.filters.isPhishing))
+    }
+
+    if (query.filters.status?.length) {
+      const submissionStatusCondition =
+        inArray(
+          questionTemplates.id,
+          this.db
+            .select({ resourceId: sql<number>`CAST(${publishEvents.resourceId} AS UNSIGNED)` })
+            .from(publishEvents)
+            .where(and(
+              eq(publishEvents.resourceType, "question_template"),
+              inArray(publishEvents.status, query.filters.status),
+            )),
+        )
+
+      const submissionResourceIds = this.db
+        .select({ resourceId: sql<number>`CAST(${publishEvents.resourceId} AS UNSIGNED)` })
+        .from(publishEvents)
+        .where(eq(publishEvents.resourceType, "question_template"))
+
+      conditions.push(
+        query.filters.status.includes("approved")
+          ? or(
+            and(eq(questionTemplates.approved, true), notInArray(questionTemplates.id, submissionResourceIds)),
+            submissionStatusCondition,
+          )!
+          : submissionStatusCondition,
+      )
     }
 
     if (query.filters.langTags?.length) {
