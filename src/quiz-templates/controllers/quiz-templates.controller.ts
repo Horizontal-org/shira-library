@@ -66,32 +66,35 @@ export class QuizTemplatesController {
     return results;
   }
 
-  @Get(":id")
-  @Public()
-  @ApiOperation({ summary: "Get a quiz template by id" })
-  @ApiOkResponse({ type: QuizTemplateEnrichedResponseDto })
-  async findOne(@Param("id", ParseIntPipe) id: number) {
-    return this.service.findOneEnriched(id, { requireApproved: true })
-  }
-
-  @Get(":id/questions")
-  @Public()
-  @ApiOperation({ summary: "List questions for a quiz template" })
-  @ApiOkResponse({ type: [QuizQuestionDto] })
-  async findQuestions(@Param("id", ParseIntPipe) id: number) {
-    return this.service.findQuestions(id, { requireApproved: true })
-  }
-
-  @Post("publish")
-  @Public()
-  @Throttle({ strict: {} })
-  @ApiOperation({ summary: "Publish a quiz template from a shira space" })
-  @ApiCreatedResponse({ type: QuizTemplateResponseDto })
-  async publish(@Body() body: PublishQuizTemplateDto) {
-    return this.publishService.publish(body)
-  }
-
   //super-admin routes
+
+  @Get("super")
+  @UseGuards(RolesGuard)
+  @Roles("super-admin")
+  @ApiOperation({ summary: "List quiz templates" })
+  async findAllSuper(@Query() query: ListQuizTemplatesDto) {
+    return this.listService.findAll({
+      search: query.search,
+      filters: {
+        langTags: query.langTags?.split(',').map((s) => s.trim()).filter(Boolean),
+        tags: query.tags?.split(',').map((s) => s.trim()).filter(Boolean),
+        status: query.status?.split(',').map((status) => status.trim()).filter(Boolean) as ('in_review' | 'approved' | 'rejected')[] | undefined,
+      },
+      sortOrder: query.sortOrder ?? 'desc',
+      sortBy: query.sortBy ?? 'createdAt',
+      page: Math.max(1, parseInt(query.page ?? '1', 10) || 1),
+      limit: Math.min(100, Math.max(1, parseInt(query.limit ?? '20', 10) || 20)),
+    })
+  }
+
+  @Get("super/:id")
+  @UseGuards(RolesGuard)
+  @Roles("super-admin")
+  @ApiOperation({ summary: "Get a quiz template for superadmin review" })
+  @ApiOkResponse({ type: QuizTemplateEnrichedResponseDto })
+  async findOneSuper(@Param("id", ParseIntPipe) id: number) {
+    return this.service.findOneEnriched(id, { includeUnapproved: true })
+  }
 
   @Post()
   @UseGuards(RolesGuard)
@@ -101,6 +104,7 @@ export class QuizTemplatesController {
   async create(@Body() body: CreateQuizTemplateDto) {
     return this.service.create(body)
   }
+
   @Patch(":id")
   @UseGuards(RolesGuard)
   @Roles("super-admin")
@@ -122,4 +126,39 @@ export class QuizTemplatesController {
     await this.service.remove(id)
     return { deleted: true }
   }
+
+  @Get("super/:id/questions")
+  @UseGuards(RolesGuard)
+  @Roles("super-admin")
+  @ApiOperation({ summary: "List questions for a quiz template" })
+  @ApiOkResponse({ type: [QuizQuestionDto] })
+  async findQuestionsSuper(@Param("id", ParseIntPipe) id: number) {
+    return this.service.findQuestions(id, { includeUnapproved: true })
+  }
+
+  @Get(":id")
+  @Public()
+  @ApiOperation({ summary: "Get a quiz template by id" })
+  @ApiOkResponse({ type: QuizTemplateEnrichedResponseDto })
+  async findOne(@Param("id", ParseIntPipe) id: number) {
+    return this.service.findOneEnriched(id, { includeUnapproved: true })
+  }
+
+  @Get(":id/questions")
+  @Public()
+  @ApiOperation({ summary: "List questions for a quiz template" })
+  @ApiOkResponse({ type: [QuizQuestionDto] })
+  async findQuestions(@Param("id", ParseIntPipe) id: number) {
+    return this.service.findQuestions(id, { includeUnapproved: true })
+  }
+
+  @Post("publish")
+  @Public()
+  @Throttle({ strict: {} })
+  @ApiOperation({ summary: "Publish a quiz template from a shira space" })
+  @ApiCreatedResponse({ type: QuizTemplateResponseDto })
+  async publish(@Body() body: PublishQuizTemplateDto) {
+    return this.publishService.publish(body)
+  }
+
 }

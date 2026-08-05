@@ -52,13 +52,16 @@ export class QuestionTemplatesController {
     })
   }
 
-  @Get('super')
+  //super-admin routes
+
+  @Get("super")
   @UseGuards(RolesGuard)
   @Roles("super-admin")
   @ApiOperation({ summary: "Superadmin list question templates" })
   @ApiOkResponse({ type: PaginatedQuestionTemplatesResponseDto })
   async findAllSuper(@Query() query: ListQuestionTemplatesDto) {
     const isPhishing = query.isPhishing === 'true' ? true : query.isPhishing === 'false' ? false : undefined
+
     return this.listService.findAll({
       search: query.search,
       filters: {
@@ -66,6 +69,7 @@ export class QuestionTemplatesController {
         tags: query.tags?.split(',').map((s) => s.trim()).filter(Boolean),
         appType: query.appType,
         isPhishing,
+        status: query.status?.split(',').map((status) => status.trim()).filter(Boolean) as ('in_review' | 'approved' | 'rejected')[] | undefined,
       },
       sortBy: query.sortBy ?? 'createdAt',
       sortOrder: query.sortOrder ?? 'desc',
@@ -79,7 +83,7 @@ export class QuestionTemplatesController {
   @ApiOperation({ summary: "Get a question template by id" })
   @ApiOkResponse({ type: QuestionTemplateWithRelationsResponseDto })
   async findOne(@Param("id", ParseIntPipe) id: number) {
-    return this.service.findOneEnriched(id, { requireApproved: true })
+    return this.service.findOneEnriched(id, { includeUnapproved: true })
   }
 
   @Post("publish")
@@ -88,6 +92,15 @@ export class QuestionTemplatesController {
   @ApiOperation({ summary: "Publish a question template from a shira space" })
   async publish(@Body() body: PublishQuestionTemplateDto) {
     return this.publishService.publish(body)
+  }
+
+  @Get("super/:id")
+  @UseGuards(RolesGuard)
+  @Roles("super-admin")
+  @ApiOperation({ summary: "Get a question template for superadmin review" })
+  @ApiOkResponse({ type: QuestionTemplateWithRelationsResponseDto })
+  async findOneSuper(@Param("id", ParseIntPipe) id: number) {
+    return this.service.findOneEnriched(id, { includeUnapproved: true })
   }
 
   @Patch(":id")

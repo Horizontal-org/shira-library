@@ -32,14 +32,17 @@ export class QuizTemplatesService {
     private readonly imagesService: ImagesService,
   ) { }
 
-  async findOne(id: number, opts?: { requireApproved?: boolean }): Promise<QuizTemplateResponseDto> {
+  async findOne(id: number, opts?: { includeUnapproved?: boolean }): Promise<QuizTemplateResponseDto> {
     const [result] = await this.db
       .select({ quiz: quizTemplates, author: authors })
       .from(quizTemplates)
       .leftJoin(authors, eq(quizTemplates.authorId, authors.id))
       .where(eq(quizTemplates.id, id))
+
     if (!result) throw new NotFoundQuizTemplateException()
-    if (opts?.requireApproved && !result.quiz.approved) throw new NotFoundQuizTemplateException()
+
+    if (!opts?.includeUnapproved && !result.quiz.approved) throw new NotFoundQuizTemplateException()
+
     return {
       ...result.quiz,
       author: result.author
@@ -51,7 +54,7 @@ export class QuizTemplatesService {
     }
   }
 
-  async findOneEnriched(id: number, opts?: { requireApproved?: boolean }): Promise<QuizTemplateEnrichedResponseDto> {
+  async findOneEnriched(id: number, opts?: { includeUnapproved?: boolean }): Promise<QuizTemplateEnrichedResponseDto> {
     const quiz = await this.findOne(id, opts)
 
     const [langTagRows, tagRows] = await Promise.all([
@@ -70,7 +73,7 @@ export class QuizTemplatesService {
     return { ...quiz, langTags: langTagRows, tags: tagRows }
   }
 
-  async findQuestions(id: number, opts?: { requireApproved?: boolean }): Promise<QuizQuestionDto[]> {
+  async findQuestions(id: number, opts?: { includeUnapproved?: boolean }): Promise<QuizQuestionDto[]> {
     await this.findOne(id, opts)
 
     const questionRows = await this.db
@@ -234,7 +237,7 @@ export class QuizTemplatesService {
       }
     }
 
-    return this.findOneEnriched(id)
+    return this.findOneEnriched(id, { includeUnapproved: true })
   }
 
   async remove(id: number): Promise<void> {

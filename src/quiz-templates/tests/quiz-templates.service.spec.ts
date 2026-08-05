@@ -63,7 +63,7 @@ describe("QuizTemplatesService", () => {
 
   describe("findOne", () => {
     it("should return the quiz template when found", async () => {
-      const quiz = { id: 1, title: "Test Quiz", createdAt: new Date() }
+      const quiz = { id: 1, title: "Test Quiz", approved: true, createdAt: new Date() }
       mockDb.where.mockResolvedValueOnce([{ quiz, author: null }])
 
       const result = await service.findOne(1)
@@ -76,23 +76,23 @@ describe("QuizTemplatesService", () => {
       await expect(service.findOne(999)).rejects.toThrow(NotFoundQuizTemplateException)
     })
 
-    it("should throw NotFoundQuizTemplateException when not approved and requireApproved is set", async () => {
+    it("should throw NotFoundQuizTemplateException for an unapproved quiz by default", async () => {
       mockDb.where.mockResolvedValueOnce([{ quiz: { id: 1, approved: false }, author: null }])
 
       await expect(
-        service.findOne(1, { requireApproved: true }),
+        service.findOne(1),
       ).rejects.toThrow(NotFoundQuizTemplateException)
     })
 
-    it("should return the quiz template when approved and requireApproved is set", async () => {
-      const quiz = { id: 1, approved: true }
+    it("should return an unapproved quiz when includeUnapproved is set", async () => {
+      const quiz = { id: 1, approved: false }
       mockDb.where.mockResolvedValueOnce([{ quiz, author: null }])
 
-      await expect(service.findOne(1, { requireApproved: true })).resolves.toEqual({ ...quiz, author: null })
+      await expect(service.findOne(1, { includeUnapproved: true })).resolves.toEqual({ ...quiz, author: null })
     })
 
-    it("should not require approval when the flag is omitted", async () => {
-      const quiz = { id: 1, approved: false }
+    it("should return an approved quiz by default", async () => {
+      const quiz = { id: 1, approved: true }
       mockDb.where.mockResolvedValueOnce([{ quiz, author: null }])
 
       await expect(service.findOne(1)).resolves.toEqual({ ...quiz, author: null })
@@ -101,7 +101,7 @@ describe("QuizTemplatesService", () => {
 
   describe("create", () => {
     it("should insert quiz and questions then return the created quiz", async () => {
-      const quiz = { id: 1, title: "New Quiz", createdAt: new Date() }
+      const quiz = { id: 1, title: "New Quiz", approved: true, createdAt: new Date() }
       mockDb.values
         .mockResolvedValueOnce([{ insertId: 1 }])
         .mockResolvedValueOnce(undefined)

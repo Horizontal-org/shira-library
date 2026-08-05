@@ -1,4 +1,4 @@
-import { IsIn, IsNumberString, IsOptional, IsString, MaxLength } from 'class-validator'
+import { IsIn, IsNumberString, IsOptional, IsString, Matches, MaxLength } from 'class-validator'
 
 export class ListQuizTemplatesDto {
   @IsOptional()
@@ -25,6 +25,11 @@ export class ListQuizTemplatesDto {
   sortBy?: 'createdAt' | 'title'
 
   @IsOptional()
+  @Matches(/^(in_review|approved|rejected)(\s*,\s*(in_review|approved|rejected))*$/)
+  @MaxLength(50)
+  status?: string
+
+  @IsOptional()
   @IsNumberString()
   @MaxLength(6)
   page?: string
@@ -38,6 +43,7 @@ export class ListQuizTemplatesDto {
 export interface QuizTemplateFilters {
   langTags?: string[]
   tags?: string[]
+  status?: ('in_review' | 'approved' | 'rejected')[]
 }
 
 export interface ListQuizTemplatesQuery {

@@ -12,6 +12,7 @@ import { ConsoleModule } from "nestjs-console";
 import { TagsModule } from "./tags/tags.module";
 import { AuthorsModule } from "./authors/authors.module";
 import { ImagesModule } from "./images/images.module";
+import { PublishEventsModule } from "./publish-events/publish-events.module";
 import { LoggerModule } from "nestjs-pino";
 import pretty from "pino-pretty";
 
@@ -48,6 +49,7 @@ import pretty from "pino-pretty";
     TagsModule,
     AuthorsModule,
     ImagesModule,
+    PublishEventsModule,
   ],
   providers: [
     {
