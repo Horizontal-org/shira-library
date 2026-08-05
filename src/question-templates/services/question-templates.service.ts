@@ -38,7 +38,7 @@ export class QuestionTemplatesService {
     }))
   }
 
-  async findOne(id: number, opts?: { includeUnapproved?: boolean }): Promise<QuestionTemplateResponseDto> {
+  async findOne(id: number, opts?: { requireApproved?: boolean }): Promise<QuestionTemplateResponseDto> {
     const [result] = await this.db
       .select({ question: questionTemplates, author: authors })
       .from(questionTemplates)
@@ -47,7 +47,7 @@ export class QuestionTemplatesService {
 
     if (!result) throw new NotFoundQuestionTemplateException()
 
-    if (!opts?.includeUnapproved && !result.question.approved) throw new NotFoundQuestionTemplateException()
+    if (opts?.requireApproved && !result.question.approved) throw new NotFoundQuestionTemplateException()
 
     return {
       ...result.question,
@@ -60,7 +60,7 @@ export class QuestionTemplatesService {
     }
   }
 
-  async findOneEnriched(id: number, opts?: { includeUnapproved?: boolean }): Promise<QuestionTemplateWithRelationsResponseDto> {
+  async findOneEnriched(id: number, opts?: { requireApproved?: boolean }): Promise<QuestionTemplateWithRelationsResponseDto> {
     const question = await this.findOne(id, opts)
 
     const [langTagRows, tagRows, explanationRows, imageRows] = await Promise.all([
@@ -128,7 +128,7 @@ export class QuestionTemplatesService {
       }
     }
 
-    return this.findOneEnriched(id, { includeUnapproved: true })
+    return this.findOneEnriched(id)
   }
 
   async remove(id: number): Promise<void> {
