@@ -82,7 +82,7 @@ export class QuestionTemplatesController {
   @ApiOperation({ summary: "Get a question template by id" })
   @ApiOkResponse({ type: QuestionTemplateWithRelationsResponseDto })
   async findOne(@Param("id", ParseIntPipe) id: number) {
-    return this.service.findOneEnriched(id, { requireApproved: true })
+    return this.service.findOneEnriched(id)
   }
 
   @Post("publish")
@@ -99,7 +99,7 @@ export class QuestionTemplatesController {
   @ApiOperation({ summary: "Get a question template for superadmin review" })
   @ApiOkResponse({ type: QuestionTemplateWithRelationsResponseDto })
   async findOneSuper(@Param("id", ParseIntPipe) id: number) {
-    return this.service.findOneEnriched(id)
+    return this.service.findOneEnriched(id, { includeUnapproved: true })
   }
 
   @Patch(":id")

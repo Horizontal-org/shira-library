@@ -66,32 +66,6 @@ export class QuizTemplatesController {
     return results;
   }
 
-
-  @Get(":id")
-  @Public()
-  @ApiOperation({ summary: "Get a quiz template by id" })
-  @ApiOkResponse({ type: QuizTemplateEnrichedResponseDto })
-  async findOne(@Param("id", ParseIntPipe) id: number) {
-    return this.service.findOneEnriched(id, { requireApproved: true })
-  }
-
-  @Get(":id/questions")
-  @Public()
-  @ApiOperation({ summary: "List questions for a quiz template" })
-  @ApiOkResponse({ type: [QuizQuestionDto] })
-  async findQuestions(@Param("id", ParseIntPipe) id: number) {
-    return this.service.findQuestions(id, { requireApproved: true })
-  }
-
-  @Post("publish")
-  @Public()
-  @Throttle({ strict: {} })
-  @ApiOperation({ summary: "Publish a quiz template from a shira space" })
-  @ApiCreatedResponse({ type: QuizTemplateResponseDto })
-  async publish(@Body() body: PublishQuizTemplateDto) {
-    return this.publishService.publish(body)
-  }
-
   //super-admin routes
 
   @Get("super")
@@ -119,7 +93,7 @@ export class QuizTemplatesController {
   @ApiOperation({ summary: "Get a quiz template for superadmin review" })
   @ApiOkResponse({ type: QuizTemplateEnrichedResponseDto })
   async findOneSuper(@Param("id", ParseIntPipe) id: number) {
-    return this.service.findOneEnriched(id)
+    return this.service.findOneEnriched(id, { includeUnapproved: true })
   }
 
   @Post()
@@ -159,7 +133,32 @@ export class QuizTemplatesController {
   @ApiOperation({ summary: "List questions for a quiz template" })
   @ApiOkResponse({ type: [QuizQuestionDto] })
   async findQuestionsSuper(@Param("id", ParseIntPipe) id: number) {
+    return this.service.findQuestions(id, { includeUnapproved: true })
+  }
+
+  @Get(":id")
+  @Public()
+  @ApiOperation({ summary: "Get a quiz template by id" })
+  @ApiOkResponse({ type: QuizTemplateEnrichedResponseDto })
+  async findOne(@Param("id", ParseIntPipe) id: number) {
+    return this.service.findOneEnriched(id)
+  }
+
+  @Get(":id/questions")
+  @Public()
+  @ApiOperation({ summary: "List questions for a quiz template" })
+  @ApiOkResponse({ type: [QuizQuestionDto] })
+  async findQuestions(@Param("id", ParseIntPipe) id: number) {
     return this.service.findQuestions(id)
+  }
+
+  @Post("publish")
+  @Public()
+  @Throttle({ strict: {} })
+  @ApiOperation({ summary: "Publish a quiz template from a shira space" })
+  @ApiCreatedResponse({ type: QuizTemplateResponseDto })
+  async publish(@Body() body: PublishQuizTemplateDto) {
+    return this.publishService.publish(body)
   }
 
 }

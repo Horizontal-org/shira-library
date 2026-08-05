@@ -66,27 +66,27 @@ describe("QuestionTemplatesService", () => {
     expect(service).toBeDefined()
   })
 
-  describe("findOne with requireApproved", () => {
-    it("throws not found when the template is not approved", async () => {
+  describe("findOne approval visibility", () => {
+    it("throws not found for an unapproved template by default", async () => {
       mockDb.where.mockResolvedValueOnce([{ question: { id: 1, approved: false }, author: null }])
 
       await expect(
-        service.findOne(1, { requireApproved: true }),
+        service.findOne(1),
       ).rejects.toThrow(NotFoundQuestionTemplateException)
     })
 
-    it("returns the template when it is approved", async () => {
-      mockDb.where.mockResolvedValueOnce([{ question: { id: 1, approved: true }, author: null }])
-
-      await expect(
-        service.findOne(1, { requireApproved: true }),
-      ).resolves.toEqual({ id: 1, approved: true, author: null })
-    })
-
-    it("does not require approval when the flag is omitted", async () => {
+    it("returns an unapproved template when includeUnapproved is set", async () => {
       mockDb.where.mockResolvedValueOnce([{ question: { id: 1, approved: false }, author: null }])
 
-      await expect(service.findOne(1)).resolves.toEqual({ id: 1, approved: false, author: null })
+      await expect(
+        service.findOne(1, { includeUnapproved: true }),
+      ).resolves.toEqual({ id: 1, approved: false, author: null })
+    })
+
+    it("returns an approved template by default", async () => {
+      mockDb.where.mockResolvedValueOnce([{ question: { id: 1, approved: true }, author: null }])
+
+      await expect(service.findOne(1)).resolves.toEqual({ id: 1, approved: true, author: null })
     })
   })
 })
