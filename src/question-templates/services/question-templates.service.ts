@@ -13,7 +13,6 @@ import { authors } from "../../db/schema/authors"
 import * as schema from "../../db/schema"
 import { QuestionTemplateResponseDto, QuestionTemplateWithRelationsResponseDto } from "../dto/question-template-response.dto"
 import { ImagesService } from "../../images/services/images.service"
-import { sanitizeQuestionContent } from "../../utils/sanitize-html.util"
 
 @Injectable()
 export class QuestionTemplatesService {
@@ -111,9 +110,6 @@ export class QuestionTemplatesService {
     },
   ): Promise<QuestionTemplateWithRelationsResponseDto> {
     const { tagIds, langTagIds, ...columns } = data
-    if (columns.description !== undefined) {
-      columns.description = sanitizeQuestionContent(columns.description)
-    }
     if (Object.keys(columns).length > 0) {
       await this.db.update(questionTemplates).set(columns).where(eq(questionTemplates.id, id))
     }

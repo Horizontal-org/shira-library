@@ -125,25 +125,4 @@ describe("PublishQuizTemplatesService", () => {
     expect(mockImagesService.linkToQuestion).toHaveBeenCalledWith([], 30)
   })
 
-  it("sanitizes the quiz description before inserting it", async () => {
-    mockCreateQuestionService.create.mockResolvedValueOnce(30)
-
-    await service.publish({
-      title: "Phishing basics",
-      description: '<p>desc</p><script>alert(1)</script>',
-      author,
-      questions: [
-        {
-          name: "Suspicious SMS",
-          content: "<p>content</p>",
-          appType: "sms",
-          isPhishing: true,
-        },
-      ],
-    })
-
-    expect(mockDb.values).toHaveBeenNthCalledWith(1, expect.objectContaining({
-      description: "<p>desc</p>",
-    }))
-  })
 })

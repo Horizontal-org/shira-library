@@ -92,7 +92,7 @@ describe("QuestionTemplatesService", () => {
   })
 
   describe("update", () => {
-    it("sanitizes the description before updating", async () => {
+    it("leaves plain-text description untouched", async () => {
       mockImagesService.findByQuestionId.mockResolvedValueOnce([])
 
       mockDb.where
@@ -102,9 +102,9 @@ describe("QuestionTemplatesService", () => {
         .mockResolvedValueOnce([]) // tagRows
         .mockResolvedValueOnce([]) // explanationRows
 
-      await service.update(1, { description: '<p>desc</p><script>alert(1)</script>' })
+      await service.update(1, { description: "Score < 50% to fail" })
 
-      expect(mockDb.set).toHaveBeenCalledWith(expect.objectContaining({ description: "<p>desc</p>" }))
+      expect(mockDb.set).toHaveBeenCalledWith(expect.objectContaining({ description: "Score < 50% to fail" }))
     })
   })
 })

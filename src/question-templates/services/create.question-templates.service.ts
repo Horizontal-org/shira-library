@@ -34,7 +34,7 @@ export class CreateQuestionTemplatesService {
 
     const [result] = await this.db.insert(questionTemplates).values({
       name: data.name,
-      description: data.description ? sanitizeQuestionContent(data.description) : data.description,
+      description: data.description,
       content: sanitizeQuestionContent(data.content),
       appType: data.appType,
       defaultApp: data.defaultApp,

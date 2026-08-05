@@ -11,7 +11,6 @@ import { CreateQuestionTemplatesService } from "../../question-templates/service
 import { TagsService } from "../../tags/services/tags.service";
 import { LangTagsService } from "../../lang-tags/services/lang-tags.service";
 import { ImagesService } from "../../images/services/images.service";
-import { sanitizeQuestionContent } from "../../utils/sanitize-html.util";
 
 @Injectable()
 export class PublishQuizTemplatesService {
@@ -41,7 +40,7 @@ export class PublishQuizTemplatesService {
 
     const [result] = await this.db.insert(quizTemplates).values({
       title: data.title.trim(),
-      description: sanitizeQuestionContent(data.description.trim()),
+      description: data.description.trim(),
       authorId: author.id,
       approved: false,
     })

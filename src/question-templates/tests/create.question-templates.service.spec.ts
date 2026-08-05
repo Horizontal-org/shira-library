@@ -29,17 +29,17 @@ describe("CreateQuestionTemplatesService", () => {
     expect(service).toBeDefined()
   })
 
-  it("sanitizes content and description before inserting the question template", async () => {
+  it("sanitizes content but leaves plain-text description untouched", async () => {
     await service.create({
       name: "Suspicious SMS",
-      description: '<p>desc</p><script>alert(1)</script>',
+      description: "Score < 50% to fail",
       content: '<p>content</p><img src=x onerror=alert(1)>',
       appType: "sms",
       isPhishing: true,
     })
 
     expect(mockDb.values).toHaveBeenNthCalledWith(1, expect.objectContaining({
-      description: "<p>desc</p>",
+      description: "Score < 50% to fail",
       content: expect.not.stringContaining("onerror"),
     }))
   })
