@@ -38,8 +38,11 @@ export class QuizTemplatesService {
       .from(quizTemplates)
       .leftJoin(authors, eq(quizTemplates.authorId, authors.id))
       .where(eq(quizTemplates.id, id))
+
     if (!result) throw new NotFoundQuizTemplateException()
+
     if (!opts?.includeUnapproved && !result.quiz.approved) throw new NotFoundQuizTemplateException()
+
     return {
       ...result.quiz,
       author: result.author

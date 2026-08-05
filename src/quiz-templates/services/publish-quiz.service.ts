@@ -85,6 +85,6 @@ export class PublishQuizTemplatesService {
       status: 'in_review',
     })
 
-    return this.quizService.findOne(quizId)
+    return this.quizService.findOne(quizId, { includeUnapproved: true })
   }
 }

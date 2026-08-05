@@ -141,7 +141,7 @@ export class QuizTemplatesController {
   @ApiOperation({ summary: "Get a quiz template by id" })
   @ApiOkResponse({ type: QuizTemplateEnrichedResponseDto })
   async findOne(@Param("id", ParseIntPipe) id: number) {
-    return this.service.findOneEnriched(id)
+    return this.service.findOneEnriched(id, { includeUnapproved: true })
   }
 
   @Get(":id/questions")
@@ -149,7 +149,7 @@ export class QuizTemplatesController {
   @ApiOperation({ summary: "List questions for a quiz template" })
   @ApiOkResponse({ type: [QuizQuestionDto] })
   async findQuestions(@Param("id", ParseIntPipe) id: number) {
-    return this.service.findQuestions(id)
+    return this.service.findQuestions(id, { includeUnapproved: true })
   }
 
   @Post("publish")
