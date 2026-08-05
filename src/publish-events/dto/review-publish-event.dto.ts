@@ -9,6 +9,6 @@ export class ReviewPublishEventDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(1000)
-  @Transform(({ value }) => value?.toLowerCase().trim())
+  @Transform(({ value }) => value?.trim())
   rejectedNote?: string
 }
