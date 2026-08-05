@@ -6,12 +6,18 @@ describe("CreateQuestionTemplatesService", () => {
   let service: CreateQuestionTemplatesService
 
   const mockDb = {
+    select: jest.fn().mockReturnThis(),
+    from: jest.fn().mockReturnThis(),
+    where: jest.fn().mockResolvedValue([]),
     insert: jest.fn().mockReturnThis(),
     values: jest.fn(),
   }
 
   beforeEach(async () => {
     jest.clearAllMocks()
+    mockDb.select.mockReturnThis()
+    mockDb.from.mockReturnThis()
+    mockDb.where.mockResolvedValue([])
     mockDb.insert.mockReturnThis()
     mockDb.values.mockResolvedValue([{ insertId: 1 }])
 
@@ -62,5 +68,48 @@ describe("CreateQuestionTemplatesService", () => {
     expect(mockDb.values).toHaveBeenNthCalledWith(2, [
       expect.objectContaining({ content: "<p>ok</p>" }),
     ])
+  })
+
+  describe("duplicate content detection", () => {
+    it("throws when the same author resubmits identical content", async () => {
+      mockDb.where.mockResolvedValueOnce([{ id: 5 }])
+
+      await expect(
+        service.create({
+          name: "Suspicious SMS",
+          content: "<p>content</p>",
+          appType: "sms",
+          isPhishing: true,
+          authorId: 1,
+        }),
+      ).rejects.toThrow("question_template_duplicate_content")
+
+      expect(mockDb.insert).not.toHaveBeenCalled()
+    })
+
+    it("allows a different author to submit the same content", async () => {
+      mockDb.where.mockResolvedValueOnce([])
+
+      await expect(
+        service.create({
+          name: "Suspicious SMS",
+          content: "<p>content</p>",
+          appType: "sms",
+          isPhishing: true,
+          authorId: 2,
+        }),
+      ).resolves.toBe(1)
+    })
+
+    it("skips the duplicate check when no authorId is given", async () => {
+      await service.create({
+        name: "Suspicious SMS",
+        content: "<p>content</p>",
+        appType: "sms",
+        isPhishing: true,
+      })
+
+      expect(mockDb.select).not.toHaveBeenCalled()
+    })
   })
 })

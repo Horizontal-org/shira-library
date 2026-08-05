@@ -9,6 +9,7 @@ import { Throttle } from "@nestjs/throttler"
 import { Roles } from "../../auth/roles.decorator"
 import { RolesGuard } from "../../auth/roles.guard"
 import { Public } from "../../auth/public.decorator"
+import { PublishDailyThrottlerGuard } from "../../auth/publish-daily-throttler.guard"
 import { QuestionTemplatesService } from "../services/question-templates.service"
 import { ListQuestionTemplatesService } from "../services/list-question-templates.service"
 import { ListQuestionTemplatesDto } from "../dto/list-question-templates.dto"
@@ -89,6 +90,7 @@ export class QuestionTemplatesController {
   @Post("publish")
   @Public()
   @Throttle({ strict: {} })
+  @UseGuards(PublishDailyThrottlerGuard)
   @ApiOperation({ summary: "Publish a question template from a shira space" })
   async publish(@Body() body: PublishQuestionTemplateDto) {
     return this.publishService.publish(body)
