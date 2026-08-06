@@ -67,19 +67,19 @@ describe("QuestionTemplatesService", () => {
   })
 
   describe("findOne approval visibility", () => {
-    it("throws not found for an unapproved template by default", async () => {
+    it("throws not found for an unapproved template when approval is required", async () => {
+      mockDb.where.mockResolvedValueOnce([{ question: { id: 1, approved: false }, author: null }])
+
+      await expect(
+        service.findOne(1, { requireApproved: true }),
+      ).rejects.toThrow(NotFoundQuestionTemplateException)
+    })
+
+    it("returns an unapproved template by default", async () => {
       mockDb.where.mockResolvedValueOnce([{ question: { id: 1, approved: false }, author: null }])
 
       await expect(
         service.findOne(1),
-      ).rejects.toThrow(NotFoundQuestionTemplateException)
-    })
-
-    it("returns an unapproved template when includeUnapproved is set", async () => {
-      mockDb.where.mockResolvedValueOnce([{ question: { id: 1, approved: false }, author: null }])
-
-      await expect(
-        service.findOne(1, { includeUnapproved: true }),
       ).resolves.toEqual({ id: 1, approved: false, author: null })
     })
 

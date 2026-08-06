@@ -93,7 +93,7 @@ export class QuizTemplatesController {
   @ApiOperation({ summary: "Get a quiz template for superadmin review" })
   @ApiOkResponse({ type: QuizTemplateEnrichedResponseDto })
   async findOneSuper(@Param("id", ParseIntPipe) id: number) {
-    return this.service.findOneEnriched(id, { includeUnapproved: true })
+    return this.service.findOneEnriched(id)
   }
 
   @Post()
@@ -133,7 +133,7 @@ export class QuizTemplatesController {
   @ApiOperation({ summary: "List questions for a quiz template" })
   @ApiOkResponse({ type: [QuizQuestionDto] })
   async findQuestionsSuper(@Param("id", ParseIntPipe) id: number) {
-    return this.service.findQuestions(id, { includeUnapproved: true })
+    return this.service.findQuestions(id)
   }
 
   @Get(":id")
@@ -141,7 +141,7 @@ export class QuizTemplatesController {
   @ApiOperation({ summary: "Get a quiz template by id" })
   @ApiOkResponse({ type: QuizTemplateEnrichedResponseDto })
   async findOne(@Param("id", ParseIntPipe) id: number) {
-    return this.service.findOneEnriched(id, { includeUnapproved: true })
+    return this.service.findOneEnriched(id, { requireApproved: true })
   }
 
   @Get(":id/questions")
@@ -149,7 +149,7 @@ export class QuizTemplatesController {
   @ApiOperation({ summary: "List questions for a quiz template" })
   @ApiOkResponse({ type: [QuizQuestionDto] })
   async findQuestions(@Param("id", ParseIntPipe) id: number) {
-    return this.service.findQuestions(id, { includeUnapproved: true })
+    return this.service.findQuestions(id, { requireApproved: true })
   }
 
   @Post("publish")
