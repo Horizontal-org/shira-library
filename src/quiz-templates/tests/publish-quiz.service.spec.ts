@@ -124,4 +124,5 @@ describe("PublishQuizTemplatesService", () => {
 
     expect(mockImagesService.linkToQuestion).toHaveBeenCalledWith([], 30)
   })
+
 })

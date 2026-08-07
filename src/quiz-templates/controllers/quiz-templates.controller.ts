@@ -21,6 +21,7 @@ import { Throttle } from "@nestjs/throttler"
 import { Roles } from "../../auth/roles.decorator"
 import { RolesGuard } from "../../auth/roles.guard"
 import { Public } from "../../auth/public.decorator"
+import { PublishDailyThrottlerGuard } from "../../auth/publish-daily-throttler.guard"
 import { QuizTemplatesService } from "../services/quiz-templates.service"
 import { ListQuizTemplatesDto } from "../dto/list-quiz-templates.dto"
 import { CreateQuizTemplateDto } from "../dto/create-quiz-template.dto"
@@ -155,6 +156,7 @@ export class QuizTemplatesController {
   @Post("publish")
   @Public()
   @Throttle({ strict: {} })
+  @UseGuards(PublishDailyThrottlerGuard)
   @ApiOperation({ summary: "Publish a quiz template from a shira space" })
   @ApiCreatedResponse({ type: QuizTemplateResponseDto })
   async publish(@Body() body: PublishQuizTemplateDto) {

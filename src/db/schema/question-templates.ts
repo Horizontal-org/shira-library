@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { mysqlTable, serial, boolean, bigint, timestamp, text, varchar } from "drizzle-orm/mysql-core";
+import { mysqlTable, serial, boolean, bigint, timestamp, text, varchar, index } from "drizzle-orm/mysql-core";
 import { authors } from "./authors";
 
 export const questionTemplates = mysqlTable("question_templates", {
@@ -9,6 +9,7 @@ export const questionTemplates = mysqlTable("question_templates", {
   highlighted: boolean("highlighted").notNull().default(false),
   isPhishing: boolean("is_phishing").notNull(),
   content: text("content").notNull(),
+  contentHash: varchar("content_hash", { length: 64 }),
   appType: varchar("app_type", { length: 255 }).notNull(),
   defaultApp: varchar("default_app", { length: 255 }),
   isDemo: boolean("is_demo").notNull().default(false),
@@ -16,6 +17,8 @@ export const questionTemplates = mysqlTable("question_templates", {
     .references(() => authors.id, { onDelete: "set null" }),
   approved: boolean("approved").default(false).notNull(),
   createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
-});
+}, (table) => ({
+  authorContentHashIdx: index("question_templates_author_content_hash_idx").on(table.authorId, table.contentHash),
+}));
 
 export type QuestionTemplate = typeof questionTemplates.$inferSelect;
