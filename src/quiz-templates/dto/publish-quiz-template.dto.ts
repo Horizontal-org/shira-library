@@ -10,6 +10,7 @@ class QuizQuestionTemplateDto {
 
   @IsString()
   @IsNotEmpty()
+  @MaxLength(50000)
   content: string
 
   @IsString()
@@ -40,10 +41,12 @@ class QuizQuestionTemplateDto {
 export class PublishQuizTemplateDto {
   @IsString()
   @IsNotEmpty()
+  @MaxLength(150)
   title: string
 
   @IsString()
   @IsNotEmpty()
+  @MaxLength(400)
   description: string
 
   @IsArray()

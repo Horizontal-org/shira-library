@@ -12,6 +12,7 @@ import { Public } from "../../auth/public.decorator"
 import { ApiKeyGuard } from "../../auth/api-key.guard"
 import { CurrentAuthor } from "../../auth/current-author.decorator"
 import { Author } from "../../db/schema/authors"
+import { PublishDailyThrottlerGuard } from "../../auth/publish-daily-throttler.guard"
 import { QuestionTemplatesService } from "../services/question-templates.service"
 import { ListQuestionTemplatesService } from "../services/list-question-templates.service"
 import { ListQuestionTemplatesDto } from "../dto/list-question-templates.dto"
@@ -93,6 +94,7 @@ export class QuestionTemplatesController {
   @Public()
   @UseGuards(ApiKeyGuard)
   @Throttle({ strict: {} })
+  @UseGuards(PublishDailyThrottlerGuard)
   @ApiOperation({ summary: "Publish a question template from a shira space" })
   async publish(@Body() body: PublishQuestionTemplateDto, @CurrentAuthor() author: Author) {
     return this.publishService.publish(body, author)

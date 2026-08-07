@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "bfaf4d68-5ca5-417b-9179-db1404a87878",
-  "prevId": "6006abf3-9811-45c1-8d1e-1b5d476038a7",
+  "id": "335ebc02-606f-4d85-a8a7-c8c08d2b432e",
+  "prevId": "bfaf4d68-5ca5-417b-9179-db1404a87878",
   "tables": {
     "authors": {
       "name": "authors",
@@ -40,6 +40,27 @@
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true,
+          "autoincrement": false
+        },
+        "api_key_hash": {
+          "name": "api_key_hash",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "api_key_prefix": {
+          "name": "api_key_prefix",
+          "type": "varchar(12)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "api_key_revoked_at": {
+          "name": "api_key_revoked_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
           "autoincrement": false
         },
         "created_at": {

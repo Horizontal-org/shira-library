@@ -24,6 +24,7 @@ import { Public } from "../../auth/public.decorator"
 import { ApiKeyGuard } from "../../auth/api-key.guard"
 import { CurrentAuthor } from "../../auth/current-author.decorator"
 import { Author } from "../../db/schema/authors"
+import { PublishDailyThrottlerGuard } from "../../auth/publish-daily-throttler.guard"
 import { QuizTemplatesService } from "../services/quiz-templates.service"
 import { ListQuizTemplatesDto } from "../dto/list-quiz-templates.dto"
 import { CreateQuizTemplateDto } from "../dto/create-quiz-template.dto"
@@ -159,6 +160,7 @@ export class QuizTemplatesController {
   @Public()
   @UseGuards(ApiKeyGuard)
   @Throttle({ strict: {} })
+  @UseGuards(PublishDailyThrottlerGuard)
   @ApiOperation({ summary: "Publish a quiz template from a shira space" })
   @ApiCreatedResponse({ type: QuizTemplateResponseDto })
   async publish(@Body() body: PublishQuizTemplateDto, @CurrentAuthor() author: Author) {

@@ -37,6 +37,7 @@ describe("QuestionTemplatesService", () => {
     select: jest.fn().mockReturnThis(),
     from: jest.fn().mockReturnThis(),
     leftJoin: jest.fn().mockReturnThis(),
+    innerJoin: jest.fn().mockReturnThis(),
     where: jest.fn().mockReturnThis(),
     orderBy: jest.fn().mockReturnThis(),
     insert: jest.fn().mockReturnThis(),
@@ -87,6 +88,23 @@ describe("QuestionTemplatesService", () => {
       mockDb.where.mockResolvedValueOnce([{ question: { id: 1, approved: true }, author: null }])
 
       await expect(service.findOne(1)).resolves.toEqual({ id: 1, approved: true, author: null })
+    })
+  })
+
+  describe("update", () => {
+    it("leaves plain-text description untouched", async () => {
+      mockImagesService.findByQuestionId.mockResolvedValueOnce([])
+
+      mockDb.where
+        .mockReturnValueOnce(mockDb) // update(...).set(...).where(...)
+        .mockResolvedValueOnce([{ question: { id: 1, approved: true }, author: null }]) // findOneEnriched -> findOne
+        .mockResolvedValueOnce([]) // langTagRows
+        .mockResolvedValueOnce([]) // tagRows
+        .mockResolvedValueOnce([]) // explanationRows
+
+      await service.update(1, { description: "Score < 50% to fail" })
+
+      expect(mockDb.set).toHaveBeenCalledWith(expect.objectContaining({ description: "Score < 50% to fail" }))
     })
   })
 })

@@ -1,9 +1,13 @@
 import { Inject, Injectable } from "@nestjs/common"
+import { createHash } from "crypto"
+import { and, eq } from "drizzle-orm"
 import { MySql2Database } from "drizzle-orm/mysql2"
 import { DRIZZLE } from "../../db/drizzle.constants"
 import * as schema from "../../db/schema"
 import { questionTemplates } from "../../db/schema/question-templates"
 import { explanationTemplates } from "../../db/schema/explanation-templates"
+import { sanitizeQuestionContent } from "../../utils/sanitize-html.util"
+import { DuplicateQuestionTemplateException } from "../exceptions/duplicate-content.question-template.exception"
 
 export type CreateQuestionExplanationInput = {
   position: string
@@ -30,11 +34,23 @@ export class CreateQuestionTemplatesService {
   constructor(@Inject(DRIZZLE) private readonly db: MySql2Database<typeof schema>) { }
 
   async create(data: CreateQuestionTemplateInput): Promise<number> {
+    const sanitizedContent = sanitizeQuestionContent(data.content)
+    const contentHash = createHash("sha256").update(sanitizedContent).digest("hex")
+
+    if (data.authorId !== undefined) {
+      const [existing] = await this.db
+        .select({ id: questionTemplates.id })
+        .from(questionTemplates)
+        .where(and(eq(questionTemplates.authorId, data.authorId), eq(questionTemplates.contentHash, contentHash)))
+
+      if (existing) throw new DuplicateQuestionTemplateException()
+    }
 
     const [result] = await this.db.insert(questionTemplates).values({
       name: data.name,
       description: data.description,
-      content: data.content,
+      content: sanitizedContent,
+      contentHash,
       appType: data.appType,
       defaultApp: data.defaultApp,
       isPhishing: data.isPhishing,
@@ -52,7 +68,7 @@ export class CreateQuestionTemplatesService {
           questionId,
           position: exp.position,
           positionIndex: exp.positionIndex,
-          content: exp.content,
+          content: sanitizeQuestionContent(exp.content),
         })),
       )
     }

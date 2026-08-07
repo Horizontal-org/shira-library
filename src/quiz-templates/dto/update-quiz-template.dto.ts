@@ -1,14 +1,16 @@
-import { IsArray, IsInt, IsNotEmpty, IsOptional, IsString, ArrayMinSize } from 'class-validator'
+import { IsArray, IsInt, IsNotEmpty, IsOptional, IsString, ArrayMinSize, MaxLength } from 'class-validator'
 
 export class UpdateQuizTemplateDto {
   @IsOptional()
   @IsString()
   @IsNotEmpty()
+  @MaxLength(150)
   title?: string
 
   @IsOptional()
   @IsString()
   @IsNotEmpty()
+  @MaxLength(400)
   description?: string
 
   @IsOptional()

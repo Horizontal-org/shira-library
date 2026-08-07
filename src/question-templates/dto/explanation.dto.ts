@@ -11,5 +11,6 @@ export class ExplanationDto {
 
   @IsString()
   @IsNotEmpty()
+  @MaxLength(20000)
   content: string
 }

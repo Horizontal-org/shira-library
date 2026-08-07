@@ -116,6 +116,37 @@ describe("QuizTemplatesService", () => {
       expect(result).toEqual({ ...quiz, author: null })
       expect(mockDb.insert).toHaveBeenCalledTimes(2)
     })
+
+    it("leaves plain-text description untouched aside from trimming", async () => {
+      const quiz = { id: 1, title: "New Quiz", approved: true, createdAt: new Date() }
+      mockDb.values
+        .mockResolvedValueOnce([{ insertId: 1 }])
+        .mockResolvedValueOnce(undefined)
+      mockDb.where.mockResolvedValueOnce([{ quiz, author: null }])
+
+      await service.create({
+        title: "New Quiz",
+        description: "  Score < 50% to fail  ",
+        questionIds: [10, 20],
+      })
+
+      expect(mockDb.values).toHaveBeenNthCalledWith(1, expect.objectContaining({
+        description: "Score < 50% to fail",
+      }))
+    })
+  })
+
+  describe("update", () => {
+    it("leaves plain-text description untouched aside from trimming", async () => {
+      mockDb.where.mockResolvedValueOnce(undefined) // update description
+      mockDb.where.mockResolvedValueOnce([{ quiz: { id: 1, approved: true }, author: null }]) // findOneEnriched -> findOne
+      mockDb.where.mockResolvedValueOnce([]) // findOneEnriched -> langTagRows
+      mockDb.where.mockResolvedValueOnce([]) // findOneEnriched -> tagRows
+
+      await service.update(1, { description: "  Score < 50% to fail  " })
+
+      expect(mockDb.set).toHaveBeenCalledWith({ description: "Score < 50% to fail" })
+    })
   })
 
   describe("findQuestions", () => {
