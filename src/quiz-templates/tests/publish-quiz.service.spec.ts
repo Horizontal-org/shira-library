@@ -2,7 +2,7 @@ import { Test, TestingModule } from "@nestjs/testing"
 import { DRIZZLE } from "../../db/drizzle.constants"
 import { PublishQuizTemplatesService } from "../services/publish-quiz.service"
 import { QuizTemplatesService } from "../services/quiz-templates.service"
-import { AuthorsService } from "../../authors/services/authors.service"
+import { Author } from "../../db/schema/authors"
 import { CreateQuestionTemplatesService } from "../../question-templates/services/create.question-templates.service"
 import { TagsService } from "../../tags/services/tags.service"
 import { LangTagsService } from "../../lang-tags/services/lang-tags.service"
@@ -14,10 +14,6 @@ describe("PublishQuizTemplatesService", () => {
   const mockDb = {
     insert: jest.fn().mockReturnThis(),
     values: jest.fn(),
-  }
-
-  const mockAuthorsService = {
-    findOrCreate: jest.fn(),
   }
 
   const mockQuizService = {
@@ -41,24 +37,27 @@ describe("PublishQuizTemplatesService", () => {
     linkToQuestion: jest.fn(),
   }
 
-  const author = {
+  const author: Author = {
+    id: 3,
     publicSpaceId: "01ARZ3NDEKTSV4RRFFQ69G5FAV",
     spaceName: "acme",
     spaceDisplayName: "Acme",
     organizationName: "Acme Corp",
+    apiKeyHash: null,
+    apiKeyPrefix: null,
+    apiKeyRevokedAt: null,
+    createdAt: new Date("2026-01-01"),
   }
 
   beforeEach(async () => {
     jest.clearAllMocks()
     mockDb.insert.mockReturnThis()
     mockDb.values.mockResolvedValue([{ insertId: 1 }])
-    mockAuthorsService.findOrCreate.mockResolvedValue({ id: 3 })
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         PublishQuizTemplatesService,
         { provide: DRIZZLE, useValue: mockDb },
-        { provide: AuthorsService, useValue: mockAuthorsService },
         { provide: QuizTemplatesService, useValue: mockQuizService },
         { provide: CreateQuestionTemplatesService, useValue: mockCreateQuestionService },
         { provide: TagsService, useValue: mockTagsService },
@@ -82,7 +81,6 @@ describe("PublishQuizTemplatesService", () => {
     await service.publish({
       title: "Phishing basics",
       description: "A quiz about phishing basics",
-      author,
       questions: [
         {
           name: "Suspicious SMS",
@@ -99,7 +97,7 @@ describe("PublishQuizTemplatesService", () => {
           templateImageIds: [12],
         },
       ],
-    })
+    }, author)
 
     expect(mockImagesService.linkToQuestion).toHaveBeenCalledWith([10, 11], 21)
     expect(mockImagesService.linkToQuestion).toHaveBeenCalledWith([12], 22)
@@ -111,7 +109,6 @@ describe("PublishQuizTemplatesService", () => {
     await service.publish({
       title: "Phishing basics",
       description: "A quiz about phishing basics",
-      author,
       questions: [
         {
           name: "Suspicious SMS",
@@ -120,7 +117,7 @@ describe("PublishQuizTemplatesService", () => {
           isPhishing: true,
         },
       ],
-    })
+    }, author)
 
     expect(mockImagesService.linkToQuestion).toHaveBeenCalledWith([], 30)
   })

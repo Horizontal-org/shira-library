@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common"
-import { and, eq, ne } from "drizzle-orm"
+import { and, eq, isNull, ne } from "drizzle-orm"
 import { MySql2Database } from "drizzle-orm/mysql2"
 import { DRIZZLE } from "../../db/drizzle.constants"
 import { authors } from "../../db/schema/authors"
@@ -11,12 +11,23 @@ import { DisplayNameTakenAuthorException } from "../exceptions/display-name-take
 export class AuthorsService {
   constructor(@Inject(DRIZZLE) private readonly db: MySql2Database<typeof schema>) { }
 
+  private readonly publicColumns = {
+    id: authors.id,
+    publicSpaceId: authors.publicSpaceId,
+    spaceName: authors.spaceName,
+    spaceDisplayName: authors.spaceDisplayName,
+    organizationName: authors.organizationName,
+    apiKeyPrefix: authors.apiKeyPrefix,
+    apiKeyRevokedAt: authors.apiKeyRevokedAt,
+    createdAt: authors.createdAt,
+  }
+
   async findAll() {
-    return this.db.select().from(authors)
+    return this.db.select(this.publicColumns).from(authors)
   }
 
   async findOne(id: number) {
-    const [result] = await this.db.select().from(authors).where(eq(authors.id, id))
+    const [result] = await this.db.select(this.publicColumns).from(authors).where(eq(authors.id, id))
     if (!result) throw new NotFoundAuthorException()
     return result
   }
@@ -60,6 +71,25 @@ export class AuthorsService {
       if (taken) throw new DisplayNameTakenAuthorException()
     }
     await this.db.update(authors).set(data).where(eq(authors.id, id))
+    return this.findOne(id)
+  }
+
+  async findByApiKeyHash(apiKeyHash: string) {
+    const [result] = await this.db
+      .select()
+      .from(authors)
+      .where(and(eq(authors.apiKeyHash, apiKeyHash), isNull(authors.apiKeyRevokedAt)))
+    return result ?? null
+  }
+
+  async setApiKey(id: number, apiKeyHash: string, apiKeyPrefix: string) {
+    await this.db.update(authors).set({ apiKeyHash, apiKeyPrefix, apiKeyRevokedAt: null }).where(eq(authors.id, id))
+    return this.findOne(id)
+  }
+
+  async revokeApiKey(id: number) {
+    await this.findOne(id)
+    await this.db.update(authors).set({ apiKeyRevokedAt: new Date() }).where(eq(authors.id, id))
     return this.findOne(id)
   }
 }

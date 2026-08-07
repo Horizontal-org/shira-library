@@ -16,6 +16,12 @@ export class AuthorResponseDto {
   @ApiProperty({ example: "Acme Corp" })
   organizationName: string
 
+  @ApiProperty({ example: "slib_9f3a1c2e", nullable: true })
+  apiKeyPrefix: string | null
+
+  @ApiProperty({ example: null, nullable: true, format: "date-time" })
+  apiKeyRevokedAt: Date | null
+
   @ApiProperty({ example: "2026-06-04T12:00:00.000Z", format: "date-time" })
   createdAt: Date
 }
@@ -23,4 +29,9 @@ export class AuthorResponseDto {
 export class DisplayNameAvailableResponseDto {
   @ApiProperty({ example: true })
   available: boolean
+}
+
+export class RegisterAuthorResponseDto {
+  @ApiProperty({ example: "slib_9f3a1c2e...redacted" })
+  apiKey: string
 }

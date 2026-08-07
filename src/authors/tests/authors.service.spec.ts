@@ -36,6 +36,31 @@ describe("AuthorsService", () => {
     expect(service).toBeDefined()
   })
 
+  describe("findAll", () => {
+    it("selects only the public columns, excluding apiKeyHash", async () => {
+      mockDb.from.mockResolvedValueOnce([{ id: 4, spaceName: "acme" }])
+
+      const result = await service.findAll()
+
+      const selectArg = mockDb.select.mock.calls[0][0]
+      expect(selectArg).not.toHaveProperty("apiKeyHash")
+      expect(selectArg).toHaveProperty("apiKeyPrefix")
+      expect(selectArg).toHaveProperty("apiKeyRevokedAt")
+      expect(result).toEqual([{ id: 4, spaceName: "acme" }])
+    })
+  })
+
+  describe("findOne", () => {
+    it("selects only the public columns, excluding apiKeyHash", async () => {
+      mockDb.where.mockResolvedValueOnce([{ id: 4, spaceName: "acme" }])
+
+      await service.findOne(4)
+
+      const selectArg = mockDb.select.mock.calls[0][0]
+      expect(selectArg).not.toHaveProperty("apiKeyHash")
+    })
+  })
+
   describe("update", () => {
     it("throws NotFoundAuthorException when the id does not match an author", async () => {
       mockDb.where.mockResolvedValueOnce([])
@@ -61,6 +86,53 @@ describe("AuthorsService", () => {
 
       await expect(service.update(4, { spaceDisplayName: "Acme Corp" })).rejects.toThrow(DisplayNameTakenAuthorException)
       expect(mockDb.update).not.toHaveBeenCalled()
+    })
+  })
+
+  describe("findByApiKeyHash", () => {
+    it("returns the matching non-revoked author", async () => {
+      mockDb.where.mockResolvedValueOnce([{ id: 4, apiKeyHash: "hash123" }])
+
+      await expect(service.findByApiKeyHash("hash123")).resolves.toEqual({ id: 4, apiKeyHash: "hash123" })
+    })
+
+    it("returns null when no author matches", async () => {
+      mockDb.where.mockResolvedValueOnce([])
+
+      await expect(service.findByApiKeyHash("unknown")).resolves.toBeNull()
+    })
+  })
+
+  describe("revokeApiKey", () => {
+    it("throws NotFoundAuthorException when the id does not match an author", async () => {
+      mockDb.where.mockResolvedValueOnce([])
+
+      await expect(service.revokeApiKey(99)).rejects.toThrow(NotFoundAuthorException)
+    })
+
+    it("sets apiKeyRevokedAt and returns the updated row", async () => {
+      mockDb.where
+        .mockResolvedValueOnce([{ id: 4 }])
+        .mockResolvedValueOnce(undefined)
+        .mockResolvedValueOnce([{ id: 4, apiKeyRevokedAt: new Date("2026-01-01") }])
+
+      const result = await service.revokeApiKey(4)
+
+      expect(mockDb.update).toHaveBeenCalled()
+      expect(result).toEqual({ id: 4, apiKeyRevokedAt: new Date("2026-01-01") })
+    })
+  })
+
+  describe("setApiKey", () => {
+    it("stores the hash and prefix and returns the updated row", async () => {
+      mockDb.where
+        .mockResolvedValueOnce(undefined)
+        .mockResolvedValueOnce([{ id: 4, apiKeyHash: "hash123", apiKeyPrefix: "slib_abcd" }])
+
+      const result = await service.setApiKey(4, "hash123", "slib_abcd")
+
+      expect(mockDb.update).toHaveBeenCalled()
+      expect(result).toEqual({ id: 4, apiKeyHash: "hash123", apiKeyPrefix: "slib_abcd" })
     })
   })
 

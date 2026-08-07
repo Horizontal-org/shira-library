@@ -84,7 +84,7 @@ describe("ImagesService", () => {
 
   describe("upload", () => {
     it("rejects a file whose real MIME type is not an allowed image type", async () => {
-      mockFileTypeFromBuffer.mockResolvedValueOnce({ mime: "application/pdf" })
+      mockFileTypeFromBuffer.mockResolvedValueOnce({ mime: "application/pdf", ext: "pdf" })
 
       await expect(service.upload(file)).rejects.toThrow(InvalidFileTypeImageException)
       expect(mockMinio.putObject).not.toHaveBeenCalled()
@@ -97,7 +97,7 @@ describe("ImagesService", () => {
     })
 
     it("stores a new image and inserts a row keyed by its content hash when no match exists", async () => {
-      mockFileTypeFromBuffer.mockResolvedValueOnce({ mime: "image/png" })
+      mockFileTypeFromBuffer.mockResolvedValueOnce({ mime: "image/png", ext: "png" })
       mockDb.where.mockResolvedValueOnce([])
       mockDb.values.mockResolvedValueOnce([{ insertId: 42 }])
 
@@ -112,11 +112,28 @@ describe("ImagesService", () => {
       expect(mockDb.values).toHaveBeenCalledWith(
         expect.objectContaining({ hash: fileHash, name: "screenshot.png" }),
       )
-      expect(result).toEqual({ id: 42, relativePath: expect.stringContaining("question-template-images/") })
+      expect(result).toEqual({ id: 42, relativePath: expect.stringMatching(/^question-template-images\/\d+_[0-9a-f]{16}\.png$/) })
+    })
+
+    it("derives the storage filename from the content hash, ignoring the client-supplied name", async () => {
+      const traversalFile = {
+        originalname: "../../../../evil.png",
+        buffer: file.buffer,
+        size: 10,
+      } as Express.Multer.File
+      mockFileTypeFromBuffer.mockResolvedValueOnce({ mime: "image/png", ext: "png" })
+      mockDb.where.mockResolvedValueOnce([])
+      mockDb.values.mockResolvedValueOnce([{ insertId: 43 }])
+
+      const result = await service.upload(traversalFile)
+
+      expect(result.relativePath).not.toContain("..")
+      expect(result.relativePath).not.toContain("evil")
+      expect(result.relativePath).toMatch(/^question-template-images\/\d+_[0-9a-f]{16}\.png$/)
     })
 
     it("reuses the existing image row and skips Minio when the hash already exists", async () => {
-      mockFileTypeFromBuffer.mockResolvedValueOnce({ mime: "image/png" })
+      mockFileTypeFromBuffer.mockResolvedValueOnce({ mime: "image/png", ext: "png" })
       mockDb.where.mockResolvedValueOnce([
         { id: 5, hash: fileHash, relativePath: "question-template-images/existing.png", name: "existing.png" },
       ])
@@ -126,21 +143,6 @@ describe("ImagesService", () => {
       expect(mockMinio.putObject).not.toHaveBeenCalled()
       expect(mockDb.insert).not.toHaveBeenCalled()
       expect(result).toEqual({ id: 5, relativePath: "question-template-images/existing.png" })
-    })
-
-    it("links the image to a question at upload time when questionId is given", async () => {
-      mockFileTypeFromBuffer.mockResolvedValueOnce({ mime: "image/jpeg" })
-      mockDb.where
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([])
-      mockDb.values
-        .mockResolvedValueOnce([{ insertId: 7 }])
-        .mockResolvedValueOnce(undefined)
-
-      await service.upload(file, 99)
-
-      expect(mockDb.insert).toHaveBeenCalledTimes(2)
-      expect(mockDb.values).toHaveBeenNthCalledWith(2, [{ imageId: 7, questionId: 99 }])
     })
   })
 

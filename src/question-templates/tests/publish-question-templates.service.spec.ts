@@ -1,7 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing"
 import { DRIZZLE } from "../../db/drizzle.constants"
 import { PublishQuestionTemplatesService } from "../services/publish-question-templates.service"
-import { AuthorsService } from "../../authors/services/authors.service"
+import { Author } from "../../db/schema/authors"
 import { CreateQuestionTemplatesService } from "../services/create.question-templates.service"
 import { TagsService } from "../../tags/services/tags.service"
 import { LangTagsService } from "../../lang-tags/services/lang-tags.service"
@@ -13,10 +13,6 @@ describe("PublishQuestionTemplatesService", () => {
   const mockDb = {
     insert: jest.fn().mockReturnThis(),
     values: jest.fn(),
-  }
-
-  const mockAuthorsService = {
-    findOrCreate: jest.fn(),
   }
 
   const mockCreateQuestionTemplatesService = {
@@ -35,6 +31,18 @@ describe("PublishQuestionTemplatesService", () => {
     linkToQuestion: jest.fn(),
   }
 
+  const author: Author = {
+    id: 3,
+    publicSpaceId: "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+    spaceName: "acme",
+    spaceDisplayName: "Acme",
+    organizationName: "Acme Corp",
+    apiKeyHash: null,
+    apiKeyPrefix: null,
+    apiKeyRevokedAt: null,
+    createdAt: new Date("2026-01-01"),
+  }
+
   beforeEach(async () => {
     jest.clearAllMocks()
     mockDb.insert.mockReturnThis()
@@ -43,7 +51,6 @@ describe("PublishQuestionTemplatesService", () => {
       providers: [
         PublishQuestionTemplatesService,
         { provide: DRIZZLE, useValue: mockDb },
-        { provide: AuthorsService, useValue: mockAuthorsService },
         { provide: CreateQuestionTemplatesService, useValue: mockCreateQuestionTemplatesService },
         { provide: TagsService, useValue: mockTagsService },
         { provide: LangTagsService, useValue: mockLangTagsService },
@@ -59,7 +66,6 @@ describe("PublishQuestionTemplatesService", () => {
   })
 
   it("links the submitted template image ids to the newly created question", async () => {
-    mockAuthorsService.findOrCreate.mockResolvedValueOnce({ id: 3 })
     mockCreateQuestionTemplatesService.create.mockResolvedValueOnce(21)
 
     await service.publish({
@@ -67,20 +73,16 @@ describe("PublishQuestionTemplatesService", () => {
       content: "<p>content</p>",
       appType: "sms",
       isPhishing: true,
-      author: {
-        publicSpaceId: "01ARZ3NDEKTSV4RRFFQ69G5FAV",
-        spaceName: "acme",
-        spaceDisplayName: "Acme",
-        organizationName: "Acme Corp",
-      },
       templateImageIds: [10, 11],
-    })
+    }, author)
 
+    expect(mockCreateQuestionTemplatesService.create).toHaveBeenCalledWith(
+      expect.objectContaining({ authorId: author.id }),
+    )
     expect(mockImagesService.linkToQuestion).toHaveBeenCalledWith([10, 11], 21)
   })
 
   it("links an empty array when no template image ids are submitted", async () => {
-    mockAuthorsService.findOrCreate.mockResolvedValueOnce({ id: 3 })
     mockCreateQuestionTemplatesService.create.mockResolvedValueOnce(22)
 
     await service.publish({
@@ -88,13 +90,7 @@ describe("PublishQuestionTemplatesService", () => {
       content: "<p>content</p>",
       appType: "sms",
       isPhishing: true,
-      author: {
-        publicSpaceId: "01ARZ3NDEKTSV4RRFFQ69G5FAV",
-        spaceName: "acme",
-        spaceDisplayName: "Acme",
-        organizationName: "Acme Corp",
-      },
-    })
+    }, author)
 
     expect(mockImagesService.linkToQuestion).toHaveBeenCalledWith([], 22)
   })

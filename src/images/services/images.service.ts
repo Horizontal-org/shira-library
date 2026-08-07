@@ -28,14 +28,12 @@ export class ImagesService {
     this.bucketName = bucketName;
   }
 
-  async upload(file: Express.Multer.File, questionId?: number) {
-    await this.validateFile(file);
+  async upload(file: Express.Multer.File) {
+    const type = await this.validateFile(file);
 
     const hash = createHash("sha256").update(file.buffer).digest("hex");
     const [existing] = await this.db.select().from(images).where(eq(images.hash, hash));
-    const image = existing ?? await this.storeNewImage(file, hash);
-
-    if (questionId) await this.linkToQuestion([image.id], questionId);
+    const image = existing ?? await this.storeNewImage(file, hash, type.ext);
 
     return { id: image.id, relativePath: image.relativePath };
   }
@@ -99,8 +97,8 @@ export class ImagesService {
     });
   }
 
-  private async storeNewImage(file: Express.Multer.File, hash: string) {
-    const relativePath = this.buildRelativePath(file.originalname);
+  private async storeNewImage(file: Express.Multer.File, hash: string, ext: string) {
+    const relativePath = this.buildRelativePath(hash, ext);
     await this.minioService.putObject(this.bucketName, relativePath, file.buffer, file.size);
 
     const [result] = await this.db.insert(images).values({
@@ -112,26 +110,18 @@ export class ImagesService {
     return { id: result.insertId, relativePath };
   }
 
-  private async validateFile(file: Express.Multer.File): Promise<void> {
+  private async validateFile(file: Express.Multer.File): Promise<{ mime: string; ext: string }> {
     // Lazily required: file-type is ESM-only and only needs resolving when actually validating a file.
     const { fileTypeFromBuffer: detectFileType } = require("file-type") as { fileTypeFromBuffer: typeof fileTypeFromBuffer };
     const type = await detectFileType(file.buffer);
     if (!type || !ALLOWED_MIME_TYPES.includes(type.mime)) {
       throw new InvalidFileTypeImageException();
     }
+    return type;
   }
 
-  private buildRelativePath(originalName: string): string {
-    const timestamp = new Date().toISOString();
-    const sanitized = this.sanitizeFileName(originalName);
-    return `question-template-images/${timestamp}_${sanitized}`;
-  }
-
-  private sanitizeFileName(input: string): string {
-    let output = "";
-    for (let i = 0; i < input.length; i++) {
-      if (input.charCodeAt(i) <= 127) output += input.charAt(i);
-    }
-    return output;
+  private buildRelativePath(hash: string, ext: string): string {
+    const timestamp = Date.now();
+    return `question-template-images/${timestamp}_${hash.slice(0, 16)}.${ext}`;
   }
 }

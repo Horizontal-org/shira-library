@@ -1,16 +1,19 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Query, UseGuards } from "@nestjs/common"
-import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger"
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from "@nestjs/common"
+import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger"
+import { Throttle } from "@nestjs/throttler"
 import { Public } from "../../auth/public.decorator"
 import { Roles } from "../../auth/roles.decorator"
 import { RolesGuard } from "../../auth/roles.guard"
 import { AuthorsService } from "../services/authors.service"
+import { RegisterAuthorService } from "../services/register-author.service"
 import { ListAuthorSubmissionsService } from "../services/list-author-submissions.service"
 import { PaginatedAuthorSubmissionsResponseDto } from "../dto/author-submission-response.dto"
 import { PaginatedAuthorQuizSubmissionsResponseDto } from "../dto/author-quiz-submission-response.dto"
 import { ListAuthorSubmissionsDto } from "../dto/list-author-submissions.dto"
 import { UpdateAuthorDto } from "../dto/update-author.dto"
 import { CheckDisplayNameAvailableDto } from "../dto/check-display-name-available.dto"
-import { AuthorResponseDto, DisplayNameAvailableResponseDto } from "../dto/author-response.dto"
+import { PublishAuthorDto } from "../dto/author-publish.dto"
+import { AuthorResponseDto, DisplayNameAvailableResponseDto, RegisterAuthorResponseDto } from "../dto/author-response.dto"
 
 @ApiTags('authors')
 @ApiBearerAuth()
@@ -18,8 +21,18 @@ import { AuthorResponseDto, DisplayNameAvailableResponseDto } from "../dto/autho
 export class AuthorsController {
   constructor(
     private readonly authorsService: AuthorsService,
+    private readonly registerAuthorService: RegisterAuthorService,
     private readonly listAuthorSubmissionsService: ListAuthorSubmissionsService,
   ) { }
+
+  @Post("register")
+  @Public()
+  @Throttle({ strict: {} })
+  @ApiOperation({ summary: "Register a self-hosted space and obtain (or rotate) its shira-library API key" })
+  @ApiCreatedResponse({ type: RegisterAuthorResponseDto })
+  async register(@Body() body: PublishAuthorDto) {
+    return this.registerAuthorService.register(body)
+  }
 
   @Get(":publicSpaceId/question-submissions")
   @Public()
@@ -80,5 +93,14 @@ export class AuthorsController {
   @ApiOkResponse({ type: AuthorResponseDto })
   async update(@Param("id", ParseIntPipe) id: number, @Body() body: UpdateAuthorDto) {
     return this.authorsService.update(id, body)
+  }
+
+  @Patch(":id/revoke-key")
+  @UseGuards(RolesGuard)
+  @Roles("super-admin")
+  @ApiOperation({ summary: "Revoke an author's shira-library API key" })
+  @ApiOkResponse({ type: AuthorResponseDto })
+  async revokeKey(@Param("id", ParseIntPipe) id: number) {
+    return this.authorsService.revokeApiKey(id)
   }
 }
