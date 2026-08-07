@@ -2,7 +2,7 @@ import { Inject, Injectable } from "@nestjs/common";
 import { MySql2Database } from "drizzle-orm/mysql2";
 import { DRIZZLE } from "../../db/drizzle.constants";
 import { CreateQuestionTemplatesService } from "./create.question-templates.service";
-import { AuthorsService } from "../../authors/services/authors.service";
+import { Author } from "../../db/schema/authors";
 import { PublishQuestionTemplateDto } from "../dto/publish-question-template.dto";
 import { TagsService } from "../../tags/services/tags.service";
 import { LangTagsService } from "../../lang-tags/services/lang-tags.service";
@@ -17,25 +17,17 @@ import { publishEvents } from "../../db/schema/publish-events"
 export class PublishQuestionTemplatesService {
   constructor(
     @Inject(DRIZZLE) private readonly db: MySql2Database<typeof schema>,
-    private readonly authorsService: AuthorsService,
     private readonly createQuestionTemplatesService: CreateQuestionTemplatesService,
     private readonly tagsService: TagsService,
     private readonly langTagsService: LangTagsService,
     private readonly imagesService: ImagesService,
   ) { }
 
-  async publish(data: PublishQuestionTemplateDto): Promise<void> {
+  async publish(data: PublishQuestionTemplateDto, author: Author): Promise<void> {
     await Promise.all([
       this.tagsService.validateIds(data.tagIds ?? []),
       this.langTagsService.validateIds(data.langTagIds ?? []),
     ])
-
-    const author = await this.authorsService.findOrCreate({
-      publicSpaceId: data.author.publicSpaceId,
-      spaceName: data.author.spaceName,
-      spaceDisplayName: data.author.spaceDisplayName,
-      organizationName: data.author.organizationName,
-    })
 
     const questionId = await this.createQuestionTemplatesService.create({
       name: data.name,

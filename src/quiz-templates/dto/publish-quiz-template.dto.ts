@@ -1,7 +1,6 @@
-import { PublishAuthorDto } from '@/authors/dto/author-publish.dto'
 import { ExplanationDto } from '@/question-templates/dto/explanation.dto'
 import { Type } from 'class-transformer'
-import { IsArray, IsInt, IsNotEmpty, IsOptional, IsString, ArrayMinSize, MaxLength, IsBoolean, ValidateNested, IsDefined } from 'class-validator'
+import { IsArray, IsInt, IsNotEmpty, IsOptional, IsString, ArrayMinSize, MaxLength, IsBoolean, ValidateNested } from 'class-validator'
 
 class QuizQuestionTemplateDto {
   @IsString()
@@ -65,9 +64,4 @@ export class PublishQuizTemplateDto {
   @IsArray()
   @IsInt({ each: true })
   langTagIds?: number[]
-
-  @IsDefined()
-  @ValidateNested()
-  @Type(() => PublishAuthorDto)
-  author: PublishAuthorDto
 }

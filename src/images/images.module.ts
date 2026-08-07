@@ -5,8 +5,10 @@ import { ImagesController } from "./controllers/images.controller";
 import { ImagesService } from "./services/images.service";
 import { ImagesCommand } from "./images.command";
 import { MINIO_TOKEN } from "./decorators/minio.decorator";
+import { AuthorsModule } from "../authors/authors.module";
 
 @Module({
+  imports: [AuthorsModule],
   controllers: [ImagesController],
   providers: [
     ImagesService,
