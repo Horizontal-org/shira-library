@@ -9,7 +9,7 @@ export const authors = mysqlTable("authors", {
   organizationName: varchar("organization_name", { length: 255 }).notNull(),
   apiKeyHash: varchar("api_key_hash", { length: 64 }),
   apiKeyPrefix: varchar("api_key_prefix", { length: 12 }),
-  apiKeyRevokedAt: timestamp("api_key_revoked_at"),
+  apiKeyRevokedAt: timestamp("api_key_revoked_at").default(sql`NULL`),
   createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
 });
 
