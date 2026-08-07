@@ -1,1 +1,0 @@
-ALTER TABLE `authors` MODIFY COLUMN `api_key_revoked_at` timestamp DEFAULT NULL;

@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "335ebc02-606f-4d85-a8a7-c8c08d2b432e",
+  "id": "8e5e7f02-430c-409f-aec9-c262370888ba",
   "prevId": "bfaf4d68-5ca5-417b-9179-db1404a87878",
   "tables": {
     "authors": {
@@ -61,7 +61,8 @@
           "type": "timestamp",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false
+          "autoincrement": false,
+          "default": "NULL"
         },
         "created_at": {
           "name": "created_at",
