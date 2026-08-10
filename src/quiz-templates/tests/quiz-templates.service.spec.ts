@@ -28,6 +28,7 @@ describe("QuizTemplatesService", () => {
     update: jest.fn().mockReturnThis(),
     set: jest.fn().mockReturnThis(),
     delete: jest.fn().mockReturnThis(),
+    transaction: jest.fn(),
   }
 
   beforeEach(async () => {
@@ -44,6 +45,7 @@ describe("QuizTemplatesService", () => {
     mockDb.update.mockReturnThis()
     mockDb.set.mockReturnThis()
     mockDb.delete.mockReturnThis()
+    mockDb.transaction.mockImplementation(async (callback) => callback(mockDb))
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
