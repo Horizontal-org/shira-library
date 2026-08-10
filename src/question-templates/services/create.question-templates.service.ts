@@ -1,5 +1,4 @@
 import { Inject, Injectable } from "@nestjs/common"
-import { createHash } from "crypto"
 import { and, eq } from "drizzle-orm"
 import { MySql2Database } from "drizzle-orm/mysql2"
 import { DRIZZLE } from "../../db/drizzle.constants"
@@ -8,6 +7,7 @@ import { questionTemplates } from "../../db/schema/question-templates"
 import { explanationTemplates } from "../../db/schema/explanation-templates"
 import { sanitizeQuestionContent } from "../../utils/sanitize-html.util"
 import { DuplicateQuestionTemplateException } from "../exceptions/duplicate-content.question-template.exception"
+import { buildQuestionContentFingerprint } from "../utils/question-content-fingerprint"
 
 export type CreateQuestionExplanationInput = {
   position: string
@@ -34,8 +34,7 @@ export class CreateQuestionTemplatesService {
   constructor(@Inject(DRIZZLE) private readonly db: MySql2Database<typeof schema>) { }
 
   async create(data: CreateQuestionTemplateInput): Promise<number> {
-    const sanitizedContent = sanitizeQuestionContent(data.content)
-    const contentHash = createHash("sha256").update(sanitizedContent).digest("hex")
+    const { sanitizedContent, contentHash } = buildQuestionContentFingerprint(data.content)
 
     if (data.authorId !== undefined) {
       const [existing] = await this.db
