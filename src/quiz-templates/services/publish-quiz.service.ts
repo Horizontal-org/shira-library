@@ -4,7 +4,6 @@ import { QuizTemplateResponseDto } from "../dto/quiz-template-response.dto";
 import { DRIZZLE } from "../../db/drizzle.constants";
 import { MySql2Database } from "drizzle-orm/mysql2";
 import { and, eq } from "drizzle-orm";
-import { createHash } from "crypto";
 import { Author } from "../../db/schema/authors";
 import { publishEvents, quizTemplates } from "../../db/schema";
 import * as schema from "../../db/schema"
@@ -18,6 +17,7 @@ import { quizQuestions } from "../../db/schema/quiz-questions";
 import { quizTags } from "../../db/schema/quiz-tags";
 import { quizLangTags } from "../../db/schema/quiz-lang-tags";
 import { sanitizeQuestionContent } from "../../utils/sanitize-html.util";
+import { buildQuestionContentFingerprint } from "../../question-templates/utils/question-content-fingerprint";
 
 @Injectable()
 export class PublishQuizTemplatesService {
@@ -45,8 +45,7 @@ export class PublishQuizTemplatesService {
 
       const questionIds: number[] = []
       for (const question of data.questions) {
-        const content = sanitizeQuestionContent(question.content)
-        const contentHash = createHash("sha256").update(content).digest("hex")
+        const { sanitizedContent: content, contentHash } = buildQuestionContentFingerprint(question.content)
 
         const [existing] = await tx
           .select({ id: questionTemplates.id })
