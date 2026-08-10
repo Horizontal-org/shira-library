@@ -3,26 +3,30 @@ import { PublishQuizTemplateDto } from "../dto/publish-quiz-template.dto";
 import { QuizTemplateResponseDto } from "../dto/quiz-template-response.dto";
 import { DRIZZLE } from "../../db/drizzle.constants";
 import { MySql2Database } from "drizzle-orm/mysql2";
+import { and, eq } from "drizzle-orm";
+import { createHash } from "crypto";
 import { Author } from "../../db/schema/authors";
 import { publishEvents, quizTemplates } from "../../db/schema";
 import * as schema from "../../db/schema"
 import { QuizTemplatesService } from "./quiz-templates.service";
-import { CreateQuestionTemplatesService } from "../../question-templates/services/create.question-templates.service";
 import { TagsService } from "../../tags/services/tags.service";
 import { LangTagsService } from "../../lang-tags/services/lang-tags.service";
-import { ImagesService } from "../../images/services/images.service";
+import { questionTemplates } from "../../db/schema/question-templates";
+import { explanationTemplates } from "../../db/schema/explanation-templates";
+import { questionTemplateImages } from "../../db/schema/question-template-images";
+import { quizQuestions } from "../../db/schema/quiz-questions";
+import { quizTags } from "../../db/schema/quiz-tags";
+import { quizLangTags } from "../../db/schema/quiz-lang-tags";
+import { sanitizeQuestionContent } from "../../utils/sanitize-html.util";
 
 @Injectable()
 export class PublishQuizTemplatesService {
   constructor(
     @Inject(DRIZZLE) private readonly db: MySql2Database<typeof schema>,
     private readonly quizService: QuizTemplatesService,
-    private readonly createQuestionService: CreateQuestionTemplatesService,
     private readonly tagsService: TagsService,
     private readonly langTagsService: LangTagsService,
-    private readonly imagesService: ImagesService,
   ) { }
-
 
   async publish(data: PublishQuizTemplateDto, author: Author): Promise<QuizTemplateResponseDto> {
     await Promise.all([
@@ -30,51 +34,81 @@ export class PublishQuizTemplatesService {
       this.langTagsService.validateIds(data.langTagIds ?? []),
     ])
 
-    const [result] = await this.db.insert(quizTemplates).values({
-      title: data.title.trim(),
-      description: data.description.trim(),
-      authorId: author.id,
-      approved: false,
-    })
-    const quizId = result.insertId
+    const quizId = await this.db.transaction(async (tx) => {
+      const [result] = await tx.insert(quizTemplates).values({
+        title: data.title.trim(),
+        description: data.description.trim(),
+        authorId: author.id,
+        approved: false,
+      })
+      const quizId = result.insertId
 
-    const questionIdsToLink = await Promise.all(
-      data.questions.map((q) =>
-        this.createQuestionService.create({
-          name: q.name,
-          content: q.content,
-          appType: q.appType,
-          defaultApp: q.defaultApp,
-          isPhishing: q.isPhishing,
+      const questionIds: number[] = []
+      for (const question of data.questions) {
+        const content = sanitizeQuestionContent(question.content)
+        const contentHash = createHash("sha256").update(content).digest("hex")
+
+        const [existing] = await tx
+          .select({ id: questionTemplates.id })
+          .from(questionTemplates)
+          .where(and(
+            eq(questionTemplates.authorId, author.id),
+            eq(questionTemplates.contentHash, contentHash),
+          ))
+
+        if (existing) {
+          questionIds.push(existing.id)
+          continue
+        }
+
+        const [questionResult] = await tx.insert(questionTemplates).values({
+          name: question.name,
+          content,
+          contentHash,
+          appType: question.appType,
+          defaultApp: question.defaultApp,
+          isPhishing: question.isPhishing,
           isDemo: false,
           highlighted: false,
           approved: false,
           authorId: author.id,
-          explanations: q.explanations?.map((exp) => ({
-            position: exp.position,
-            positionIndex: String(exp.index),
-            content: exp.content,
-          })),
-        }),
-      ),
-    )
+        })
+        const questionId = questionResult.insertId
+        questionIds.push(questionId)
 
+        if (question.explanations?.length) {
+          await tx.insert(explanationTemplates).values(question.explanations.map((explanation) => ({
+            questionId,
+            position: explanation.position,
+            positionIndex: String(explanation.index),
+            content: sanitizeQuestionContent(explanation.content),
+          })))
+        }
 
-    await Promise.all(
-      data.questions.map((q, i) => this.imagesService.linkToQuestion(q.templateImageIds ?? [], questionIdsToLink[i])),
-    )
+        const imageIds = [...new Set(question.templateImageIds ?? [])]
+        if (imageIds.length) {
+          await tx.insert(questionTemplateImages).values(imageIds.map((imageId) => ({ imageId, questionId })))
+        }
+      }
 
-    await this.quizService.linkQuizRelations(quizId, {
-      questionIds: questionIdsToLink,
-      langTagIds: data.langTagIds,
-      tagIds: data.tagIds
-    })
+      await tx.insert(quizQuestions).values([...new Set(questionIds)].map((questionId) => ({ quizId, questionId })))
 
-    await this.db.insert(publishEvents).values({
-      resourceType: 'quiz_template',
-      resourceId: String(quizId),
-      authorId: author.id,
-      status: 'in_review',
+      if (data.tagIds?.length) {
+        await tx.insert(quizTags).values(data.tagIds.map((tagId) => ({ quizId, tagId })))
+      }
+
+      if (data.langTagIds?.length) {
+        await tx.insert(quizLangTags).values(data.langTagIds.map((langTagId) => ({ quizId, langTagId })))
+      }
+
+      await tx.insert(publishEvents).values({
+        resourceType: 'quiz_template',
+        resourceId: String(quizId),
+        authorId: author.id,
+        status: 'in_review',
+      })
+
+      return quizId
     })
 
     return this.quizService.findOne(quizId)
