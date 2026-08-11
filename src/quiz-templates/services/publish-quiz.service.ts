@@ -3,6 +3,7 @@ import { PublishQuizTemplateDto } from "../dto/publish-quiz-template.dto";
 import { QuizTemplateResponseDto } from "../dto/quiz-template-response.dto";
 import { DRIZZLE } from "../../db/drizzle.constants";
 import { MySql2Database } from "drizzle-orm/mysql2";
+import { and, eq } from "drizzle-orm";
 import { Author } from "../../db/schema/authors";
 import { publishEvents, quizTemplates } from "../../db/schema";
 import * as schema from "../../db/schema"
