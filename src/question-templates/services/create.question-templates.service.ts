@@ -1,12 +1,10 @@
 import { Inject, Injectable } from "@nestjs/common"
-import { and, eq } from "drizzle-orm"
 import { MySql2Database } from "drizzle-orm/mysql2"
 import { DRIZZLE } from "../../db/drizzle.constants"
 import * as schema from "../../db/schema"
 import { questionTemplates } from "../../db/schema/question-templates"
 import { explanationTemplates } from "../../db/schema/explanation-templates"
 import { sanitizeQuestionContent } from "../../utils/sanitize-html.util"
-import { DuplicateQuestionTemplateException } from "../exceptions/duplicate-content.question-template.exception"
 import { buildQuestionContentFingerprint } from "../utils/question-content-fingerprint"
 
 export type CreateQuestionExplanationInput = {
@@ -35,15 +33,6 @@ export class CreateQuestionTemplatesService {
 
   async create(data: CreateQuestionTemplateInput): Promise<number> {
     const { sanitizedContent, contentHash } = buildQuestionContentFingerprint(data.content)
-
-    if (data.authorId !== undefined) {
-      const [existing] = await this.db
-        .select({ id: questionTemplates.id })
-        .from(questionTemplates)
-        .where(and(eq(questionTemplates.authorId, data.authorId), eq(questionTemplates.contentHash, contentHash)))
-
-      if (existing) throw new DuplicateQuestionTemplateException()
-    }
 
     const [result] = await this.db.insert(questionTemplates).values({
       name: data.name,

@@ -70,10 +70,7 @@ describe("CreateQuestionTemplatesService", () => {
     ])
   })
 
-  describe("duplicate content detection", () => {
-    it("throws when the same author resubmits identical content", async () => {
-      mockDb.where.mockResolvedValueOnce([{ id: 5 }])
-
+  it("allows an author to create matching question content", async () => {
       await expect(
         service.create({
           name: "Suspicious SMS",
@@ -82,34 +79,9 @@ describe("CreateQuestionTemplatesService", () => {
           isPhishing: true,
           authorId: 1,
         }),
-      ).rejects.toThrow("question_template_duplicate_content")
-
-      expect(mockDb.insert).not.toHaveBeenCalled()
-    })
-
-    it("allows a different author to submit the same content", async () => {
-      mockDb.where.mockResolvedValueOnce([])
-
-      await expect(
-        service.create({
-          name: "Suspicious SMS",
-          content: "<p>content</p>",
-          appType: "sms",
-          isPhishing: true,
-          authorId: 2,
-        }),
       ).resolves.toBe(1)
-    })
-
-    it("skips the duplicate check when no authorId is given", async () => {
-      await service.create({
-        name: "Suspicious SMS",
-        content: "<p>content</p>",
-        appType: "sms",
-        isPhishing: true,
-      })
 
       expect(mockDb.select).not.toHaveBeenCalled()
-    })
+      expect(mockDb.insert).toHaveBeenCalled()
   })
 })

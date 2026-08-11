@@ -47,19 +47,6 @@ export class PublishQuizTemplatesService {
       for (const question of data.questions) {
         const { sanitizedContent: content, contentHash } = buildQuestionContentFingerprint(question.content)
 
-        const [existing] = await tx
-          .select({ id: questionTemplates.id })
-          .from(questionTemplates)
-          .where(and(
-            eq(questionTemplates.authorId, author.id),
-            eq(questionTemplates.contentHash, contentHash),
-          ))
-
-        if (existing) {
-          questionIds.push(existing.id)
-          continue
-        }
-
         const [questionResult] = await tx.insert(questionTemplates).values({
           name: question.name,
           content,

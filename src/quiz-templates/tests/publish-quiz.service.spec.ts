@@ -128,8 +128,10 @@ describe("PublishQuizTemplatesService", () => {
     ]))
   })
 
-  it("reuses an existing question and does not create its images again", async () => {
-    mockDb.where.mockResolvedValueOnce([{ id: 42 }])
+  it("creates a distinct question even when the author already has matching content", async () => {
+    mockDb.values
+      .mockResolvedValueOnce([{ insertId: 1 }])
+      .mockResolvedValueOnce([{ insertId: 42 }])
 
     await service.publish({
       title: "Phishing basics",
@@ -143,8 +145,13 @@ describe("PublishQuizTemplatesService", () => {
       }],
     }, author)
 
+    expect(mockDb.select).not.toHaveBeenCalled()
+    expect(mockDb.values).toHaveBeenCalledWith(expect.objectContaining({
+      authorId: author.id,
+      contentHash: expect.any(String),
+    }))
+    expect(mockDb.values).toHaveBeenCalledWith([{ imageId: 10, questionId: 42 }])
     expect(mockDb.values).toHaveBeenCalledWith([{ quizId: 1, questionId: 42 }])
-    expect(mockDb.values).not.toHaveBeenCalledWith(expect.objectContaining({ contentHash: expect.any(String) }))
   })
 
 })
