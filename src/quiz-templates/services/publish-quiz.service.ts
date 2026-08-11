@@ -3,7 +3,6 @@ import { PublishQuizTemplateDto } from "../dto/publish-quiz-template.dto";
 import { QuizTemplateResponseDto } from "../dto/quiz-template-response.dto";
 import { DRIZZLE } from "../../db/drizzle.constants";
 import { MySql2Database } from "drizzle-orm/mysql2";
-import { and, eq } from "drizzle-orm";
 import { Author } from "../../db/schema/authors";
 import { publishEvents, quizTemplates } from "../../db/schema";
 import * as schema from "../../db/schema"
@@ -46,19 +45,6 @@ export class PublishQuizTemplatesService {
       const questionIds: number[] = []
       for (const question of data.questions) {
         const { sanitizedContent: content, contentHash } = buildQuestionContentFingerprint(question.content)
-
-        const [existing] = await tx
-          .select({ id: questionTemplates.id })
-          .from(questionTemplates)
-          .where(and(
-            eq(questionTemplates.authorId, author.id),
-            eq(questionTemplates.contentHash, contentHash),
-          ))
-
-        if (existing) {
-          questionIds.push(existing.id)
-          continue
-        }
 
         const [questionResult] = await tx.insert(questionTemplates).values({
           name: question.name,
