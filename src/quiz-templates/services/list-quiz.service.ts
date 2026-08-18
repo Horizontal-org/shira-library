@@ -146,7 +146,7 @@ export class ListQuizTemplatesService {
         .where(eq(publishEvents.resourceType, "quiz_template"))
 
       conditions.push(
-        query.filters.status.includes("approved")
+        query.filters.status.includes("accepted")
           ? or(
             and(eq(quizTemplates.approved, true), notInArray(quizTemplates.id, submissionResourceIds)),
             submissionStatusCondition,

@@ -73,7 +73,7 @@ export class QuestionTemplatesController {
         tags: query.tags?.split(',').map((s) => s.trim()).filter(Boolean),
         appType: query.appType,
         isPhishing,
-        status: query.status?.split(',').map((status) => status.trim()).filter(Boolean) as ('in_review' | 'approved' | 'rejected')[] | undefined,
+        status: query.status?.split(',').map((status) => status.trim()).filter(Boolean) as ('in_review' | 'accepted' | 'rejected')[] | undefined,
       },
       sortBy: query.sortBy ?? 'createdAt',
       sortOrder: query.sortOrder ?? 'desc',

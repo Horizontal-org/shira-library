@@ -189,7 +189,7 @@ export class ListQuestionTemplatesService {
         .where(eq(publishEvents.resourceType, "question_template"))
 
       conditions.push(
-        query.filters.status.includes("approved")
+        query.filters.status.includes("accepted")
           ? or(
             and(eq(questionTemplates.approved, true), notInArray(questionTemplates.id, submissionResourceIds)),
             submissionStatusCondition,

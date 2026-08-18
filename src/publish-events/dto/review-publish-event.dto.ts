@@ -2,8 +2,8 @@ import { Transform } from "class-transformer"
 import { IsIn, IsNotEmpty, IsString, MaxLength, ValidateIf } from "class-validator"
 
 export class ReviewPublishEventDto {
-  @IsIn(["approved", "rejected"])
-  status: "approved" | "rejected"
+  @IsIn(["accepted", "rejected"])
+  status: "accepted" | "rejected"
 
   @ValidateIf((dto: ReviewPublishEventDto) => dto.status === "rejected")
   @IsString()
