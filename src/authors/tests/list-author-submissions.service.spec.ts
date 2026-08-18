@@ -45,7 +45,7 @@ describe("ListAuthorSubmissionsService", () => {
       ).rejects.toThrow(NotFoundAuthorException)
     })
 
-    it("maps rows, omitting reason when there is none, and returns pagination info", async () => {
+    it("maps rows without a submission note and returns pagination info", async () => {
       mockDb.where
         .mockResolvedValueOnce([{ id: 4 }])
         .mockReturnValueOnce(mockDb)
@@ -58,7 +58,7 @@ describe("ListAuthorSubmissionsService", () => {
           questionName: "Anti-virus marketing",
           createdAt: new Date("2026-07-21T10:00:00.000Z"),
           status: "in_review",
-          rejectedNote: null,
+          submissionNote: null,
         },
       ])
 
@@ -75,7 +75,7 @@ describe("ListAuthorSubmissionsService", () => {
             questionName: "Anti-virus marketing",
             dateSubmitted: "2026-07-21",
             status: "in_review",
-            reason: "",
+            submissionNote: "",
           },
         ],
         total: 1,
@@ -84,7 +84,7 @@ describe("ListAuthorSubmissionsService", () => {
       })
     })
 
-    it("includes reason when the submission was rejected", async () => {
+    it("includes the submission note when present", async () => {
       mockDb.where
         .mockResolvedValueOnce([{ id: 4 }])
         .mockReturnValueOnce(mockDb)
@@ -97,7 +97,7 @@ describe("ListAuthorSubmissionsService", () => {
           questionName: "Question for healthcare providers",
           createdAt: new Date("2026-07-03T10:00:00.000Z"),
           status: "rejected",
-          rejectedNote: "does not apply",
+          submissionNote: "does not apply",
         },
       ])
 
@@ -114,7 +114,7 @@ describe("ListAuthorSubmissionsService", () => {
             questionName: "Question for healthcare providers",
             dateSubmitted: "2026-07-03",
             status: "rejected",
-            reason: "does not apply",
+            submissionNote: "does not apply",
           },
         ],
         total: 3,
@@ -133,7 +133,7 @@ describe("ListAuthorSubmissionsService", () => {
       ).rejects.toThrow(NotFoundAuthorException)
     })
 
-    it("maps rows, omitting reason when there is none, and returns pagination info", async () => {
+    it("maps rows without a submission note and returns pagination info", async () => {
       mockDb.where
         .mockResolvedValueOnce([{ id: 4 }])
         .mockReturnValueOnce(mockDb)
@@ -146,7 +146,7 @@ describe("ListAuthorSubmissionsService", () => {
           quizTitle: "Anti-virus marketing quiz",
           createdAt: new Date("2026-07-21T10:00:00.000Z"),
           status: "in_review",
-          rejectedNote: null,
+          submissionNote: null,
         },
       ])
 
@@ -163,7 +163,7 @@ describe("ListAuthorSubmissionsService", () => {
             quizTitle: "Anti-virus marketing quiz",
             dateSubmitted: "2026-07-21",
             status: "in_review",
-            reason: "",
+            submissionNote: "",
           },
         ],
         total: 1,
@@ -172,7 +172,7 @@ describe("ListAuthorSubmissionsService", () => {
       })
     })
 
-    it("includes reason when the submission was rejected", async () => {
+    it("includes the submission note when present", async () => {
       mockDb.where
         .mockResolvedValueOnce([{ id: 4 }])
         .mockReturnValueOnce(mockDb)
@@ -185,7 +185,7 @@ describe("ListAuthorSubmissionsService", () => {
           quizTitle: "Healthcare providers quiz",
           createdAt: new Date("2026-07-03T10:00:00.000Z"),
           status: "rejected",
-          rejectedNote: "does not apply",
+          submissionNote: "does not apply",
         },
       ])
 
@@ -202,7 +202,7 @@ describe("ListAuthorSubmissionsService", () => {
             quizTitle: "Healthcare providers quiz",
             dateSubmitted: "2026-07-03",
             status: "rejected",
-            reason: "does not apply",
+            submissionNote: "does not apply",
           },
         ],
         total: 3,

@@ -1,0 +1,1 @@
+ALTER TABLE `publish_events` RENAME COLUMN `rejected_note` TO `submission_note`;

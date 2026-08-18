@@ -32,19 +32,19 @@ describe("ReviewPublishEventService", () => {
     service = module.get<ReviewPublishEventService>(ReviewPublishEventService)
   })
 
-  it("approves a question submission and clears an existing rejection note", async () => {
+  it("approves a question submission and persists its optional note", async () => {
     mockDb.where
       .mockResolvedValueOnce([{ id: 5, resourceType: "question_template", resourceId: "12", status: "in_review" }])
       .mockResolvedValueOnce(undefined)
       .mockResolvedValueOnce(undefined)
 
-    await expect(service.review(5, { status: "approved" })).resolves.toEqual({
+    await expect(service.review(5, { status: "approved", submissionNote: "Ready for the library" })).resolves.toEqual({
       id: "5",
       status: "approved",
-      rejectedNote: null,
+      submissionNote: "Ready for the library",
     })
     expect(mockDb.set).toHaveBeenNthCalledWith(1, { approved: true })
-    expect(mockDb.set).toHaveBeenNthCalledWith(2, { status: "approved", rejectedNote: null })
+    expect(mockDb.set).toHaveBeenNthCalledWith(2, { status: "approved", submissionNote: "Ready for the library" })
   })
 
   it("rejects a quiz submission and persists its note", async () => {
@@ -53,13 +53,13 @@ describe("ReviewPublishEventService", () => {
       .mockResolvedValueOnce(undefined)
       .mockResolvedValueOnce(undefined)
 
-    await expect(service.review(8, { status: "rejected", rejectedNote: "Missing sources" })).resolves.toEqual({
+    await expect(service.review(8, { status: "rejected", submissionNote: "Missing sources" })).resolves.toEqual({
       id: "8",
       status: "rejected",
-      rejectedNote: "Missing sources",
+      submissionNote: "Missing sources",
     })
     expect(mockDb.set).toHaveBeenNthCalledWith(1, { approved: false })
-    expect(mockDb.set).toHaveBeenNthCalledWith(2, { status: "rejected", rejectedNote: "Missing sources" })
+    expect(mockDb.set).toHaveBeenNthCalledWith(2, { status: "rejected", submissionNote: "Missing sources" })
   })
 
   it("throws when the submission does not exist", async () => {
@@ -78,7 +78,7 @@ describe("ReviewPublishEventService", () => {
   it("does not allow a reviewed submission to be changed again", async () => {
     mockDb.where.mockResolvedValueOnce([{ id: 7, resourceType: "quiz_template", resourceId: "21", status: "approved" }])
 
-    await expect(service.review(7, { status: "rejected", rejectedNote: "Changed my mind" })).rejects.toThrow(ConflictException)
+    await expect(service.review(7, { status: "rejected", submissionNote: "Changed my mind" })).rejects.toThrow(ConflictException)
     expect(mockDb.update).not.toHaveBeenCalled()
   })
 })
