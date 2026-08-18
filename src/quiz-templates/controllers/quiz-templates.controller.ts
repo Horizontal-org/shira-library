@@ -159,7 +159,7 @@ export class QuizTemplatesController {
   @Post("publish")
   @Public()
   @UseGuards(ApiKeyGuard)
-  @Throttle({ strict: {} })
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @UseGuards(PublishDailyThrottlerGuard)
   @ApiOperation({ summary: "Publish a quiz template from a shira space" })
   @ApiCreatedResponse({ type: QuizTemplateResponseDto })

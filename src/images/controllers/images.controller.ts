@@ -16,7 +16,7 @@ export class ImagesController {
   @Post("upload")
   @Public()
   @UseGuards(ApiKeyGuard)
-  @Throttle({ strict: {} })
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @UseInterceptors(FileInterceptor("file", { limits: { fileSize: 5 * 1024 * 1024 } }))
   @ApiOperation({ summary: "Upload an orphan image, to be linked to a question template via templateImageIds on publish" })
   @ApiCreatedResponse({ type: UploadImageResponseDto })

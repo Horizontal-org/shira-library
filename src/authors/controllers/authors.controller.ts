@@ -27,7 +27,7 @@ export class AuthorsController {
 
   @Post("register")
   @Public()
-  @Throttle({ strict: {} })
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @ApiOperation({ summary: "Register a self-hosted space and obtain (or rotate) its shira-library API key" })
   @ApiCreatedResponse({ type: RegisterAuthorResponseDto })
   async register(@Body() body: PublishAuthorDto) {
