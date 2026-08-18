@@ -25,7 +25,7 @@ export class ListQuizTemplatesDto {
   sortBy?: 'createdAt' | 'title'
 
   @IsOptional()
-  @Matches(/^(in_review|approved|rejected)(\s*,\s*(in_review|approved|rejected))*$/)
+  @Matches(/^(in_review|accepted|rejected)(\s*,\s*(in_review|accepted|rejected))*$/)
   @MaxLength(50)
   status?: string
 
@@ -43,7 +43,7 @@ export class ListQuizTemplatesDto {
 export interface QuizTemplateFilters {
   langTags?: string[]
   tags?: string[]
-  status?: ('in_review' | 'approved' | 'rejected')[]
+  status?: ('in_review' | 'accepted' | 'rejected')[]
 }
 
 export interface ListQuizTemplatesQuery {
