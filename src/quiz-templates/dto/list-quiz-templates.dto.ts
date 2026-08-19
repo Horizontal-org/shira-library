@@ -17,6 +17,11 @@ export class ListQuizTemplatesDto {
   tags?: string      // comma-separated slugs: "phishing,social-engineering"
 
   @IsOptional()
+  @IsString()
+  @MaxLength(31)
+  author?: string
+
+  @IsOptional()
   @IsIn(['asc', 'desc'])
   sortOrder?: 'asc' | 'desc'
 
@@ -43,6 +48,7 @@ export class ListQuizTemplatesDto {
 export interface QuizTemplateFilters {
   langTags?: string[]
   tags?: string[]
+  authorPublicSpaceId?: string
   status?: ('in_review' | 'accepted' | 'rejected')[]
 }
 

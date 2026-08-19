@@ -60,6 +60,7 @@ export class QuizTemplatesController {
       filters: {
         langTags: query.langTags?.split(',').map((s) => s.trim()).filter(Boolean),
         tags: query.tags?.split(',').map((s) => s.trim()).filter(Boolean),
+        authorPublicSpaceId: query.author,
       },
       sortOrder: query.sortOrder ?? 'desc',
       sortBy: query.sortBy ?? 'createdAt',
@@ -68,6 +69,13 @@ export class QuizTemplatesController {
     })
 
     return results;
+  }
+
+  @Get("creators")
+  @Public()
+  @ApiOperation({ summary: "List creators of public quiz templates" })
+  async findCreators() {
+    return this.listService.findCreators()
   }
 
   //super-admin routes
@@ -82,6 +90,7 @@ export class QuizTemplatesController {
       filters: {
         langTags: query.langTags?.split(',').map((s) => s.trim()).filter(Boolean),
         tags: query.tags?.split(',').map((s) => s.trim()).filter(Boolean),
+        authorPublicSpaceId: query.author,
         status: query.status?.split(',').map((status) => status.trim()).filter(Boolean) as ('in_review' | 'accepted' | 'rejected')[] | undefined,
       },
       sortOrder: query.sortOrder ?? 'desc',
