@@ -21,10 +21,10 @@ export class ReviewPublishEventService {
 
     if (!event) throw new NotFoundPublishEventException()
     if (event.status !== "in_review") {
-      throw new ConflictException("Only submissions in review can be approved or rejected")
+      throw new ConflictException("Only submissions in review can be accepted or rejected")
     }
 
-    const approved = data.status === "approved"
+    const approved = data.status === "accepted"
     const resourceId = Number(event.resourceId)
 
     if (event.resourceType === "question_template") {

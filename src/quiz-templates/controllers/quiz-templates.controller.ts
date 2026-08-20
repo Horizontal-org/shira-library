@@ -60,6 +60,7 @@ export class QuizTemplatesController {
       filters: {
         langTags: query.langTags?.split(',').map((s) => s.trim()).filter(Boolean),
         tags: query.tags?.split(',').map((s) => s.trim()).filter(Boolean),
+        authorPublicSpaceId: query.author,
       },
       sortOrder: query.sortOrder ?? 'desc',
       sortBy: query.sortBy ?? 'createdAt',
@@ -68,6 +69,13 @@ export class QuizTemplatesController {
     })
 
     return results;
+  }
+
+  @Get("creators")
+  @Public()
+  @ApiOperation({ summary: "List creators of public quiz templates" })
+  async findCreators() {
+    return this.listService.findCreators()
   }
 
   //super-admin routes
@@ -82,7 +90,8 @@ export class QuizTemplatesController {
       filters: {
         langTags: query.langTags?.split(',').map((s) => s.trim()).filter(Boolean),
         tags: query.tags?.split(',').map((s) => s.trim()).filter(Boolean),
-        status: query.status?.split(',').map((status) => status.trim()).filter(Boolean) as ('in_review' | 'approved' | 'rejected')[] | undefined,
+        authorPublicSpaceId: query.author,
+        status: query.status?.split(',').map((status) => status.trim()).filter(Boolean) as ('in_review' | 'accepted' | 'rejected')[] | undefined,
       },
       sortOrder: query.sortOrder ?? 'desc',
       sortBy: query.sortBy ?? 'createdAt',
@@ -159,7 +168,7 @@ export class QuizTemplatesController {
   @Post("publish")
   @Public()
   @UseGuards(ApiKeyGuard)
-  @Throttle({ strict: {} })
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @UseGuards(PublishDailyThrottlerGuard)
   @ApiOperation({ summary: "Publish a quiz template from a shira space" })
   @ApiCreatedResponse({ type: QuizTemplateResponseDto })

@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common"
-import { and, asc, count, desc, eq, inArray, like, notInArray, or, sql, SQL } from "drizzle-orm"
+import { and, asc, count, desc, eq, inArray, isNull, like, notInArray, or, sql, SQL } from "drizzle-orm"
 import { MySql2Database } from "drizzle-orm/mysql2"
 import { DRIZZLE } from "../../db/drizzle.constants"
 import { quizTemplates } from "../../db/schema/quiz-templates"
@@ -16,6 +16,31 @@ import { PaginatedQuizTemplatesResponseDto } from "../dto/quiz-template-response
 @Injectable()
 export class ListQuizTemplatesService {
   constructor(@Inject(DRIZZLE) private readonly db: MySql2Database<typeof schema>) { }
+
+  async findCreators() {
+    const [creators, [{ nonAttributedTemplateTotal }]] = await Promise.all([
+      this.db
+        .select({
+          publicSpaceId: authors.publicSpaceId,
+          displayName: authors.spaceDisplayName,
+        })
+        .from(quizTemplates)
+        .innerJoin(authors, eq(quizTemplates.authorId, authors.id))
+        .where(eq(quizTemplates.approved, true))
+        .groupBy(authors.publicSpaceId, authors.spaceDisplayName)
+        .orderBy(asc(authors.spaceDisplayName)),
+      this.db
+        .select({ nonAttributedTemplateTotal: count() })
+        .from(quizTemplates)
+        .where(and(eq(quizTemplates.approved, true), isNull(quizTemplates.authorId))),
+    ])
+
+    if (nonAttributedTemplateTotal > 0) {
+      creators.unshift({ publicSpaceId: "none", displayName: "Shira Team" })
+    }
+
+    return creators;
+  }
 
   async findAll(query: ListQuizTemplatesQuery): Promise<PaginatedQuizTemplatesResponseDto> {
     const conditions = this.buildConditions(query)
@@ -127,6 +152,20 @@ export class ListQuizTemplatesService {
       conditions.push(like(quizTemplates.title, `%${query.search}%`))
     }
 
+    if (query.filters.authorPublicSpaceId) {
+      conditions.push(
+        query.filters.authorPublicSpaceId === "none"
+          ? isNull(quizTemplates.authorId)
+          : inArray(
+            quizTemplates.authorId,
+            this.db
+              .select({ authorId: authors.id })
+              .from(authors)
+              .where(eq(authors.publicSpaceId, query.filters.authorPublicSpaceId)),
+          ),
+      )
+    }
+
     if (query.filters.status?.length) {
       const submissionStatusCondition =
         inArray(
@@ -146,7 +185,7 @@ export class ListQuizTemplatesService {
         .where(eq(publishEvents.resourceType, "quiz_template"))
 
       conditions.push(
-        query.filters.status.includes("approved")
+        query.filters.status.includes("accepted")
           ? or(
             and(eq(quizTemplates.approved, true), notInArray(quizTemplates.id, submissionResourceIds)),
             submissionStatusCondition,

@@ -21,16 +21,10 @@ import pretty from "pino-pretty";
     ConfigModule.forRoot({ isGlobal: true }),
     ThrottlerModule.forRoot([
       {
-        // Default: applied to all public GET endpoints
+        // Applied to all endpoints by the global ThrottlerGuard
         name: 'default',
         ttl: 60_000,
         limit: 60,
-      },
-      {
-        // Strict: apply with @Throttle({ strict: {} }) on public POST endpoints
-        name: 'strict',
-        ttl: 60_000,
-        limit: 10,
       },
     ]),
     LoggerModule.forRoot({

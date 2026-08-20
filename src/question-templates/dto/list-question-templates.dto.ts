@@ -34,7 +34,7 @@ export class ListQuestionTemplatesDto {
   sortBy?: 'createdAt' | 'title'
 
   @IsOptional()
-  @Matches(/^(in_review|approved|rejected)(\s*,\s*(in_review|approved|rejected))*$/)
+  @Matches(/^(in_review|accepted|rejected)(\s*,\s*(in_review|accepted|rejected))*$/)
   @MaxLength(50)
   status?: string
 
@@ -55,7 +55,7 @@ export interface QuestionTemplateFilters {
   appType?: string
   isPhishing?: boolean
   highlighted?: boolean
-  status?: ('in_review' | 'approved' | 'rejected')[]
+  status?: ('in_review' | 'accepted' | 'rejected')[]
 }
 
 export interface ListQuestionTemplatesQuery {
