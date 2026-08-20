@@ -1,1 +1,1 @@
-ALTER TABLE `publish_events` RENAME COLUMN `rejected_note` TO `submission_note`;
+ALTER TABLE `publish_events` CHANGE `rejected_note` `submission_note` varchar(1000);
