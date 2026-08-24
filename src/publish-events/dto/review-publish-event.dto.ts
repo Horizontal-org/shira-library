@@ -5,7 +5,7 @@ export class ReviewPublishEventDto {
   @IsIn(["accepted", "rejected"])
   status: "accepted" | "rejected"
 
-  @ValidateIf((dto: ReviewPublishEventDto) => dto.status !== "rejected" || Boolean(dto.submissionNote))
+  @ValidateIf((dto: ReviewPublishEventDto) => dto.status === "rejected" || dto.submissionNote !== undefined)
   @IsString()
   @IsNotEmpty()
   @MaxLength(1000)
