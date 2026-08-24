@@ -127,6 +127,13 @@
       "when": 1787156891000,
       "tag": "0017_accepted_publish_status",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "5",
+      "when": 1787156892000,
+      "tag": "0018_submission_note",
+      "breakpoints": true
     }
   ]
 }

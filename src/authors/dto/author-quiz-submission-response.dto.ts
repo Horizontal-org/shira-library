@@ -19,8 +19,8 @@ export class AuthorQuizSubmissionResponseDto {
   @ApiProperty({ example: "in_review" })
   status: string
 
-  @ApiProperty({ example: "does not apply", required: false })
-  reason?: string
+  @ApiProperty({ example: "Great submission", required: false })
+  submissionNote?: string
 }
 
 export class PaginatedAuthorQuizSubmissionsResponseDto {

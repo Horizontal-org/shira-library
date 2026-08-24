@@ -9,7 +9,7 @@ export const publishEvents = mysqlTable("publish_events", {
   authorId: bigint("author_id", { mode: "number", unsigned: true })
     .references(() => authors.id, { onDelete: "set null" }),
   status: varchar("status", { length: 50 }),
-  rejectedNote: varchar("rejected_note", { length: 1000 }),
+  submissionNote: varchar("submission_note", { length: 1000 }),
   createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
 });
 
