@@ -35,13 +35,16 @@ export class ReviewPublishEventService {
       throw new BadRequestException("Unsupported submission resource type")
     }
 
-    const submissionNote = data.submissionNote?.trim() || null
+    const rejectedNote = data.rejectedNote?.trim() ?? data.submissionNote?.trim() ?? null
+    if (data.status === "rejected" && !rejectedNote) {
+      throw new BadRequestException("A rejection note is required")
+    }
     await this.db
       .update(publishEvents)
-      .set({ status: data.status, submissionNote })
+      .set({ status: data.status, rejectedNote })
       .where(eq(publishEvents.id, id))
 
-    return { id: String(event.id), status: data.status, submissionNote }
+    return { id: String(event.id), status: data.status, rejectedNote, submissionNote: rejectedNote }
   }
 
   async reviewByResource(

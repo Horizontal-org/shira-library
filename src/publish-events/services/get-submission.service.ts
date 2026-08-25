@@ -17,7 +17,7 @@ export class GetSubmissionService {
         resourceId: publishEvents.resourceId,
         resourceType: publishEvents.resourceType,
         status: publishEvents.status,
-        submissionNote: publishEvents.submissionNote,
+        rejectedNote: publishEvents.rejectedNote,
         submittedAt: publishEvents.createdAt,
         authorId: authors.id,
         publicSpaceId: authors.publicSpaceId,
@@ -39,7 +39,8 @@ export class GetSubmissionService {
       resourceId: submission.resourceId,
       resourceType: submission.resourceType,
       status: submission.status ?? "in_review",
-      submissionNote: submission.submissionNote,
+      rejectedNote: submission.rejectedNote,
+      submissionNote: submission.rejectedNote,
       submittedAt: submission.submittedAt.toISOString(),
       author: submission.authorId === null ? null : {
         id: submission.authorId,

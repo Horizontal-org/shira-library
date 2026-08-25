@@ -41,10 +41,11 @@ describe("ReviewPublishEventService", () => {
     await expect(service.review(5, { status: "accepted", submissionNote: "Ready for the library" })).resolves.toEqual({
       id: "5",
       status: "accepted",
+      rejectedNote: "Ready for the library",
       submissionNote: "Ready for the library",
     })
     expect(mockDb.set).toHaveBeenNthCalledWith(1, { approved: true })
-    expect(mockDb.set).toHaveBeenNthCalledWith(2, { status: "accepted", submissionNote: "Ready for the library" })
+    expect(mockDb.set).toHaveBeenNthCalledWith(2, { status: "accepted", rejectedNote: "Ready for the library" })
   })
 
   it("rejects a quiz submission and persists its note", async () => {
@@ -56,10 +57,11 @@ describe("ReviewPublishEventService", () => {
     await expect(service.review(8, { status: "rejected", submissionNote: "Missing sources" })).resolves.toEqual({
       id: "8",
       status: "rejected",
+      rejectedNote: "Missing sources",
       submissionNote: "Missing sources",
     })
     expect(mockDb.set).toHaveBeenNthCalledWith(1, { approved: false })
-    expect(mockDb.set).toHaveBeenNthCalledWith(2, { status: "rejected", submissionNote: "Missing sources" })
+    expect(mockDb.set).toHaveBeenNthCalledWith(2, { status: "rejected", rejectedNote: "Missing sources" })
   })
 
   it("throws when the submission does not exist", async () => {
