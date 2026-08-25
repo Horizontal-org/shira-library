@@ -36,7 +36,7 @@ export class ListAuthorSubmissionsService {
           questionName: questionTemplates.name,
           createdAt: publishEvents.createdAt,
           status: publishEvents.status,
-          submissionNote: publishEvents.submissionNote,
+          rejectedNote: publishEvents.rejectedNote,
         })
         .from(publishEvents)
         .innerJoin(
@@ -58,7 +58,8 @@ export class ListAuthorSubmissionsService {
       questionName: row.questionName,
       dateSubmitted: row.createdAt.toISOString().slice(0, 10),
       status: row.status as string,
-      submissionNote: row.submissionNote || ''
+      rejectedNote: row.rejectedNote || '',
+      submissionNote: row.rejectedNote || '',
     }))
 
     return { data, total, page, limit }
@@ -85,7 +86,7 @@ export class ListAuthorSubmissionsService {
           quizTitle: quizTemplates.title,
           createdAt: publishEvents.createdAt,
           status: publishEvents.status,
-          submissionNote: publishEvents.submissionNote,
+          rejectedNote: publishEvents.rejectedNote,
         })
         .from(publishEvents)
         .innerJoin(
@@ -107,7 +108,8 @@ export class ListAuthorSubmissionsService {
       quizTitle: row.quizTitle,
       dateSubmitted: row.createdAt.toISOString().slice(0, 10),
       status: row.status as string,
-      submissionNote: row.submissionNote || ''
+      rejectedNote: row.rejectedNote || '',
+      submissionNote: row.rejectedNote || '',
     }))
 
     return { data, total, page, limit }

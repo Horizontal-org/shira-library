@@ -1,11 +1,19 @@
 import { Transform } from "class-transformer"
-import { IsIn, IsNotEmpty, IsString, MaxLength, ValidateIf } from "class-validator"
+import { IsIn, IsNotEmpty, IsOptional, IsString, MaxLength } from "class-validator"
 
 export class ReviewPublishEventDto {
   @IsIn(["accepted", "rejected"])
   status: "accepted" | "rejected"
 
-  @ValidateIf((dto: ReviewPublishEventDto) => dto.status === "rejected" || dto.submissionNote !== undefined)
+    // TODO: Keep for retro compatibility, delete after deploy
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(1000)
+  @Transform(({ value }) => value?.trim())
+  rejectedNote?: string
+
+  @IsOptional()
   @IsString()
   @IsNotEmpty()
   @MaxLength(1000)

@@ -20,6 +20,9 @@ export class AuthorSubmissionResponseDto {
   status: string
 
   @ApiProperty({ example: "Great submission", required: false })
+  rejectedNote?: string
+
+  @ApiProperty({ example: "Great submission", required: false })
   submissionNote?: string
 }
 

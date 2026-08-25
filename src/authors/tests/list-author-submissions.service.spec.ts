@@ -55,10 +55,12 @@ describe("ListAuthorSubmissionsService", () => {
       mockDb.offset.mockResolvedValueOnce([
         {
           id: 1,
+          resourceId: "11",
+          resourceType: "question_template",
           questionName: "Anti-virus marketing",
           createdAt: new Date("2026-07-21T10:00:00.000Z"),
           status: "in_review",
-          submissionNote: null,
+          rejectedNote: null,
         },
       ])
 
@@ -72,9 +74,12 @@ describe("ListAuthorSubmissionsService", () => {
         data: [
           {
             id: "1",
+            resourceId: "11",
+            resourceType: "question_template",
             questionName: "Anti-virus marketing",
             dateSubmitted: "2026-07-21",
             status: "in_review",
+            rejectedNote: "",
             submissionNote: "",
           },
         ],
@@ -94,10 +99,12 @@ describe("ListAuthorSubmissionsService", () => {
       mockDb.offset.mockResolvedValueOnce([
         {
           id: 3,
+          resourceId: "12",
+          resourceType: "question_template",
           questionName: "Question for healthcare providers",
           createdAt: new Date("2026-07-03T10:00:00.000Z"),
           status: "rejected",
-          submissionNote: "does not apply",
+          rejectedNote: "does not apply",
         },
       ])
 
@@ -111,9 +118,12 @@ describe("ListAuthorSubmissionsService", () => {
         data: [
           {
             id: "3",
+            resourceId: "12",
+            resourceType: "question_template",
             questionName: "Question for healthcare providers",
             dateSubmitted: "2026-07-03",
             status: "rejected",
+            rejectedNote: "does not apply",
             submissionNote: "does not apply",
           },
         ],
@@ -143,10 +153,12 @@ describe("ListAuthorSubmissionsService", () => {
       mockDb.offset.mockResolvedValueOnce([
         {
           id: 1,
+          resourceId: "21",
+          resourceType: "quiz_template",
           quizTitle: "Anti-virus marketing quiz",
           createdAt: new Date("2026-07-21T10:00:00.000Z"),
           status: "in_review",
-          submissionNote: null,
+          rejectedNote: null,
         },
       ])
 
@@ -160,9 +172,12 @@ describe("ListAuthorSubmissionsService", () => {
         data: [
           {
             id: "1",
+            resourceId: "21",
+            resourceType: "quiz_template",
             quizTitle: "Anti-virus marketing quiz",
             dateSubmitted: "2026-07-21",
             status: "in_review",
+            rejectedNote: "",
             submissionNote: "",
           },
         ],
@@ -182,10 +197,12 @@ describe("ListAuthorSubmissionsService", () => {
       mockDb.offset.mockResolvedValueOnce([
         {
           id: 3,
+          resourceId: "22",
+          resourceType: "quiz_template",
           quizTitle: "Healthcare providers quiz",
           createdAt: new Date("2026-07-03T10:00:00.000Z"),
           status: "rejected",
-          submissionNote: "does not apply",
+          rejectedNote: "does not apply",
         },
       ])
 
@@ -199,9 +216,12 @@ describe("ListAuthorSubmissionsService", () => {
         data: [
           {
             id: "3",
+            resourceId: "22",
+            resourceType: "quiz_template",
             quizTitle: "Healthcare providers quiz",
             dateSubmitted: "2026-07-03",
             status: "rejected",
+            rejectedNote: "does not apply",
             submissionNote: "does not apply",
           },
         ],
