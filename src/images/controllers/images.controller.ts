@@ -13,10 +13,12 @@ import { UploadImageResponseDto } from "../dto/upload-image-response.dto";
 export class ImagesController {
   constructor(private readonly service: ImagesService) { }
 
+  private static readonly IMAGE_UPLOAD_LIMIT_PER_MINUTE = 30;
+
   @Post("upload")
   @Public()
   @UseGuards(ApiKeyGuard)
-  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Throttle({ default: { limit: ImagesController.IMAGE_UPLOAD_LIMIT_PER_MINUTE, ttl: 60_000 } })
   @UseInterceptors(FileInterceptor("file", { limits: { fileSize: 5 * 1024 * 1024 } }))
   @ApiOperation({ summary: "Upload an orphan image, to be linked to a question template via templateImageIds on publish" })
   @ApiCreatedResponse({ type: UploadImageResponseDto })
