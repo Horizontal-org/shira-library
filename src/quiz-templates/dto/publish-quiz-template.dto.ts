@@ -3,6 +3,10 @@ import { Type } from 'class-transformer'
 import { IsArray, IsInt, IsNotEmpty, IsOptional, IsString, ArrayMinSize, MaxLength, IsBoolean, ValidateNested } from 'class-validator'
 
 class QuizQuestionTemplateDto {
+  @IsOptional()
+  @IsInt()
+  position?: number
+
   @IsString()
   @IsNotEmpty()
   @MaxLength(255)
@@ -38,6 +42,26 @@ class QuizQuestionTemplateDto {
   templateImageIds?: number[]
 }
 
+class QuizNoteTemplateDto {
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(100)
+  name: string
+
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(50000)
+  content: string
+
+  @IsInt()
+  position: number
+
+  @IsOptional()
+  @IsArray()
+  @IsInt({ each: true })
+  templateImageIds?: number[]
+}
+
 export class PublishQuizTemplateDto {
   @IsString()
   @IsNotEmpty()
@@ -54,6 +78,12 @@ export class PublishQuizTemplateDto {
   @ValidateNested({ each: true })
   @Type(() => QuizQuestionTemplateDto)
   questions: QuizQuestionTemplateDto[]
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => QuizNoteTemplateDto)
+  notes?: QuizNoteTemplateDto[]
 
   @IsOptional()
   @IsArray()

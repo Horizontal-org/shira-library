@@ -1,4 +1,4 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { BadRequestException, Inject, Injectable } from "@nestjs/common";
 import { PublishQuizTemplateDto } from "../dto/publish-quiz-template.dto";
 import { QuizTemplateResponseDto } from "../dto/quiz-template-response.dto";
 import { DRIZZLE } from "../../db/drizzle.constants";
@@ -18,6 +18,9 @@ import { quizTags } from "../../db/schema/quiz-tags";
 import { quizLangTags } from "../../db/schema/quiz-lang-tags";
 import { sanitizeQuestionContent } from "../../utils/sanitize-html.util";
 import { buildQuestionContentFingerprint } from "../../question-templates/utils/question-content-fingerprint";
+import { noteTemplates } from "../../db/schema/note-templates";
+import { noteTemplateImages } from "../../db/schema/note-template-images";
+import { quizNotes } from "../../db/schema/quiz-notes";
 
 @Injectable()
 export class PublishQuizTemplatesService {
@@ -29,6 +32,14 @@ export class PublishQuizTemplatesService {
   ) { }
 
   async publish(data: PublishQuizTemplateDto, author: Author): Promise<QuizTemplateResponseDto> {
+    const positions = [
+      ...data.questions.map((question, index) => question.position ?? index + 1),
+      ...(data.notes ?? []).map((note) => note.position),
+    ]
+    if (new Set(positions).size !== positions.length) {
+      throw new BadRequestException("Quiz item positions must be unique")
+    }
+
     await Promise.all([
       this.tagsService.validateIds(data.tagIds ?? []),
       this.langTagsService.validateIds(data.langTagIds ?? []),
@@ -43,8 +54,8 @@ export class PublishQuizTemplatesService {
       })
       const quizId = result.insertId
 
-      const questionIds: number[] = []
-      for (const question of data.questions) {
+      const questionLinks: { quizId: number; questionId: number; position: number }[] = []
+      for (const [index, question] of data.questions.entries()) {
         const { sanitizedContent: content, contentHash } = buildQuestionContentFingerprint(question.content)
 
         const [questionResult] = await tx.insert(questionTemplates).values({
@@ -60,7 +71,7 @@ export class PublishQuizTemplatesService {
           authorId: author.id,
         })
         const questionId = questionResult.insertId
-        questionIds.push(questionId)
+        questionLinks.push({ quizId, questionId, position: question.position ?? index + 1 })
 
         if (question.explanations?.length) {
           await tx.insert(explanationTemplates).values(question.explanations.map((explanation) => ({
@@ -77,7 +88,21 @@ export class PublishQuizTemplatesService {
         }
       }
 
-      await tx.insert(quizQuestions).values([...new Set(questionIds)].map((questionId) => ({ quizId, questionId })))
+      await tx.insert(quizQuestions).values(questionLinks)
+
+      for (const note of data.notes ?? []) {
+        const [noteResult] = await tx.insert(noteTemplates).values({
+          name: note.name.trim(),
+          content: sanitizeQuestionContent(note.content),
+          authorId: author.id,
+        })
+        const noteId = noteResult.insertId
+        const imageIds = [...new Set(note.templateImageIds ?? [])]
+        if (imageIds.length) {
+          await tx.insert(noteTemplateImages).values(imageIds.map((imageId) => ({ imageId, noteId })))
+        }
+        await tx.insert(quizNotes).values({ quizId, noteId, position: note.position })
+      }
 
       if (data.tagIds?.length) {
         await tx.insert(quizTags).values(data.tagIds.map((tagId) => ({ quizId, tagId })))

@@ -9,6 +9,7 @@ import { DRIZZLE } from "../../db/drizzle.constants";
 import { InjectMinio } from "../decorators/minio.decorator";
 import { images } from "../../db/schema/images";
 import { questionTemplateImages } from "../../db/schema/question-template-images";
+import { noteTemplateImages } from "../../db/schema/note-template-images";
 import * as schema from "../../db/schema";
 import { InvalidFileTypeImageException } from "../exceptions/invalid-file-type.image.exception";
 
@@ -77,6 +78,20 @@ export class ImagesService {
       .from(questionTemplateImages)
       .innerJoin(images, eq(questionTemplateImages.imageId, images.id))
       .where(inArray(questionTemplateImages.questionId, questionIds));
+  }
+
+  async findByNoteIds(noteIds: number[]) {
+    if (!noteIds.length) return [];
+    return this.db
+      .select({
+        noteId: noteTemplateImages.noteId,
+        id: images.id,
+        name: images.name,
+        relativePath: images.relativePath,
+      })
+      .from(noteTemplateImages)
+      .innerJoin(images, eq(noteTemplateImages.imageId, images.id))
+      .where(inArray(noteTemplateImages.noteId, noteIds));
   }
 
   async getPresignedUrl(relativePath: string): Promise<string> {
