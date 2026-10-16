@@ -134,6 +134,13 @@
       "when": 1787156892000,
       "tag": "0018_submission_note",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "5",
+      "when": 1791929705948,
+      "tag": "0019_pale_champions",
+      "breakpoints": true
     }
   ]
 }

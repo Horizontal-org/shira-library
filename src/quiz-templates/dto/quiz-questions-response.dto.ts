@@ -13,6 +13,9 @@ export class QuizQuestionExplanationDto {
 }
 
 export class QuizQuestionDto {
+  @ApiProperty({ example: 1 })
+  position: number
+
   @ApiProperty({ example: 14 })
   questionId: number
 
@@ -36,6 +39,23 @@ export class QuizQuestionDto {
 
   @ApiProperty({ type: [QuizQuestionExplanationDto] })
   explanations: QuizQuestionExplanationDto[]
+
+  @ApiProperty({ type: [ImageResponseDto] })
+  images: ImageResponseDto[]
+}
+
+export class QuizNoteDto {
+  @ApiProperty({ example: 7 })
+  noteId: number
+
+  @ApiProperty({ example: "Before you begin" })
+  name: string
+
+  @ApiProperty({ example: "<p>Read this first.</p>" })
+  content: string
+
+  @ApiProperty({ example: 2 })
+  position: number
 
   @ApiProperty({ type: [ImageResponseDto] })
   images: ImageResponseDto[]
