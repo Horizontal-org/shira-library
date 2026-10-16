@@ -437,8 +437,8 @@
           "notNull": false,
           "autoincrement": false
         },
-        "rejected_note": {
-          "name": "rejected_note",
+        "submission_note": {
+          "name": "submission_note",
           "type": "varchar(1000)",
           "primaryKey": false,
           "notNull": false,

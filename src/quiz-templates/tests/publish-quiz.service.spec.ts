@@ -151,7 +151,7 @@ describe("PublishQuizTemplatesService", () => {
       contentHash: expect.any(String),
     }))
     expect(mockDb.values).toHaveBeenCalledWith([{ imageId: 10, questionId: 42 }])
-    expect(mockDb.values).toHaveBeenCalledWith([{ quizId: 1, questionId: 42 }])
+    expect(mockDb.values).toHaveBeenCalledWith([{ quizId: 1, questionId: 42, position: 1 }])
   })
 
 })
