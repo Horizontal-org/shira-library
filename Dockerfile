@@ -27,4 +27,5 @@ USER appuser
 
 EXPOSE 3006
 
+ENTRYPOINT /usr/src/app/entrypoint.sh
 CMD ["node", "dist/src/main.js"]
