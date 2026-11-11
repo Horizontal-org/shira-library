@@ -16,7 +16,7 @@ ENV NODE_ENV=${NODE_ENV}
 WORKDIR /usr/src/app
 
 COPY package*.json ./
-RUN npm ci --omit=dev --legacy-peer-deps
+RUN npm ci --omit=dev --legacy-peer-deps && rm -rf /root/.npm
 
 COPY --from=builder /usr/src/app/dist ./dist
 COPY --from=builder /usr/src/app/dist/drizzle.config.js ./drizzle.config.js
