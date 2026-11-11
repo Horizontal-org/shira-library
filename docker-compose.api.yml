@@ -7,5 +7,19 @@ services:
     networks:
       - "shira"
     restart: "unless-stopped"
+    environment:
+      JWT_SECRET: "${JWT_SECRET}"
+      MYSQL_HOST: "${MYSQL_HOST:-db}"
+      MYSQL_DATABASE: "${MYSQL_DATABASE:-shira_library}"
+      MYSQL_USER: "${MYSQL_USER:-shira_library}"
+      MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      LIBRARY_IMAGE_ENDPOINT: "${LIBRARY_IMAGE_ENDPOINT}"
+      LIBRARY_IMAGE_PORT: "${LIBRARY_IMAGE_PORT:-3900}"
+      LIBRARY_IMAGE_BUCKET: "${LIBRARY_IMAGE_BUCKET:-shira-library}"
+      LIBRARY_IMAGE_ACCESS_KEY: "${LIBRARY_IMAGE_ACCESS_KEY}"
+      LIBRARY_IMAGE_SECRET_KEY: "${LIBRARY_IMAGE_SECRET_KEY}"
+      SUPERADMIN_URL: "${SUPERADMIN_URL}"
+      SPACE_URL: "${SPACE_URL}"
 networks:
   shira:
