@@ -21,6 +21,7 @@ RUN npm ci --omit=dev --legacy-peer-deps && rm -rf /root/.npm
 COPY --from=builder /usr/src/app/dist ./dist
 COPY --from=builder /usr/src/app/dist/drizzle.config.js ./drizzle.config.js
 COPY --from=builder /usr/src/app/src/db/migrations ./src/db/migrations
+COPY --from=builder /usr/src/app/entrypoint.sh .
 
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 USER appuser
