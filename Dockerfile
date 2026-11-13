@@ -1,4 +1,4 @@
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 
 WORKDIR /usr/src/app
 
@@ -8,7 +8,7 @@ RUN npm ci --legacy-peer-deps
 COPY . .
 RUN npm run docker-build
 
-FROM node:20-alpine AS production
+FROM node:22-alpine AS production
 
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
@@ -16,15 +16,17 @@ ENV NODE_ENV=${NODE_ENV}
 WORKDIR /usr/src/app
 
 COPY package*.json ./
-RUN npm ci --omit=dev --legacy-peer-deps
+RUN npm ci --omit=dev --legacy-peer-deps && rm -rf /root/.npm
 
 COPY --from=builder /usr/src/app/dist ./dist
 COPY --from=builder /usr/src/app/dist/drizzle.config.js ./drizzle.config.js
 COPY --from=builder /usr/src/app/src/db/migrations ./src/db/migrations
+COPY --from=builder /usr/src/app/entrypoint.sh .
 
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 USER appuser
 
 EXPOSE 3006
 
+ENTRYPOINT /usr/src/app/entrypoint.sh
 CMD ["node", "dist/src/main.js"]
