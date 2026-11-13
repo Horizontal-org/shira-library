@@ -6,6 +6,8 @@ on:
     - "Publish Docker image"
     types:
     - "completed"
+    branches:
+    - "development"
 jobs:
   deploy:
     name: "Deploy alpha"
