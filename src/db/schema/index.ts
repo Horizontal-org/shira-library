@@ -12,3 +12,6 @@ export { quizTags } from "./quiz-tags";
 export { questionLangTags } from "./question-lang-tags";
 export { quizLangTags } from "./quiz-lang-tags";
 export { quizQuestions } from "./quiz-questions";
+export { noteTemplates } from "./note-templates";
+export { noteTemplateImages } from "./note-template-images";
+export { quizNotes } from "./quiz-notes";

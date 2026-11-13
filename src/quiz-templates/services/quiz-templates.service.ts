@@ -15,10 +15,13 @@ import { langTags } from "../../db/schema/lang-tags"
 import { explanationTemplates } from "../../db/schema/explanation-templates"
 import { ImagesService } from "../../images/services/images.service"
 import { authors } from "../../db/schema/authors"
+import { noteTemplates } from "../../db/schema/note-templates"
+import { quizNotes } from "../../db/schema/quiz-notes"
 
 import {
   QuizQuestionDto,
   QuizQuestionExplanationDto,
+  QuizNoteDto,
 } from "../dto/quiz-questions-response.dto"
 import {
   QuizTemplateEnrichedResponseDto,
@@ -85,6 +88,7 @@ export class QuizTemplatesService {
         defaultApp: questionTemplates.defaultApp,
         appType: questionTemplates.appType,
         content: questionTemplates.content,
+        position: quizQuestions.position,
       })
       .from(quizQuestions)
       .innerJoin(questionTemplates, eq(quizQuestions.questionId, questionTemplates.id))
@@ -121,8 +125,8 @@ export class QuizTemplatesService {
 
     return Promise.all(
       questionRows
-        .sort((a, b) => (a.quizQuestionId ?? 0) - (b.quizQuestionId ?? 0))
-        .map(async (row) => {
+        .sort((a, b) => (a.position - b.position) || ((a.quizQuestionId ?? 0) - (b.quizQuestionId ?? 0)))
+        .map(async (row, index) => {
           const languages = languageRows.filter((languageRow) => languageRow.questionId === row.questionId)
           const explanations: QuizQuestionExplanationDto[] = explanationRows
             .filter((explanationRow) => explanationRow.questionId === row.questionId)
@@ -144,6 +148,7 @@ export class QuizTemplatesService {
           )
 
           const question: QuizQuestionDto = {
+            position: row.position || index + 1,
             questionId: row.questionId,
             questionName: row.questionName,
             isPhishing: row.isPhishing,
@@ -158,6 +163,35 @@ export class QuizTemplatesService {
           return question
         }),
     )
+  }
+
+  async findNotes(id: number, opts?: { requireApproved?: boolean }): Promise<QuizNoteDto[]> {
+    await this.findOne(id, opts)
+
+    const rows = await this.db
+      .select({
+        noteId: noteTemplates.id,
+        name: noteTemplates.name,
+        content: noteTemplates.content,
+        position: quizNotes.position,
+      })
+      .from(quizNotes)
+      .innerJoin(noteTemplates, eq(quizNotes.noteId, noteTemplates.id))
+      .where(eq(quizNotes.quizId, id))
+
+    const imageRows = await this.imagesService.findByNoteIds(rows.map((row) => row.noteId))
+    return Promise.all(rows
+      .sort((a, b) => a.position - b.position)
+      .map(async (row) => ({
+        ...row,
+        images: await Promise.all(imageRows
+          .filter((image) => image.noteId === row.noteId)
+          .map(async (image) => ({
+            id: image.id,
+            name: image.name,
+            url: await this.imagesService.getPresignedUrl(image.relativePath),
+          }))),
+      })))
   }
 
   async create(data: {

@@ -31,7 +31,7 @@ import { CreateQuizTemplateDto } from "../dto/create-quiz-template.dto"
 import { PublishQuizTemplateDto } from "../dto/publish-quiz-template.dto"
 import { UpdateQuizTemplateDto } from "../dto/update-quiz-template.dto"
 import { ListQuizTemplatesService } from "../services/list-quiz.service"
-import { QuizQuestionDto } from "../dto/quiz-questions-response.dto"
+import { QuizNoteDto, QuizQuestionDto } from "../dto/quiz-questions-response.dto"
 import {
   DeleteQuizTemplateResponseDto,
   PaginatedQuizTemplatesResponseDto,
@@ -149,6 +149,15 @@ export class QuizTemplatesController {
     return this.service.findQuestions(id)
   }
 
+  @Get("super/:id/notes")
+  @UseGuards(RolesGuard)
+  @Roles("super-admin")
+  @ApiOperation({ summary: "List notes for a quiz template" })
+  @ApiOkResponse({ type: [QuizNoteDto] })
+  async findNotesSuper(@Param("id", ParseIntPipe) id: number) {
+    return this.service.findNotes(id)
+  }
+
   @Get(":id")
   @Public()
   @ApiOperation({ summary: "Get a quiz template by id" })
@@ -163,6 +172,14 @@ export class QuizTemplatesController {
   @ApiOkResponse({ type: [QuizQuestionDto] })
   async findQuestions(@Param("id", ParseIntPipe) id: number) {
     return this.service.findQuestions(id, { requireApproved: true })
+  }
+
+  @Get(":id/notes")
+  @Public()
+  @ApiOperation({ summary: "List notes for a quiz template" })
+  @ApiOkResponse({ type: [QuizNoteDto] })
+  async findNotes(@Param("id", ParseIntPipe) id: number) {
+    return this.service.findNotes(id, { requireApproved: true })
   }
 
   @Post("publish")
