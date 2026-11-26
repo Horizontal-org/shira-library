@@ -1,0 +1,45 @@
+---
+name: "Deploy"
+on:
+  workflow_run:
+    workflows:
+    - "Publish Docker image"
+    types:
+    - "completed"
+    branches:
+    - "main"
+jobs:
+  deploy:
+    name: "Deploy"
+    runs-on: "ubuntu-latest"
+    steps:
+    - name: "Deploy remotely"
+      uses: "appleboy/ssh-action@v1"
+      with:
+        host: "${{ secrets.HOST }}"
+        username: "${{ secrets.USERNAME }}"
+        key: "${{ secrets.KEY }}"
+        port: "${{ secrets.PORT }}"
+        script: "/home/shira/deploy.sh"
+    - uses: "mattermost/action-mattermost-notify@master"
+      if: "success()"
+      with:
+        MATTERMOST_WEBHOOK_URL: "${{ secrets.MATTERMOST_WEBHOOK_URL }}"
+        PAYLOAD: |-
+          {
+            "text": "Deployed ${{ github.repository }}",
+            "channel": "github-actions",
+            "username": "${{ github.triggering_actor }}",
+            "color": "#3f6a3a"
+          }
+    - uses: "mattermost/action-mattermost-notify@master"
+      if: "failure()"
+      with:
+        MATTERMOST_WEBHOOK_URL: "${{ secrets.MATTERMOST_WEBHOOK_URL }}"
+        PAYLOAD: |-
+          {
+            "text": "Deploy failed ${{ github.repository }}\n\nhttps://github.com/Horizontal-org/shira/actions/runs/${{ github.run_id }}",
+            "channel": "github-actions",
+            "username": "${{ github.triggering_actor }}",
+            "color": "#ff0000"
+          }
